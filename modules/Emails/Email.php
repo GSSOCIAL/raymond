@@ -661,6 +661,14 @@ class Email extends SugarBean {
 			$emailAddressCollection[] = $addr_arr['email'];
 		}
 
+		//если отправка из cases добавляем bcc к тем что уже имеются или не имеются
+		if (isset($_REQUEST['parent_type']) && !empty($_REQUEST['parent_type']) && $_REQUEST['parent_type'] == 'Cases') {
+			if (!empty($request['sendBcc'])) {
+				$request['sendBcc'] .= ', ' . $sugar_config['bcc_email'];
+			} else {
+				$request['sendBcc'] = $sugar_config['bcc_email'];
+			}
+		}
 		foreach($this->email2ParseAddresses($request['sendBcc']) as $addr_arr) {
 			if(empty($addr_arr['email'])) continue;
 
@@ -904,6 +912,8 @@ class Email extends SugarBean {
 								$bean->retrieve($_REQUEST['parent_id']);
 								if($bean->load_relationship('emails')) {
 									$bean->emails->add($this->id);
+									//сохраняем case для перезаписи date_modified
+									$className == 'aCase' ? $bean->save() : '';
 								} // if
 
 							} // if

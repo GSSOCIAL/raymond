@@ -5447,3 +5447,30 @@ function suite_strrpos($haystack, $needle, $offset = 0, $encoding = DEFAULT_UTIL
         return strrpos($haystack, $needle, $offset);
     }
 }
+
+if (!function_exists('print_array')) {
+    function print_array($var, $exit = false, $in_file = false)
+    {
+        ob_start();
+        if (!$in_file) echo '<pre>';
+        print_r($var);
+        if (!$in_file) echo '</pre>';
+        $content = ob_get_contents();
+        //ob_flush();
+
+        if ($in_file) {
+            $file = fopen("cache/print_array.log", "a+");
+            fwrite($file, "\n\n******************************\n");
+            fwrite($file, date("Y-m-d H:i:s") . "\n");
+            fwrite($file, $content);
+            fclose($file);
+            empty($file);
+
+            ob_end_clean();
+        }
+
+        if ($exit) exit;
+        return $content;
+
+    }
+}

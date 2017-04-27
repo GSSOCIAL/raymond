@@ -148,6 +148,7 @@ function caseUpdates(record){
 A;
 
     $updates = $focus->get_linked_beans('aop_case_updates', 'AOP_Case_Updates');
+	$updates = array_merge($updates, $focus->get_linked_beans('emails', "Email"));
     if (!$updates || is_null($focus->id)) {
         $html .= quick_edit_case_updates($focus);
 
@@ -184,12 +185,29 @@ EOD;
         }
     );
 
-    foreach ($updates as $update) {
-        $html .= display_single_update($update, $hideImage);
+    // Получаем Email основного получателя
+    $contacts = $focus->getContacts('Primary Contact');
+    $email = '';
+    if(isset($contacts[0])) {
+        $email = $contacts[0]->emailAddress->getPrimaryAddress($contacts[0]);
     }
-    $html .= '</div>';
-    $html .= quick_edit_case_updates($focus);
 
+    foreach($updates as $update){
+
+        if($update->object_name == 'AOP_Case_Updates') {
+            // Отображение стандартного облока
+            $html .= display_single_update($update, $hideImage);
+        } elseif ($update->object_name == 'Email' AND $update->to_addrs == $email AND !empty($update->assigned_user_id)) {
+            // Для отображения Email
+            // Емайл должен быть адресован основному клиенту, и у емайл должен быть явно указан ответственный
+            $html .= display_single_update_email($update, $hideImage);
+
+        }
+
+
+    }
+    $html .= "</div>";
+    $html .= quick_edit_case_updates($focus);
     return $html;
 }
 
@@ -216,29 +234,37 @@ function getUpdateDisplayHead(SugarBean $update)
     global $mod_strings;
     if ($update->contact_id) {
         $name = $update->getUpdateContact()->name;
-    } elseif ($update->assigned_user_id) {
+    } elseif ($update->object_name == 'Email' AND ($update->type == 'out' OR $update->type == 'inbound') ) {
+        // Для исходящих писем
+        $name = $update->assigned_user_name;
+    }elseif($update->assigned_user_id){
         $name = $update->getUpdateUser()->name;
     } else {
         $name = 'Unknown';
     }
-    $html = "<a href='' onclick='toggleCaseUpdate(\"" . $update->id . "\");return false;'>";
-    $html .= "<img  id='caseUpdate" .
-             $update->id .
-             "Image' class='caseUpdateImage' src='" .
-             SugarThemeRegistry::current()->getImageURL('basic_search.gif') .
-             "'>";
-    $html .= '</a>';
-    $html .= '<span>' .
-             ($update->internal ? '<strong>' . $mod_strings['LBL_INTERNAL'] . '</strong> ' : '') .
-             $name .
-             ' ' .
-             $update->date_entered .
-             '</span><br>';
-    $notes = $update->get_linked_beans('notes', 'Notes');
-    if ($notes) {
-        $html .= $mod_strings['LBL_AOP_CASE_ATTACHMENTS'];
-        foreach ($notes as $note) {
-            $html .= "<a href='index.php?module=Notes&action=DetailView&record={$note->id}'>{$note->filename}</a>&nbsp;";
+    $html = "<a href='' onclick='toggleCaseUpdate(\"".$update->id."\");return false;'>";
+    $html .= "<img  id='caseUpdate".$update->id."Image' class='caseUpdateImage' src='".SugarThemeRegistry::current()->getImageURL('basic_search.gif')."'>";
+    $html .= "</a>";
+    if(isset($update->internal)) {
+        $html .= "<span>" . ($update->internal ? "<strong>" . $mod_strings['LBL_INTERNAL'] . "</strong> " : '') . $name . " " . $update->date_entered . "</span><br>";
+    } else {
+        $html .= "<span>" . $name . " " . $update->date_entered . "</span><br>";
+    }
+
+    $notes = $update->get_linked_beans('notes','Notes');
+    if($notes){
+        $html.= $mod_strings['LBL_AOP_CASE_ATTACHMENTS'];
+        foreach($notes as $note){
+            //$html .= "<a href='index.php?module=Notes&action=DetailView&record={$note->id}'>{$note->filename}</a>&nbsp;";
+            if(preg_match("|\.pdf$|is", $note->filename)) {
+                // Если вложение - PDF-файл
+                // Ставим сразу ссылку на скачивание
+                $html .= "<a href='index.php?entryPoint=download&id={$note->id}&type=Notes&inPage=true&ContentType=application/PDF' target='_blank'>{$note->filename}</a>&nbsp;";
+            } else {
+                // Все остальные вложнения-некартинки
+                // Ставим сразу ссылку на скачивание
+                $html .= "<a href='index.php?entryPoint=download&id={$note->id}&type=Notes'>{$note->filename}</a>&nbsp;";
+            }
         }
     }
 
@@ -276,14 +302,42 @@ function display_single_update(AOP_Case_Updates $update)
     }
 
     /*if contact user*/
-    if ($update->contact_id) {
-        $html = "<div id='extramargin'><div id='caseStyleContact'>" . getUpdateDisplayHead($update);
-        $html .= "<div id='caseUpdate" . $update->id . "' class='caseUpdate'>";
+    if($update->contact_id){
+        $html = "<div id='extramargin'><div id='caseStyleContact'>".getUpdateDisplayHead($update);
+        $html .= "<div id='caseUpdate".$update->id."' class='caseUpdate'>";
         $html .= nl2br(html_entity_decode($update->description));
-        $html .= '</div></div></div>';
-
+        $html .= "</div></div></div>";
         return $html;
     }
+
+}
+
+/**
+ * Gets a single update and returns it
+ *
+ * @param AOP_Case_Updates $update
+ * @return string - the html for the update
+ */
+function display_single_update_email(Email $update){
+
+    /*if assigned user*/
+    if($update->assigned_user_id){
+        $html = "<div id='lessmargin'><div id='caseStyleUser'>" . getUpdateDisplayHead($update);
+        $html .= "<div id='caseUpdate" . $update->id . "' class='caseUpdate'>";
+        $html .= nl2br(html_entity_decode($update->description));
+        $html .= "</div></div></div>";
+        return $html;
+    }
+
+    /*if contact user*/
+    if($update->contact_id){
+        $html = "<div id='extramargin'><div id='caseStyleContact'>".getUpdateDisplayHead($update);
+        $html .= "<div id='caseUpdate".$update->id."' class='caseUpdate'>";
+        $html .= nl2br(html_entity_decode($update->description));
+        $html .= "</div></div></div>";
+        return $html;
+    }
+
 }
 
 /**
@@ -296,10 +350,19 @@ function display_single_update(AOP_Case_Updates $update)
 function display_case_attachments($case)
 {
     $html = '';
-    $notes = $case->get_linked_beans('notes', 'Notes');
-    if ($notes) {
-        foreach ($notes as $note) {
-            $html .= "<a href='index.php?module=Notes&action=DetailView&record={$note->id}'>{$note->filename}</a>&nbsp;";
+    $notes = $case->get_linked_beans('notes','Notes');
+    if($notes){
+        foreach($notes as $note){
+            //$html .= "<a href='index.php?module=Notes&action=DetailView&record={$note->id}'>{$note->filename}</a>&nbsp;";
+            if(preg_match("|\.pdf$|is", $note->filename)) {
+                // Если вложение - PDF-файл
+                // Ставим сразу ссылку на скачивание
+                $html .= "<a href='index.php?entryPoint=download&id={$note->id}&type=Notes&inPage=true&ContentType=application/PDF' target='_blank'>{$note->filename}</a>&nbsp;";
+            } else {
+                // Все остальные вложнения-некартинки
+                // Ставим сразу ссылку на скачивание
+                $html .= "<a href='index.php?entryPoint=download&id={$note->id}&type=Notes'>{$note->filename}</a>&nbsp;";
+            }
         }
     }
 
@@ -341,6 +404,7 @@ function quick_edit_case_updates($case)
     if (isset($case->internal) && $case->internal) {
         $internalChecked = "checked='checked'";
     }
+    $internal = $mod_strings['LBL_AOP_INTERNAL'];
     $saveBtn = $app_strings['LBL_SAVE_BUTTON_LABEL'];
     $saveTitle = $app_strings['LBL_SAVE_BUTTON_TITLE'];
 

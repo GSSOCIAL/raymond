@@ -226,8 +226,14 @@ else {
                 header("Content-Type: image/png");
             }
         } else {
-            header('Content-type: ' . $mime_type);
-            header("Content-Disposition: attachment; filename=\"".$name."\";");
+            if(isset($_REQUEST['inPage'])) {
+                if(isset($_REQUEST['ContentType'])) {
+                    header('Content-type: ' . $_REQUEST['ContentType']);
+                }
+            } else {
+                header('Content-type: ' . $mime_type);
+                header("Content-Disposition: attachment; filename=\"" . $name . "\";");
+            }
 
         }
         // disable content type sniffing in MSIE

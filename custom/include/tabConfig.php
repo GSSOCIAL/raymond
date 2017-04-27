@@ -1,44 +1,16 @@
-<?php 
-$GLOBALS["tabStructure"] =array (
-  'LBL_TABGROUP_SALES' => 
-  array (
-    'label' => 'LBL_TABGROUP_SALES',
-    'modules' => 
-    array (
-      0 => 'Home',
-      1 => 'Accounts',
-      2 => 'Contacts',
-      3 => 'Opportunities',
-      4 => 'Leads',
-      5 => 'Contracts',
-      6 => 'Quotes',
-      7 => 'Forecasts',
-    ),
-  ),
-  'LBL_TABGROUP_MARKETING' => 
-  array (
-    'label' => 'LBL_TABGROUP_MARKETING',
-    'modules' => 
-    array (
-      0 => 'Home',
-      1 => 'Accounts',
-      2 => 'Contacts',
-      3 => 'Leads',
-      4 => 'Campaigns',
-      5 => 'Prospects',
-      6 => 'ProspectLists',
-    ),
-  ),
+<?php
+// created: 2017-02-22 05:39:47
+$GLOBALS['tabStructure'] = array (
   'LBL_TABGROUP_SUPPORT' => 
   array (
     'label' => 'LBL_TABGROUP_SUPPORT',
     'modules' => 
     array (
-      0 => 'Home',
+      0 => 'Cases',
       1 => 'Accounts',
       2 => 'Contacts',
-      3 => 'Cases',
-      4 => 'Bugs',
+      3 => 'ass_hardware',
+      4 => 'ass_lic',
     ),
   ),
   'LBL_TABGROUP_ACTIVITIES' => 
@@ -47,12 +19,10 @@ $GLOBALS["tabStructure"] =array (
     'modules' => 
     array (
       0 => 'Home',
-      1 => 'Calendar',
-      2 => 'Calls',
-      3 => 'Meetings',
-      4 => 'Emails',
-      5 => 'Tasks',
-      6 => 'Notes',
+      1 => 'Tasks',
+      2 => 'Emails',
+      3 => 'Calendar',
+      4 => 'Meetings',
     ),
   ),
   'LBL_TABGROUP_COLLABORATION' => 
@@ -61,9 +31,10 @@ $GLOBALS["tabStructure"] =array (
     'modules' => 
     array (
       0 => 'Home',
-      1 => 'Emails',
-      2 => 'Documents',
+      1 => 'Documents',
+      2 => 'Notes',
       3 => 'Project',
+      4 => 'Tasks',
     ),
   ),
 );

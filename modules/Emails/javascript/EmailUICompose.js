@@ -891,8 +891,11 @@ SE.composeLayout = {
     	 parentPanel.beforeRenderEvent.subscribe(function() {
 
     	 	YAHOO.util.Event.onAvailable('htmleditordiv' + idx, function() {
+
+                var cl_height = document.documentElement.clientHeight;
+                cl_height = Math.round(cl_height * 80 / 100) - 60;
     	 		SE.composeLayout._createComposeLayout(idx);
-    	 		SE.composeLayout[idx].set('height', 350);
+    	 		SE.composeLayout[idx].set('height', cl_height);
 	        	SE.composeLayout[idx].render();
            });
         });
@@ -2280,14 +2283,19 @@ SE.composeLayout = {
         	SE.util.emptySelectOptions(addressFrom);
 	        var fromAccountOpts = SE.composeLayout.fromAccounts;
 	        for (id = 0 ; id < fromAccountOpts.length ; id++) {
-	              var key = fromAccountOpts[id].value;
-	              var display = fromAccountOpts[id].text;
-	              var is_default = false;
-	              if(key == SUGAR.default_inbound_accnt_id)
-	              	is_default = true;
-	              var opt = new Option(display, key);
-	              addressFrom.options.add(opt);
-	              addressFrom.options[id].selected = is_default; //Safari bug new Option(x,y,true) does not work.
+                var key = fromAccountOpts[id].value;
+                var display = fromAccountOpts[id].text;
+                var is_default = false;
+                if (/\(support\.crmhosting@/.test(display) && $('#Activities_composeemail_button_old').is('[casescompose]'))  {
+                    is_default = true;
+                    console.info('display: '+display);
+                } else {
+                    if (key == SUGAR.default_inbound_accnt_id)
+                        is_default = true;
+                }
+                var opt = new Option(display, key);
+                addressFrom.options.add(opt);
+                addressFrom.options[id].selected = is_default; //Safari bug new Option(x,y,true) does not work.
 	        }
         }
 

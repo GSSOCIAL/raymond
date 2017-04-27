@@ -142,14 +142,10 @@ class AOP_Case_Updates extends Basic
         return BeanFactory::getBean('Cases', $this->case_id);
     }
 
-    /**
-     * @return null|Contact[]
-     */
-    public function getContacts()
-    {
+    public function getContacts($role = 'all'){
         $case = $this->getCase();
-        if ($case) {
-            return $case->get_linked_beans('contacts', 'Contacts');
+        if($case){
+            return $case->getContacts($role);
         }
 
         return null;
@@ -195,6 +191,28 @@ class AOP_Case_Updates extends Basic
 
         return array();
     }
+
+
+    public function getEmailForSupportInternalUsers(){
+        $seedGroup = 
+        $user = $this->getUser();
+        if($user){
+            return array($user->emailAddress->getPrimaryAddress($user));
+        }
+        return array();
+    }
+
+    /**
+     * Получить список Вложений, относящихся к текущей записи
+     * @return SugarBean[]
+     */
+    public function getNotes() {
+        $notes = $this->get_linked_beans('notes','Notes');
+        if(empty($notes)) $notes = array();
+        return $notes;
+    }
+
+
 
     /**
      * @param EmailTemplate $template
@@ -242,9 +260,11 @@ class AOP_Case_Updates extends Basic
         $signature = array(),
         $caseId = null,
         $addDelimiter = true,
-        $contactId = null
+        $contactId = null,
+        $emailCC = array()
     ) {
         $GLOBALS['log']->info('AOPCaseUpdates: sendEmail called');
+		global $sugar_config;
         require_once 'include/SugarPHPMailer.php';
         $mailer = new SugarPHPMailer();
         $admin = new Administration();
@@ -272,6 +292,55 @@ class AOP_Case_Updates extends Basic
         foreach ($emails as $email) {
             $mailer->addAddress($email);
         }
+
+        foreach ($emailCC as $email) {
+            $mailer->addCC($email);
+        }
+
+        global $sugar_config;
+        if (isset($sugar_config['bcc_email']) && !empty($sugar_config['bcc_email'])) {
+            print_array('1: ' . __DIR__,0,1);
+            print_array('$emails:' . var_export($emails,1),0,1);
+            print_array('$mailer->Subject = ' . $mailer->Subject,0,1);
+            print_array('$_REQUEST = ' . var_export($_REQUEST,1),0,1);
+
+            if(isset($_REQUEST['update_text'])) {
+                $mailer->addBCC($sugar_config['bcc_email'], '');
+                print_array('bcc email: '.$sugar_config['bcc_email'], 0, 1);
+            }
+        }
+
+        $notes = $this->getNotes();
+        if(count($notes) > 0) {
+            // Есть прикрепленные Заметки
+            foreach ($notes as $seedNote) {
+                $mailer->addAttachment("upload://{$seedNote->id}", $seedNote->filename);
+            }
+        } else{
+            if (isset($_FILES['case_update_file'])) {
+                foreach ($_FILES['case_update_file']['name'] as $i => $name) {
+                    if($_FILES['case_update_file']['tmp_name'][$i]) $mailer->addAttachment($_FILES['case_update_file']['tmp_name'][$i], $name);
+                }
+            }
+
+            foreach ($_REQUEST as $key => $val) {
+                if(preg_match("|^case_update_id_|is", $key)) {
+                    $number = str_replace("case_update_id_", "", $key);
+                    if($number != '') {
+                        $seedDocument = new Document();
+                        $seedDocument->retrieve($_REQUEST['case_update_id_' . $number]);
+                        if(!empty($seedDocument->id)) {
+                            $seedRevision = new DocumentRevision();
+                            $seedRevision->retrieve($seedDocument->document_revision_id);
+                            if(!empty($seedRevision->id)) {
+                                $mailer->addAttachment($sugar_config['upload_dir'] . $seedRevision->id, $_REQUEST['case_update_name_' . $number]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         try {
             if ($mailer->send()) {
                 require_once 'modules/Emails/Email.php';

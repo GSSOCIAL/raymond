@@ -863,6 +863,7 @@ class SugarBean
                 if (!$subpanel_def->isCollection() && isset($list_fields[$order_by]) && isset($submodule->field_defs[$order_by]) && (!isset($submodule->field_defs[$order_by]['source']) || $submodule->field_defs[$order_by]['source'] == 'db')) {
                     $order_by = $submodule->table_name . '.' . $order_by;
                 }
+                $table_name = $this_subpanel->table_name;
                 $panel_name = $this_subpanel->name;
                 $params = array();
                 $params['distinct'] = $this_subpanel->distinct_query();
@@ -2727,8 +2728,8 @@ class SugarBean
         }
         $xtpl = new XTemplate(get_notify_template_file($current_language));
         if ($this->module_dir == "Cases") {
-            //we should use Case, you can refer to the en_us.notify_template.html.
-            $template_name = "Case";
+            $template_name = "Case"; //we should use Case, you can refer to the en_us.notify_template.html.
+            $notify_mail->isHTML(true);
         } else {
             $template_name = $beanList[$this->module_dir];
         }

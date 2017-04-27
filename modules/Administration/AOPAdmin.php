@@ -81,6 +81,8 @@ if (!array_key_exists('aop', $cfg->config)) {
         'distribution_options' => '',
         'distribution_user_id' => '',
         'user_email_template_id' => '',
+        'support_internal_email_role_id' => '',
+        'support_internal_email_template_id' => '',
         'contact_email_template_id' => '',
         'case_creation_email_template_id' => '',
         'case_closure_email_template_id' => '',
@@ -108,6 +110,8 @@ if (isset($_REQUEST['do']) && $_REQUEST['do'] == 'save') {
     $cfg->config['aop']['distribution_user_id'] = $_REQUEST['distribution_user_id'];
     $cfg->config['aop']['distribution_options'] = $_REQUEST['distribution_options'];
     $cfg->config['aop']['user_email_template_id'] = $_REQUEST['user_email_template_id'];
+    $cfg->config['aop']['support_internal_email_role_id'] = $_REQUEST['support_internal_email_role_id'];
+    $cfg->config['aop']['support_internal_email_template_id'] = $_REQUEST['support_internal_email_template_id'];
     $cfg->config['aop']['contact_email_template_id'] = $_REQUEST['contact_email_template_id'];
     $cfg->config['aop']['case_creation_email_template_id'] = $_REQUEST['case_creation_email_template_id'];
     $cfg->config['aop']['case_closure_email_template_id'] = $_REQUEST['case_closure_email_template_id'];
@@ -138,6 +142,7 @@ if (!empty($cfg->config['aop']['distribution_user_id'])) {
 $sugar_smarty->assign('distribution_user_name', $distributionUserName);
 
 $emailTemplateList = get_bean_select_array(true, 'EmailTemplate', 'name');
+$emailRoleList = get_bean_select_array(true, 'ACLRole', 'name');
 
 $userEmailTemplateDropdown =
     get_select_options_with_id($emailTemplateList, $cfg->config['aop']['user_email_template_id']);
@@ -151,6 +156,8 @@ $joomlaEmailTemplateDropdown =
     get_select_options_with_id($emailTemplateList, $cfg->config['aop']['joomla_account_creation_email_template_id']);
 
 $sugar_smarty->assign('USER_EMAIL_TEMPLATES', $userEmailTemplateDropdown);
+$sugar_smarty->assign('SUPPORT_INTERNAL_EMAIL_ROLES', $supportInternalEmailRoleDropdown);
+$sugar_smarty->assign('SUPPORT_INTERNAL_EMAIL_TEMPLATES', $supportInternalEmailTemplateDropdown);
 $sugar_smarty->assign('CONTACT_EMAIL_TEMPLATES', $contactEmailTemplateDropdown);
 $sugar_smarty->assign('CREATION_EMAIL_TEMPLATES', $creationEmailTemplateDropdown);
 $sugar_smarty->assign('CLOSURE_EMAIL_TEMPLATES', $closureEmailTemplateDropdown);
@@ -209,11 +216,15 @@ echo $javascript->getScript();
           showElem('distribution_user_row');
           hideElem('distribution_options_row');
           addToValidate('ConfigureSettings', 'distribution_user_id', 'relate', true, "Please choose a user to assign cases to.");
+        } else if(selectElement.value == 'donotAssign') {
+            hideElem('distribution_options_row');
+            hideElem('distribution_user_row');
+            removeFromValidate('ConfigureSettings', 'distribution_user_id');
         } else {
-          SUGAR.clearRelateField(this.form, 'distribution_user_name', 'distribution_user_id');
-          hideElem('distribution_user_row');
-          showElem('distribution_options_row');
-          removeFromValidate('ConfigureSettings', 'distribution_user_id');
+          	SUGAR.clearRelateField(this.form, 'distribution_user_name', 'distribution_user_id');
+          	hideElem('distribution_user_row');
+          	showElem('distribution_options_row');
+          	removeFromValidate('ConfigureSettings', 'distribution_user_id');
         }
       };
       selectElement.onchange();

@@ -124,14 +124,20 @@ function generateComposeDataPackage($data, $forFullCompose = TRUE)
         $attachments = array();
         if ($bean->module_dir == 'Cases') {
             $subject = str_replace('%1', $bean->case_number, $bean->getEmailSubjectMacro() . " " . from_html($bean->name));//bug 41928
-            $bean->load_relationship("contacts");
-            $contact_ids = $bean->contacts->get();
-            $contact = new Contact();
-            foreach ($contact_ids as $cid) {
-                $contact->retrieve($cid);
+            // Основной получатель письма
+            $contacts = $bean->getContacts('Primary Contact');
+            foreach ($contacts as $seedContact) {
                 $namePlusEmail .= empty($namePlusEmail) ? "" : ", ";
-                $namePlusEmail .= from_html($contact->full_name) . " <" . from_html($contact->emailAddress->getPrimaryAddress($contact)) . ">";
+                $namePlusEmail .= from_html($seedContact->full_name) . " <" . from_html($seedContact->emailAddress->getPrimaryAddress($seedContact)) . ">";
             }
+            // СС
+            $contactsCC = $bean->getContacts('Alternate Contact');
+            $cc_addrs = '';
+            foreach ($contactsCC as $seedContactCC) {
+                $cc_addrs .= $cc_addrs == '' ? "" : ", ";
+                $cc_addrs .= from_html($seedContactCC->full_name) . " <" . from_html($seedContactCC->emailAddress->getPrimaryAddress($seedContactCC)) . ">";
+            }
+
         }
         if ($bean->module_dir == 'KBDocuments') {
 
@@ -153,6 +159,7 @@ function generateComposeDataPackage($data, $forFullCompose = TRUE)
         } // if
         $ret = array(
             'to_email_addrs' => $namePlusEmail,
+            'cc_addrs' => $cc_addrs,
             'parent_type' => $data['parent_type'],
             'parent_id' => $data['parent_id'],
             'parent_name' => $parentName,

@@ -74,7 +74,7 @@ $layout_defs['Cases'] = array(
                 array('widget_class' => 'SubPanelTopCreateTaskButton'),
                 array('widget_class' => 'SubPanelTopScheduleMeetingButton'),
                 array('widget_class' => 'SubPanelTopScheduleCallButton'),
-                array('widget_class' => 'SubPanelTopComposeEmailButton'),
+                array('widget_class' => 'SubPanelTopComposeEmailButtonCase'),
             ),
 
             'collection_list' => array(
