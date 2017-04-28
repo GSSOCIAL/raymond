@@ -24,8 +24,8 @@
             if(typeof sqs_objects == 'undefined'){
                 sqs_objects = new Array;
             }
-            sqs_objects['EditView_case_document_name_'+docCount]={
-                "form":"EditView",
+            sqs_objects['{/literal}{$ViewType}{literal}_case_document_name_'+docCount]={
+                "form":"{/literal}{$ViewType}{literal}",
                 "method":"query",
                 'modules': 'Documents',
                 "field_list":["name","id"],
@@ -35,7 +35,7 @@
                 "limit":"30",
                 "no_match_text":"No Match"};
             SUGAR.util.doWhen(
-                    "typeof(sqs_objects) != 'undefined' && typeof(sqs_objects['EditView_case_document_name_"+docCount+"']) != 'undefined'",
+                    "typeof(sqs_objects) != 'undefined' && typeof(sqs_objects['{/literal}{$ViewType}{literal}_case_document_name_"+docCount+"']) != 'undefined'",
                     enableQS
             );
 
@@ -69,7 +69,7 @@
                                 "",
                                 true,
                                 false,
-                                {"call_back_function":"set_return","form_name":"EditView","field_to_name_array":{"id":"case_document_id","name":"case_document_name"}},
+                                {"call_back_function":"set_return","form_name":"{/literal}{$FormName}{literal}","field_to_name_array":{"id":"case_document_id","name":"case_document_name"}},
                                 "single",
                                 true
                                 );' >

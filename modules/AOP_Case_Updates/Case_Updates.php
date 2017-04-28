@@ -98,48 +98,59 @@ function caseUpdates(record){
 
     //Post parameters
 
-    var params =
-        "record="+record+"&module=Cases&return_module=Cases&action=Save&return_id="+record+"&return_action=DetailView&relate_to=Cases&relate_id="+record+"&offset=1&update_text="
-        + update_data + "&internal=" + internal;
+//    var params =
+//        "record="+record+"&module=Cases&return_module=Cases&action=Save&return_id="+record+"&return_action=DetailView&relate_to=Cases&relate_id="+record+"&offset=1&update_text="
+//        + update_data + "&internal=" + internal;
+    var message = document.getElementById('case_updates');
+    var fd = new FormData(message);
+    fd.append("record", record);
+    fd.append("module", "Cases");
+    fd.append("return_module", "Cases");
+    fd.append("action", "Save");
+    fd.append("return_id", record);
+    fd.append("return_action", "DetailView");
+    fd.append("relate_to", "Cases");
+    fd.append("relate_id", record);
+    fd.append("offset", "1");
+    // fd.append("update_text", update_data);
+    // fd.append("internal", internal);
+
 
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.open("POST", "index.php", true);
 
 
-    xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    xmlhttp.setRequestHeader("Content-length", params.length);
-    xmlhttp.setRequestHeader("Connection", "close");
+    // xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    // xmlhttp.setRequestHeader("Content-length", fd.length);
+    // xmlhttp.setRequestHeader("Connection", "close");
 
     //When button is clicked
     xmlhttp.onreadystatechange = function() {
 
         if(xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            location.reload()
+//                showSubPanel('history', null, true);
+//                //Reload the case updates stream and history panels
+//    		    $("#LBL_AOP_CASE_UPDATES").load("index.php?module=Cases&action=DetailView&record="+record + " #LBL_AOP_CASE_UPDATES", function(){
+//
+//
+//                    //Collapse all except newest update
+//                    $('.caseUpdateImage').attr("src",showUpdateImage);
+//                    $('.caseUpdate').slideUp('fast');
+//
+//                    var id = $('.caseUpdate').last().attr('id');
+//                    if(id){
+//                        toggleCaseUpdate(id.replace('caseUpdate',''));
+//                    }
+//
+//
+//                    loadingMessgPanl.hide();
+//
+//                });
+    	}
+    }
 
-
-            showSubPanel('history', null, true);
-            //Reload the case updates stream and history panels
-		    $("#LBL_AOP_CASE_UPDATES").load("index.php?module=Cases&action=DetailView&record="+record + " #LBL_AOP_CASE_UPDATES", function(){
-
-
-            //Collapse all except newest update
-            $('.caseUpdateImage').attr("src",showUpdateImage);
-            $('.caseUpdate').slideUp('fast');
-
-            var id = $('.caseUpdate').last().attr('id');
-            if(id){
-            toggleCaseUpdate(id.replace('caseUpdate',''));
-            }
-
-
-            loadingMessgPanl.hide();
-
-            }
-
-        );
-	}
-}
-
-        xmlhttp.send(params);
+        xmlhttp.send(fd);
 
 
 
@@ -214,12 +225,20 @@ EOD;
 /**
  * @return mixed|string|void
  */
-function display_update_form()
+function display_update_form($type = 'EditView')
 {
     global $mod_strings, $app_strings;
     $sugar_smarty = new Sugar_Smarty();
     $sugar_smarty->assign('MOD', $mod_strings);
     $sugar_smarty->assign('APP', $app_strings);
+
+    if ($type == 'DetailView') {
+        $sugar_smarty->assign('ViewType', 'DetailView');
+        $sugar_smarty->assign('FormName', 'case_updates_form');
+    } else {
+        $sugar_smarty->assign('ViewType', 'EditView');
+        $sugar_smarty->assign('FormName', 'EditView');
+    }
 
     return $sugar_smarty->fetch('modules/AOP_Case_Updates/tpl/caseUpdateForm.tpl');
 }
@@ -408,8 +427,11 @@ function quick_edit_case_updates($case)
     $saveBtn = $app_strings['LBL_SAVE_BUTTON_LABEL'];
     $saveTitle = $app_strings['LBL_SAVE_BUTTON_TITLE'];
 
+    $update_file_html = display_update_form('DetailView');
+
     $html = <<< EOD
-    <form id='case_updates' enctype="multipart/form-data">
+    
+    <form id='case_updates' name='case_updates_form' enctype="multipart/form-data">
 
     <div><label for="update_text">{$mod_strings['LBL_UPDATE_TEXT']}</label></div>
     <textarea id="update_text" name="update_text" cols="80" rows="4"></textarea>
@@ -417,6 +439,12 @@ function quick_edit_case_updates($case)
     <div><label>{$mod_strings['LBL_INTERNAL']}</label>
     <input id='internal' type='checkbox' name='internal' tabindex=0 title='' value='1' $internalChecked ></input>
     </div>
+    
+    <div><label for='case_update_form'>{$mod_strings['LBL_CASE_UPDATE_FORM']}</label><br />
+        {$update_file_html}
+    </div>
+    
+    
     <input type='button' value='$saveBtn' onclick="caseUpdates('$record')" title="$saveTitle" name="button"> </input>
 
 
