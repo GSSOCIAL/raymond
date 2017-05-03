@@ -82,6 +82,13 @@ array (
             'label' => 'LBL_END_DATE',
           ),
         ),
+        4 =>
+        array (
+          0 =>
+          array (
+              'customCode' => '{include file="custom/modules/ass_lic/tpls/genLicBtn.tpl"}'
+          ),
+        ),
       ),
     ),
   ),
