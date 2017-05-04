@@ -75,18 +75,12 @@ array (
             'name' => 'lic_key',
             'studio' => 'visible',
             'label' => 'LBL_LIC_KEY',
+            'customCode' => '{include file="custom/modules/ass_lic/tpls/genLicBtn.tpl"}'
           ),
-          1 => 
+          1 =>
           array (
             'name' => 'end_date',
             'label' => 'LBL_END_DATE',
-          ),
-        ),
-        4 =>
-        array (
-          0 =>
-          array (
-              'customCode' => '{include file="custom/modules/ass_lic/tpls/genLicBtn.tpl"}'
           ),
         ),
       ),
