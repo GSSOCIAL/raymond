@@ -258,17 +258,7 @@ class CaseUpdatesHook
         $caseUpdate = new AOP_Case_Updates();
         $caseUpdate->name = $email->name;
         $caseUpdate->contact_id = $contact_id;
-        // Чиним баг с неотображением картинок
-        // В Case - правильное описание
-        $seedCase = new aCase();
-        $seedCase->retrieve($email->parent_id);
-        if(!empty($seedCase->id)) {
-            // Case корректно найден
-            $updateText = $seedCase->description;
-        } else {
-            // Case по какой то причине не найден
-            $updateText = $this->unquoteEmail($email->description_html ? $email->description_html : $email->description);
-        }
+        $updateText = $this->unquoteEmail($email->description_html ? $email->description_html : $email->description);
         $caseUpdate->description = $updateText;
         $caseUpdate->internal = false;
         $caseUpdate->case_id = $email->parent_id;
