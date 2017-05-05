@@ -1,3 +1,4 @@
+<textarea id="lic_key" name="lic_key" rows="4" cols="20" title="" tabindex=""></textarea><br />
 <button value="Generate License Keys" onclick="generateLicense();" class="button lastChild" title="Generate License Keys" type="button">Generate License Keys</button>
 <script>
     {literal}
