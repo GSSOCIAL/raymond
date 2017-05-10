@@ -27,7 +27,8 @@ class assLicHooks {
             $file_path = 'cache/'.create_guid();
 
             //собираем команду для генерации лицензий
-            $cmd = "for i in {$lic_type}; do echo \"------\"; ./genlic -C {$bean->name} -H {$bean->hard_id} -P \$i -D {$interval} ;done > ".$file_path;
+            //$cmd = "for i in {$lic_type}; do echo \"------\"; ./genlic -C {$bean->name} -H {$bean->hard_id} -P \$i -D {$interval} ;done > ".$file_path;
+            $cmd = "for i in {$lic_type}; do echo \"------\"; cd /home/genlic; ./genlic -C {$bean->name} -H {$bean->hard_id} -P \$i -D {$interval} ;done > ".$file_path;
             $bean->lic_key = $cmd;
             exec($cmd);
 
