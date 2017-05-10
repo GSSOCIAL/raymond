@@ -37,11 +37,17 @@ array (
       array (
         0 => 
         array (
-          0 => 'name',
+          0 =>
+          array (
+              'name' => 'name',
+              'label' => 'LBL_NAME',
+              'customCode' => '{include file="custom/modules/ass_lic/tpls/name.tpl"}'
+          ),
           1 => 
           array (
             'name' => 'hard_id',
             'label' => 'LBL_HARD_ID',
+              'customCode' => '{include file="custom/modules/ass_lic/tpls/hard_id.tpl"}'
           ),
         ),
         1 => 
@@ -51,6 +57,7 @@ array (
             'name' => 'lic_type',
             'studio' => 'visible',
             'label' => 'LBL_LIC_TYPE',
+              'customCode' => '{include file="custom/modules/ass_lic/tpls/lic_type.tpl"}'
           ),
           1 => 
           array (
@@ -75,12 +82,13 @@ array (
             'name' => 'lic_key',
             'studio' => 'visible',
             'label' => 'LBL_LIC_KEY',
-            'customCode' => '{include file="custom/modules/ass_lic/tpls/genLicBtn.tpl"}'
+            'displayParams'=>array('readonly'=>true)
           ),
           1 =>
           array (
             'name' => 'end_date',
             'label' => 'LBL_END_DATE',
+            'customCode' => '{include file="custom/modules/ass_lic/tpls/end_date.tpl"}'
           ),
         ),
       ),
