@@ -49,8 +49,8 @@ if (!empty($err_text)) {//если есть не заполненное поле
     $file_path = 'cache/'.create_guid();
 
     //собираем команду для генерации лицензий
-    $cmd = "for i in {$lic_type}; do echo \"------\"; ./genlic -C {$serial} -H {$hard_id} -P \$i -D {$interval} ;done > ".$file_path;
-
+//    $cmd = "for i in {$lic_type}; do echo \"------\"; /home/genlic/genlic -C {$serial} -H {$hard_id} -P \$i -D {$interval} ;done > ".$file_path;
+     $cmd = "for i in {$lic_type}; do echo \"------\"; cd /home/genlic; ./genlic -C {$serial} -H {$hard_id} -P \$i -D {$interval} ;done > ".$file_path;
     exec($cmd);
 
     //Если сгенерился файл с ключами, то отправляем его содержимое обратно и удаляем файл, если не сгенерился то отправялем ошибку.
