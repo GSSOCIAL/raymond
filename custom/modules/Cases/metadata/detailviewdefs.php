@@ -82,12 +82,12 @@ array (
         ),
         4 => 
         array (
-            0 =>
-                array(
-                    'name' => 'description',
-                    'label' => 'LBL_DESCRIPTION',
-                    'customCode' => '{$fields.description.value|from_html}',
-                ),
+          0 =>
+          array (
+            'name' => 'description',
+            'label' => 'LBL_DESCRIPTION',
+            'customCode' => '{$fields.description.value|from_html}',
+          ),
         ),
         5 => 
         array (
@@ -118,10 +118,6 @@ array (
         8 => 
         array (
           0 => 
-          array (
-            'name' => 'ass_hardware_cases_name',
-          ),
-          1 => 
           array (
             'name' => 'ass_hardware_cases_name',
           ),

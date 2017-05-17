@@ -71,7 +71,6 @@ class CaseUpdatesHook
                 $_FILES['case_update_file' . $index][$key] = $val;
             }
         }
-
         return $count;
     }
 
