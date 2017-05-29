@@ -2286,7 +2286,7 @@ SE.composeLayout = {
                 var key = fromAccountOpts[id].value;
                 var display = fromAccountOpts[id].text;
                 var is_default = false;
-                if (/\(support@/.test(display) && $('#Activities_composeemail_button_old').is('[casescompose]'))  {
+                if (/\(support@/.test(display) && ($('#Activities_composeemail_button').is('[casescompose]') || $('#Activities_composeemail_button_old').is('[casescompose]')))  {
                     is_default = true;
                     console.info('display: '+display);
                 } else {
