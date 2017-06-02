@@ -144,6 +144,9 @@ if (is_array($_POST['merged_ids'])) {
             if ($name == 'accounts' && $focus->merge_bean->module_dir == 'Opportunities') {
                 continue;
             }
+            if ($name == 'contacts') {
+                $primaryContact = $focus->merge_bean->getContacts('Primary Contact');
+            }
 
             if ($mergeSource->load_relationship($name)) {
                 //check to see if loaded relationship is with email address
@@ -156,6 +159,9 @@ if (is_array($_POST['merged_ids'])) {
                     if (is_array($data) && $focus->merge_bean->load_relationship($name)) {
                         foreach ($data as $related_id) {
                             //add to primary bean
+                            if ( $name == 'contacts' && !empty($primaryContact) && $related_id == $primaryContact[0]->id ) {
+                                continue;
+                            }
                             $focus->merge_bean->$name->add($related_id);
                         }
                     }
