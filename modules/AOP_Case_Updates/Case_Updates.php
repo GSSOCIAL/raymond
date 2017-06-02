@@ -204,14 +204,28 @@ EOD;
     }
 
     foreach($updates as $update){
-
         if($update->object_name == 'AOP_Case_Updates') {
             // Отображение стандартного облока
             $html .= display_single_update($update, $hideImage);
-        } elseif ($update->object_name == 'Email' AND $update->to_addrs == $email AND !empty($update->assigned_user_id)) {
+        } elseif ($update->object_name == 'Email'  AND !empty($update->assigned_user_id)) {
             // Для отображения Email
             // Емайл должен быть адресован основному клиенту, и у емайл должен быть явно указан ответственный
-            $html .= display_single_update_email($update, $hideImage);
+            $sea = new SugarEmailAddress();
+            $addresses = array();
+            foreach ( array('to', 'cc', 'bcc') as $x ) {
+                $a = explode(',', $update->{$x.'_addrs'});
+                array_walk($a, function (&$address) use ($sea) {
+                    $arr = $sea->splitEmailAddress($address);
+                    $address = $arr['email'];
+                });
+                $addresses = array_merge($addresses, $a);
+            }
+            foreach ( $addresses as $address ) {
+                if ( $address == $email ) {
+                    $html .= display_single_update_email($update, $hideImage);
+                    break;        
+                }
+            }
 
         }
 
