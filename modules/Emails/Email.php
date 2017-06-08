@@ -263,9 +263,9 @@ class Email extends SugarBean {
 	 * @return array
 	 */
 	function email2ParseAddresses($addresses) {
+        require_once('modules/Emails/EmailUI.php');
 		$addresses = from_html($addresses);
-        $addresses = $this->et->unifyEmailString($addresses);
-
+        $addresses = EmailUI::unifyEmailString($addresses);
 		$pattern = '/@.*,/U';
 		preg_match_all($pattern, $addresses, $matchs);
 		if (!empty($matchs[0])){
@@ -1218,10 +1218,13 @@ class Email extends SugarBean {
 	function cleanEmails($emails)
 	{
 	    if(empty($emails)) return '';
-		$emails = str_replace(array(",",";"), "::", from_html($emails));
-		$addrs = explode("::", $emails);
+        $addrs = $this->email2ParseAddresses($emails);
+        array_walk($addrs, function(&$element) {
+            $element = $element['display'] . ' <' . $element['email'] . '>';
+        });
 		$res = array();
 		foreach($addrs as $addr) {
+            //$addrTemp = $addr['display'] . ' <' . $addr['email'] . '>';
             $parts = $this->emailAddress->splitEmailAddress($addr);
             if(empty($parts["email"])) {
                 continue;
