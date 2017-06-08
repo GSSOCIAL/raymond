@@ -3486,6 +3486,17 @@ class InboundEmail extends SugarBean {
 						$attach->name = urlencode($this->retrieveAttachmentNameFromStructure($part));
 					}
 					$attach->filename = $attach->name;
+					if ( !empty($part->id) ) {
+					    $id = substr($part->id, 1, -1);
+					    $matches = array();
+					    preg_match_all('/([[:alnum:]-]+)/',$id,$matches);
+					    if ( !empty($matches) ) {
+					        $matches = $matches[1];
+					        $attach->id = strtolower($matches[0]);
+					        $attach->new_with_id = true;
+					    }
+					}
+
 					if (empty($attach->filename)) {
 						continue;
 					}
