@@ -3487,7 +3487,7 @@ class InboundEmail extends SugarBean {
 					}
 					$attach->filename = $attach->name;
 					if ( !empty($part->id) ) {
-					    $id = substr($part->id, 1, -1);
+					    $id = $part->id;
 					    $matches = array();
 					    preg_match_all('/([[:alnum:]-]+)/',$id,$matches);
 					    if ( !empty($matches) ) {
