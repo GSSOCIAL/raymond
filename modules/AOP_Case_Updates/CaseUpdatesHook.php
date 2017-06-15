@@ -100,7 +100,7 @@ class CaseUpdatesHook
 
             return;
         }
-        if ($_REQUEST['module'] === 'Import') {
+        if ($_REQUEST['module'] === 'Import' && $_REQUEST['module'] === 'MergeRecords') {
             return;
         }
         //Grab the update field and create a new update with it.
@@ -336,7 +336,7 @@ class CaseUpdatesHook
      */
     public function closureNotifyPrep($case)
     {
-        if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'Import') {
+        if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'Import' && $_REQUEST['module'] === 'MergeRecords') {
             return;
         }
         $case->send_closure_email = true;
@@ -350,7 +350,7 @@ class CaseUpdatesHook
      */
     public function closureNotify($case)
     {
-        if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'Import') {
+        if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'Import' && $_REQUEST['module'] === 'MergeRecords') {
             return;
         }
         if ($case->state !== 'Closed' || !$case->send_closure_email) {
@@ -444,7 +444,7 @@ class CaseUpdatesHook
      */
     public function creationNotify($bean, $event, $arguments)
     {
-        if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'Import') {
+        if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'Import' && $_REQUEST['module'] === 'MergeRecords') {
             return;
         }
         if ($arguments['module'] !== 'Cases' || $arguments['related_module'] !== 'Contacts') {
@@ -487,15 +487,16 @@ class CaseUpdatesHook
         $ret = array();
         $ret['subject'] = from_html(aop_parse_template($template->subject, $beans));
         $ret['body'] = from_html(
-            $app_strings['LBL_AOP_EMAIL_REPLY_DELIMITER'] . aop_parse_template(
+            '<html><head></head><body width="100%"><style>img { max-width: 100% }</style>'.$app_strings['LBL_AOP_EMAIL_REPLY_DELIMITER'] . aop_parse_template(
                 str_replace(
                     '$sugarurl',
                     $sugar_config['site_url'],
                     $template->body_html
                 ),
                 $beans
-            )
+            ).'</body></html>'
         );
+
         $ret['body_alt'] = strip_tags(
             from_html(
                 aop_parse_template(
@@ -651,7 +652,7 @@ class CaseUpdatesHook
         global $current_user, $sugar_config;
         static $contacts_send;
         $email_template = new EmailTemplate();
-        if ($_REQUEST['module'] === 'Import') {
+        if ($_REQUEST['module'] === 'Import' || $_REQUEST['module'] === 'MergeRecords' ) {
             //Don't send email on import
             return;
         }

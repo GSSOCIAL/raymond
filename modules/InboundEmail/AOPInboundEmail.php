@@ -48,7 +48,8 @@ class AOPInboundEmail extends InboundEmail {
         foreach($matches as $match){
             $id = strtolower($match);
             if(in_array($id,$noteIds)){
-                $string = str_replace('cid:'.$match,$sugar_config['site_url']."/index.php?entryPoint=download&id={$id}&type=Notes&",$string);
+                //$string = str_replace('cid:'.$match,$sugar_config['site_url']."/index.php?entryPoint=download&id={$id}&type=Notes&",$string);
+                $string = str_replace('cid:'.$match,$sugar_config['site_url']."/upload/{$id}?",$string);
             }
         }
         return $string;
