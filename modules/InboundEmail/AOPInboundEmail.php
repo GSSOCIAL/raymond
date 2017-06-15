@@ -55,6 +55,37 @@ class AOPInboundEmail extends InboundEmail {
         return $string;
     }
 
+    public function getCaseIdFromCaseNumber($emailName, $aCase) {
+        global $db;
+        $result = parent::getCaseIdFromCaseNumber($emailName, $aCase);
+        if ( !$result ) { 
+            if ( !empty($this->references) && is_array($this->references) ) {
+                $refs = "'".join("', '", $this->references)."'";
+                $sql = "
+                    SELECT 
+                     e.parent_id case_id
+                    FROM 
+                     emails e 
+                    ,cases c
+                    WHERE 
+                     e.header_message_id IN ({$refs})
+                    AND e.deleted = 0
+                    AND e.parent_type = 'Cases'
+                    AND c.id = e.parent_id
+                    AND c.deleted = 0
+                    ORDER BY 
+                     e.date_entered DESC
+                    LIMIT 1";
+                $res = $db->query($sql);
+                $row = $db->fetchByAssoc($res);
+                if ( !empty($row['case_id']) ) {
+                    return $row['case_id'];
+                }
+            }
+        }
+        return $result;
+    }
+
 
     function handleCreateCase($email, $userId) {
         global $current_user, $mod_strings, $current_language;

@@ -86,6 +86,7 @@ class InboundEmail extends SugarBean {
 	var $group_id;
 	var $is_personal;
 	var $groupfolder_id;
+	var $references;
 
 	// email 2.0
 	var $pop3socket;
@@ -4089,6 +4090,10 @@ class InboundEmail extends SugarBean {
 			$email->intent			= $this->mailbox_type;
 
 			$email->message_id		= $this->compoundMessageId; // filled by importDupeCheck();
+			$email->header_message_id = $header->message_id;
+
+			$this->references = explode('::::', preg_replace('/\s+/', '::::', $header->references));
+
 
 			$oldPrefix = $this->imagePrefix;
 			if(!$forDisplay) {
