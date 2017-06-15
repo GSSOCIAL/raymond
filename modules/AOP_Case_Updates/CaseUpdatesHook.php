@@ -255,13 +255,15 @@ class CaseUpdatesHook
             }
         }
         $caseUpdate = new AOP_Case_Updates();
+        $caseUpdate->id = create_guid();
+        $caseUpdate->new_with_id = true;
         $caseUpdate->name = $email->name;
         $caseUpdate->contact_id = $contact_id;
         $updateText = $this->unquoteEmail($email->description_html ? $email->description_html : $email->description);
         $caseUpdate->description = $updateText;
         $caseUpdate->internal = false;
         $caseUpdate->case_id = $email->parent_id;
-        $caseUpdate->save();
+        //$caseUpdate->save();
         $notes = $email->get_linked_beans('notes', 'Notes');
         foreach ($notes as $note) {
             //Link notes to case update also
