@@ -63,15 +63,18 @@ class AOPInboundEmail extends InboundEmail {
                 $refs = "'".join("', '", $this->references)."'";
                 $sql = "
                     SELECT 
-                     e.parent_id case_id
+                     eb.bean_id case_id
                     FROM 
                      emails e 
+                    ,emails_beans eb
                     ,cases c
                     WHERE 
                      e.header_message_id IN ({$refs})
                     AND e.deleted = 0
                     AND e.parent_type = 'Cases'
-                    AND c.id = e.parent_id
+                    AND eb.email_id = e.id
+                    AND eb.deleted = 0
+                    AND c.id = eb.bean_id
                     AND c.deleted = 0
                     ORDER BY 
                      e.date_entered DESC
