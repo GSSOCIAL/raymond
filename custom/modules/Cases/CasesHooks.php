@@ -3,7 +3,7 @@
 class CasesHooks {
 
     function before_save(&$bean, $event, $arguments) { 
-        if ( !empty($bean->fetched_row['id']) ) {
+        /*if ( !empty($bean->fetched_row['id']) ) {
             $fields = $bean->getFieldDefinitions();
             $changed = false;
             foreach ( $fields as $field => $def ) {
@@ -17,16 +17,16 @@ class CasesHooks {
                     $bean->status = 'Open_Assigned';
                 }
             }
-        }
+        }*/
     }
 
     function after_relationship_add(&$bean, $event, $arguments) {
-        if ( !empty($bean->fetched_row['id']) && $bean->status == 'Open_New' ) {
+        /*if ( !empty($bean->fetched_row['id']) && $bean->status == 'Open_New' ) {
             if ( $bean->fetched_row['account_id'] != $arguments['related_id'] || $arguments['related_module'] != 'Accounts' ) { 
                 $bean->status = 'Open_Assigned';
                 $bean->save();
             }
-        }
+        }*/
     }
 
 }
