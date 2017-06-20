@@ -157,6 +157,10 @@ function caseUpdates(record){
 }
 $(document).ready(function() {
     $('.caseUpdate').find('img[class!=attachment_thumb]').replaceWith(function() { return '<a href="' + $(this).attr('src') + '" data-lightbox="attachement">' + this.outerHTML + '</a>'; });
+
+    lightbox.option({
+      'positionFromTop': $('.navbar').length ? $('.navbar').height() + 30 : 50
+    });
 });
 </script>
 <link href="modules/AOP_Case_Updates/assets/lightbox/css/lightbox.min.css" rel="stylesheet">
