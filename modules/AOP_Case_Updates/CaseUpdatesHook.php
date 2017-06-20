@@ -661,13 +661,7 @@ class CaseUpdatesHook
         if (!isAOPEnabled()) {
             return;
         }
-        $case = $caseUpdate->getCase();
-        if ( !empty($case) ) {
-            if ( $case->status == 'Open_New' ) {
-                $case->status = 'Open_Assigned';
-                $case->save();
-            }
-        }
+
         $aop_config = $sugar_config['aop'];
         $signature = array();
         $addDelimiter = true;
