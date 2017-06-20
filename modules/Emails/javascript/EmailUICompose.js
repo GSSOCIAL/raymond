@@ -2290,8 +2290,8 @@ SE.composeLayout = {
                     is_default = true;
                     console.info('display: '+display);
                 } else {
-                    if (key == SUGAR.default_inbound_accnt_id)
-                        is_default = true;
+                    /*if (key == SUGAR.default_inbound_accnt_id)
+                        is_default = true;*/
                 }
                 var opt = new Option(display, key);
                 addressFrom.options.add(opt);
