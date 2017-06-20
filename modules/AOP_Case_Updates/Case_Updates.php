@@ -155,7 +155,37 @@ function caseUpdates(record){
 
 
 }
+$(document).ready(function() {
+    $('.caseUpdate').find('img[class!=attachment_thumb]').replaceWith(function() { return '<a href="' + $(this).attr('src') + '" data-lightbox="attachement">' + this.outerHTML + '</a>'; });
+});
 </script>
+<link href="modules/AOP_Case_Updates/assets/lightbox/css/lightbox.min.css" rel="stylesheet">
+<script src="modules/AOP_Case_Updates/assets/lightbox/js/lightbox.min.js"></script>
+<style>
+    .case_updates_wrapper img {
+        max-width: 100%;
+    }
+
+    .thumb_link {
+        display: inline-block;
+        padding: 2px;
+        margin: 0 0.5rem 1rem 0.5rem;
+        background-color: #fff;
+        line-height: 0;
+        border-radius: 4px;
+        transition: background-color 0.5s ease-out;
+        border: 1px solid;
+        width: 10rem;
+        text-align: center;
+        //height: 10rem;
+        overflow: hidden;
+    }
+
+    .thumb_link img {
+        #width: 7rem;
+        border-radius: 4px;
+    }
+</style>
 A;
 
     $updates = $focus->get_linked_beans('aop_case_updates', 'AOP_Case_Updates');
@@ -178,7 +208,7 @@ $(document).ready(function(){
 </script>
 <a href='' onclick='collapseAllUpdates(); return false;'>{$mod_strings['LBL_CASE_UPDATES_COLLAPSE_ALL']}</a>
 <a href='' onclick='expandAllUpdates(); return false;'>{$mod_strings['LBL_CASE_UPDATES_EXPAND_ALL']}</a>
-<div>
+<div class="case_updates_wrapper">
 EOD;
 
     usort(
@@ -302,6 +332,21 @@ function getUpdateDisplayHead(SugarBean $update)
     return $html;
 }
 
+function displayAttachedImages($update){
+    global $sugar_config;
+    $html = '';
+    $notes = $update->get_linked_beans('notes','Notes');
+    if($notes){
+        $html.= $mod_strings['LBL_AOP_CASE_ATTACHMENTS'];
+        foreach($notes as $note){
+            if(preg_match("/(\.png|\.jpg|\.jpeg|\.gif)$/is", $note->filename) )  {
+                $html .= "<a href='{$sugar_config['site_url']}/upload/{$note->id}' data-lightbox='attachement' class='thumb_link'><img class='attachment_thumb' src='{$sugar_config['site_url']}/upload/{$note->id}'/></a>";
+            }
+        }
+    }
+    return $html;
+}
+
 /**
  * Gets a single update and returns it.
  *
@@ -319,6 +364,7 @@ function display_single_update(AOP_Case_Updates $update)
             $html = "<div id='caseStyleInternal'>" . getUpdateDisplayHead($update);
             $html .= "<div id='caseUpdate" . $update->id . "' class='caseUpdate'>";
             $html .= nl2br(html_entity_decode($update->description));
+            $html .= displayAttachedImages($update);
             $html .= '</div></div>';
 
             return $html;
@@ -326,6 +372,7 @@ function display_single_update(AOP_Case_Updates $update)
             $html = "<div id='lessmargin'><div id='caseStyleUser'>" . getUpdateDisplayHead($update);
             $html .= "<div id='caseUpdate" . $update->id . "' class='caseUpdate'>";
             $html .= nl2br(html_entity_decode($update->description));
+            $html .= displayAttachedImages($update);
             $html .= '</div></div></div>';
 
             return $html;
@@ -337,6 +384,7 @@ function display_single_update(AOP_Case_Updates $update)
         $html = "<div id='extramargin'><div id='caseStyleContact'>".getUpdateDisplayHead($update);
         $html .= "<div id='caseUpdate".$update->id."' class='caseUpdate'>";
         $html .= nl2br(html_entity_decode($update->description));
+        $html .= displayAttachedImages($update);
         $html .= "</div></div></div>";
         return $html;
     }
@@ -356,6 +404,7 @@ function display_single_update_email(Email $update){
         $html = "<div id='lessmargin'><div id='caseStyleUser'>" . getUpdateDisplayHead($update);
         $html .= "<div id='caseUpdate" . $update->id . "' class='caseUpdate'>";
         $html .= nl2br(html_entity_decode($update->description));
+        $html .= displayAttachedImages($update);
         $html .= "</div></div></div>";
         return $html;
     }
@@ -365,6 +414,7 @@ function display_single_update_email(Email $update){
         $html = "<div id='extramargin'><div id='caseStyleContact'>".getUpdateDisplayHead($update);
         $html .= "<div id='caseUpdate".$update->id."' class='caseUpdate'>";
         $html .= nl2br(html_entity_decode($update->description));
+        $html .= displayAttachedImages($update);
         $html .= "</div></div></div>";
         return $html;
     }
