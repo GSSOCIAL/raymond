@@ -87,6 +87,7 @@ class InboundEmail extends SugarBean {
 	var $is_personal;
 	var $groupfolder_id;
 	var $references;
+	var $partToNotesMap = array();
 
 	// email 2.0
 	var $pop3socket;
@@ -3487,16 +3488,6 @@ class InboundEmail extends SugarBean {
 						$attach->name = urlencode($this->retrieveAttachmentNameFromStructure($part));
 					}
 					$attach->filename = $attach->name;
-					if ( !empty($part->id) ) {
-					    $id = $part->id;
-					    $matches = array();
-					    preg_match_all('/([[:alnum:]-]+)/',$id,$matches);
-					    if ( !empty($matches) ) {
-					        $matches = $matches[1];
-					        $attach->id = strtolower($matches[0]);
-					        $attach->new_with_id = true;
-					    }
-					}
 
 					if (empty($attach->filename)) {
 						continue;
@@ -3510,6 +3501,9 @@ class InboundEmail extends SugarBean {
 					} else {
 						// only save if doing a full import, else we want only the binaries
 						$attach->save();
+					}
+					if ( !empty($part->id) ) {
+						$this->partToNotesMap[str_replace(array('<', '>'), array('',''), $part->id)] = $attach->id;
 					}
 				} // end if disposition type 'attachment'
 			}// end ifdisposition
@@ -4103,6 +4097,10 @@ class InboundEmail extends SugarBean {
 			// handle multi-part email bodies
 			$email->description_html= $this->getMessageText($msgNo, 'HTML', $structure, $fullHeader,$clean_email); // runs through handleTranserEncoding() already
 			$email->description	= $this->getMessageText($msgNo, 'PLAIN', $structure, $fullHeader,$clean_email); // runs through handleTranserEncoding() already
+			if ( !empty($this->partToNotesMap) ) {
+				$email->description_html = str_ireplace(array_keys($this->partToNotesMap), $this->partToNotesMap, $email->description_html);
+				$email->description = str_ireplace(array_keys($this->partToNotesMap), $this->partToNotesMap, $email->description);
+			}
 			$this->imagePrefix = $oldPrefix;
 
 			// empty() check for body content

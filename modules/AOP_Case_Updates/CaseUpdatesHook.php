@@ -275,6 +275,7 @@ class CaseUpdatesHook
             $newNote->parent_id = $caseUpdate->id;
             $newNote->save();
             $note_ids[] = $note->id;
+            $note_ids[] = $newNote->id;
             $srcFile = "upload://{$note->id}";
             $destFile = "upload://{$newNote->id}";
             copy($srcFile, $destFile);

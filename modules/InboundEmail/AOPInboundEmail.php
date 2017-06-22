@@ -38,7 +38,7 @@ class AOPInboundEmail extends InboundEmail {
             return $string;
         }
         $matches = array();
-        preg_match_all('/cid:([[:alnum:]-]*)/',$string,$matches);
+        preg_match_all('/cid:([[:alnum:]-]*)/i',$string,$matches);
         if(!isset($matches[1]) OR !count($matches[1])){
             return $string;
         }
