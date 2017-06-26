@@ -7,7 +7,7 @@
  */
 
 class assLicHooks {
-    function genLic (SugarBean $bean, $event, $arguments) {
+    function genLic (SugarBean &$bean, $event, $arguments) {
 
         if (empty($bean->lic_key) && !empty($bean->name) && !empty($bean->hard_id) && !empty($bean->end_date) && !empty($bean->lic_type) ) {
             //если с полями всё норма
