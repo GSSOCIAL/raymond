@@ -82,26 +82,13 @@ array (
         ),
         4 => 
         array (
-          0 =>
-          array (
-            'name' => 'description',
-            'label' => 'LBL_DESCRIPTION',
-            'customCode' => '{$fields.description.value|from_html}',
-          ),
-        ),
-        5 => 
-        array (
-          0 => 'resolution',
-        ),
-        6 => 
-        array (
           0 => 
           array (
             'name' => 'assigned_user_name',
             'label' => 'LBL_ASSIGNED_TO',
           ),
         ),
-        7 => 
+        5 => 
         array (
           0 => 
           array (
@@ -115,7 +102,7 @@ array (
             'customCode' => '{$fields.date_modified.value} {$APP.LBL_BY} {$fields.modified_by_name.value}',
           ),
         ),
-        8 => 
+        6 => 
         array (
           0 => 
           array (
