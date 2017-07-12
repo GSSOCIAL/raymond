@@ -154,6 +154,7 @@ class AOPInboundEmail extends InboundEmail {
 
             $c->save(true);
             $c->retrieve($c->id);
+            $c->disable_change_status_hook = true;
             if(!empty($c->contact_created_by_id)) {
                 // Если указан контакт основной
                 // Добавляем его как основной в список контактов
@@ -197,6 +198,7 @@ class AOPInboundEmail extends InboundEmail {
 
             $c = new aCase();
             $c->retrieve($caseId);
+            $c->disable_change_status_hook = true;
             if($c->load_relationship('emails')) {
                 $c->emails->add($email->id);
             } // if
@@ -327,7 +329,7 @@ class AOPInboundEmail extends InboundEmail {
             $GLOBALS['case_CC_only'] = true;
             $email->retrieve($email->id);
             $c->retrieve($case_id);
-
+            $c->disable_change_status_hook = true;
             // Все текущие контакты кейса
             $contacts = $c->getContacts();
 
