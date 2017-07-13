@@ -2,7 +2,7 @@
 
 class CasesHooks {
 
-    public static $disable_change_status_hook == false;
+    public static $disable_change_status_hook = false;
 
     function before_save(&$bean, $event, $arguments) { 
         if ( (!isset(self::$disable_change_status_hook) || self::$disable_change_status_hook != true ) && !empty($bean->fetched_row['id']) ) {
