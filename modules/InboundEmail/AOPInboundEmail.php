@@ -151,7 +151,7 @@ class AOPInboundEmail extends InboundEmail {
             if(!empty($contactIds)) {
                 $c->contact_created_by_id = $contactIds[0];
             }
-
+            $c->disable_change_status_hook = true;
             $c->save(true);
             $c->retrieve($c->id);
             $c->disable_change_status_hook = true;
