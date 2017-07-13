@@ -2,8 +2,10 @@
 
 class CasesHooks {
 
+    public static $disable_change_status_hook == false;
+
     function before_save(&$bean, $event, $arguments) { 
-        if ( (!isset($bean->disable_change_status_hook) || $bean->disable_change_status_hook != true ) && !empty($bean->fetched_row['id']) ) {
+        if ( (!isset(self::$disable_change_status_hook) || self::$disable_change_status_hook != true ) && !empty($bean->fetched_row['id']) ) {
             $fields = $bean->getFieldDefinitions();
             $changed = false;
             foreach ( $fields as $field => $def ) {
@@ -21,7 +23,7 @@ class CasesHooks {
     }
 
     function after_relationship_add(&$bean, $event, $arguments) {
-        if ( (!isset($bean->disable_change_status_hook) || $bean->disable_change_status_hook != true ) && !empty($bean->fetched_row['id']) && $bean->status == 'Open_New' ) {
+        if ( (!isset(self::$disable_change_status_hook) || self::$disable_change_status_hook != true ) && !empty($bean->fetched_row['id']) && $bean->status == 'Open_New' ) {
             if ( $bean->fetched_row['account_id'] != $arguments['related_id'] || $arguments['related_module'] != 'Accounts' ) { 
                 $bean->status = 'Open_Assigned';
                 $bean->save();
