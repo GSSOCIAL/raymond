@@ -29,6 +29,13 @@ array (
           'field' => '30',
         ),
       ),
+      'includes' => 
+      array (
+        0 => 
+        array (
+          'file' => 'modules/Cases/js/copyToClipboard.js',
+        ),
+      ),
       'useTabs' => true,
       'tabDefs' => 
       array (
@@ -120,6 +127,16 @@ array (
           0 => 
           array (
             'name' => 'ass_hardware_cases_name',
+          ),
+        ),
+        9 => array (
+          0 => array (
+            'name' => 'copyWebPassword',
+            'customCode' => '{$COPY_WEB_PASSWORD_BUTTON}'
+          ),
+          1 => array (
+            'name' => 'copyRootPassword',
+            'customCode' => '{$COPY_ROOT_PASSWORD_BUTTON}'
           ),
         ),
       ),
