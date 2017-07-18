@@ -24,10 +24,10 @@ class CasesHooks {
 
     function after_relationship_add(&$bean, $event, $arguments) {
         if ( (!isset(self::$disable_change_status_hook) || self::$disable_change_status_hook != true ) && !empty($bean->fetched_row['id']) && $bean->status == 'Open_New' ) {
-            if ( $bean->fetched_row['account_id'] != $arguments['related_id'] || $arguments['related_module'] != 'Accounts' ) { 
+            //if ( $bean->fetched_row['account_id'] != $arguments['related_id'] || $arguments['related_module'] != 'Accounts' ) { 
                 $bean->status = 'Open_Assigned';
                 $bean->save();
-            }
+            //}
         }
     }
 
