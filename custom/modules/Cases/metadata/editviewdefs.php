@@ -78,47 +78,6 @@ array (
         ),
         3 => 
         array (
-          0 => 
-          array (
-            'name' => 'name',
-            'displayParams' => 
-            array (
-            ),
-          ),
-          1 => 
-          array (
-            'name' => 'suggestion_box',
-            'label' => 'LBL_SUGGESTION_BOX',
-          ),
-        ),
-        4 => 
-        array (
-          0 => 
-          array (
-            'name' => 'update_text',
-            'studio' => 'visible',
-            'label' => 'LBL_UPDATE_TEXT',
-          ),
-        ),
-        5 => 
-        array (
-          0 => 
-          array (
-            'name' => 'internal',
-            'studio' => 'visible',
-            'label' => 'LBL_INTERNAL',
-          ),
-        ),
-        6 => 
-        array (
-          0 => 
-          array (
-            'name' => 'case_update_form',
-            'studio' => 'visible',
-          ),
-        ),
-        7 => 
-        array (
           0 => 'assigned_user_name',
           1 => 
           array (
