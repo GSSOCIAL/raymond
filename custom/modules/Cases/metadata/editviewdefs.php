@@ -108,6 +108,14 @@ array (
                                 ',
           ),
         ),
+        4 => 
+        array (
+          0 => 
+          array (
+            'name' => 'resolution',
+            'nl2br' => true,
+          ),
+        ),
       ),
     ),
   ),
