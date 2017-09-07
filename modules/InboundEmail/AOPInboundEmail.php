@@ -94,6 +94,8 @@ class AOPInboundEmail extends InboundEmail {
         global $current_user, $mod_strings, $current_language;
         global $sugar_config;
         global $db;
+        require_once('custom/modules/Cases/CasesHooks.php');
+        CasesHooks::$disable_change_status_hook = true;
         $mod_strings = return_module_language($current_language, "Emails");
         $GLOBALS['log']->debug('In handleCreateCase in AOPInboundEmail');
         $c = new aCase();
@@ -151,7 +153,6 @@ class AOPInboundEmail extends InboundEmail {
             if(!empty($contactIds)) {
                 $c->contact_created_by_id = $contactIds[0];
             }
-
             $c->save(true);
             $c->retrieve($c->id);
             if(!empty($c->contact_created_by_id)) {
@@ -327,7 +328,6 @@ class AOPInboundEmail extends InboundEmail {
             $GLOBALS['case_CC_only'] = true;
             $email->retrieve($email->id);
             $c->retrieve($case_id);
-
             // Все текущие контакты кейса
             $contacts = $c->getContacts();
 
@@ -379,6 +379,7 @@ class AOPInboundEmail extends InboundEmail {
             $this->handleAutoresponse($email, $contactAddr);
             $c->save();//сохраняем кейс для перезаписи date_modified 
         }
+        CasesHooks::$disable_change_status_hook = false;
         echo "End of handle create case\n";
 
     } // fn
