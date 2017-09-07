@@ -77,5 +77,30 @@ array (
     'id' => 'ASSIGNED_USER_ID',
     'default' => true,
   ),
+  'UPDATE_TEXT' => 
+  array (
+    'type' => 'text',
+    'default' => false,
+    'studio' => 'visible',
+    'label' => 'LBL_UPDATE_TEXT',
+    'sortable' => false,
+    'width' => '10%',
+  ),
+  'INTERNAL' => 
+  array (
+    'type' => 'bool',
+    'studio' => 'visible',
+    'label' => 'LBL_INTERNAL',
+    'width' => '10%',
+    'default' => false,
+  ),
+  'AOP_CASE_UPDATES_THREADED' => 
+  array (
+    'type' => 'function',
+    'studio' => 'visible',
+    'label' => 'LBL_AOP_CASE_UPDATES_THREADED',
+    'width' => '10%',
+    'default' => false,
+  ),
 );
 ?>

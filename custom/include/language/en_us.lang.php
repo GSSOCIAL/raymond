@@ -23,16 +23,6 @@ $GLOBALS['app_list_strings']['case_type_dom']=array (
   'sysprep' => 'Sysprep',
   'other' => 'Other',
 );
-
-$GLOBALS['app_list_strings']['case_status_dom']=array (
-  'Open_New' => 'New',
-  'Open_Assigned' => 'In Progress',
-  'Closed_Closed' => 'Completed',
-  'Open_Pending Input' => 'Hold',
-  'Closed_Rejected' => 'Rejected',
-  'Closed_Duplicate' => 'Duplicate',
-  'Open_Reopen' => 'Reopen',
-);
 $GLOBALS['app_list_strings']['messenger_type_dom']=array (
   '' => '',
   'MSN' => 'MSN',
@@ -61,4 +51,10 @@ $GLOBALS['app_list_strings']['case_type_dom']=array (
   'sysprep' => 'Sysprep',
   'testing' => 'Testing',
   'other' => 'Other',
+);
+$GLOBALS['app_list_strings']['case_status_dom']=array (
+  'Open_New' => 'New',
+  'Open_Assigned' => 'In Progress',
+  'Closed_Closed' => 'Completed',
+  'Open_Reopen' => 'Reopen',
 );
