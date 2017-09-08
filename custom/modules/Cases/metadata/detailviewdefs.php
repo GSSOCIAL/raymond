@@ -86,8 +86,12 @@ array (
             'name' => 'assigned_user_name',
             'label' => 'LBL_ASSIGNED_TO',
           ),
+          1 => 
+          array (
+            'name' => 'ass_hardware_cases_name',
+          ),
         ),
-        5 => 
+        4 => 
         array (
           0 => 
           array (
@@ -101,14 +105,11 @@ array (
             'customCode' => '{$fields.date_modified.value} {$APP.LBL_BY} {$fields.modified_by_name.value}',
           ),
         ),
-        6 => 
-        array (
-          0 => 
-          array (
-            'name' => 'ass_hardware_cases_name',
-          ),
-        ),
-        9 => array (
+          5 =>
+              array (
+                  0 => 'resolution',
+              ),
+        6 => array (
           0 => array (
             'name' => 'copyWebPassword',
             'customCode' => '{$COPY_WEB_PASSWORD_BUTTON}'
