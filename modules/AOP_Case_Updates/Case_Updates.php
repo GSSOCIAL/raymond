@@ -485,10 +485,10 @@ function quick_edit_case_updates($case)
     if ($roles === 'no edit cases' || in_array('no edit cases', $roles)) {
         return '';
     }
-    $internalChecked = '';
-    if (isset($case->internal) && $case->internal) {
+    //$internalChecked = '';
+    //if (isset($case->internal) && $case->internal) {
         $internalChecked = "checked='checked'";
-    }
+    //}
     $internal = $mod_strings['LBL_AOP_INTERNAL'];
     $saveBtn = $app_strings['LBL_SAVE_BUTTON_LABEL'];
     $saveTitle = $app_strings['LBL_SAVE_BUTTON_TITLE'];
