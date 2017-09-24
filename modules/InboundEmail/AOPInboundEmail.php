@@ -81,7 +81,7 @@ class AOPInboundEmail extends InboundEmail {
                     LIMIT 1";
                 $res = $db->query($sql);
                 $row = $db->fetchByAssoc($res);
-                if ( !empty($row['case_id']) ) {
+                if ( !empty($row['case_id']) && $refs != "''") {
                     return $row['case_id'];
                 }
             }

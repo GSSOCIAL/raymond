@@ -137,7 +137,7 @@ class AOP_Case_Updates extends Basic
     /**
      * @return string message_id
      */
-    public function getCaseLastMessageID() {
+    public function getCaseReferences() {
         global $db;
         $sql = <<<SQL
             SELECT 
@@ -155,13 +155,24 @@ class AOP_Case_Updates extends Basic
              e.header_message_id IS NOT NULL
             AND e.header_message_id != ''
             AND c.id = '{$this->case_id}'
+            AND e.type = 'inbound'
             ORDER BY 
-             e.date_entered DESC
-            LIMIT 1;
+             e.date_entered DESC;
 SQL;
-        $result = $db->fetchByAssoc($db->query($sql));
-        if ( $result && !empty($result['header_message_id']) ) {
-            return $result['header_message_id'];
+        $result = $db->query($sql);
+        $lastMessageId = null;
+        $references = array();
+        while ( $row = $db->fetchByAssoc($result) ) {
+            if ( is_null($lastMessageId) ) {
+                $lastMessageId = $row['header_message_id'];
+            }
+            $references[] = $row['header_message_id'];
+        }
+        if ( !empty($references) ) {
+            return array(
+                'lastMessageId' => $lastMessageId,
+                'references' => implode(' ', $references)
+            );
         }
         return false;
     }
@@ -322,10 +333,10 @@ SQL;
         $mailer->From = $emailSettings['from_address'];
         $mailer->FromName = $emailSettings['from_name'];
         if ( !$this->internal ) {
-            $lastMessageId = $this->getCaseLastMessageID();
+            $references = $this->getCaseReferences();
             if ( $lastMessageId !== false ) {
-                $mailer->addCustomHeader('In-Reply-To', htmlspecialchars_decode($lastMessageId));
-                $mailer->addCustomHeader('References', htmlspecialchars_decode($lastMessageId));
+                $mailer->addCustomHeader('In-Reply-To', htmlspecialchars_decode($references['lastMessageId']));
+                $mailer->addCustomHeader('References', htmlspecialchars_decode($references['references']));
             }
         }
         foreach ($emails as $email) {
