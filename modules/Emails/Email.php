@@ -122,6 +122,7 @@ class Email extends SugarBean {
     public $link_action;
     public $emailAddress;
     public $attachments = array();
+    public $header_message_id;
 
     /* to support Email 2.0 */
     public $isDuplicate;
@@ -1075,7 +1076,6 @@ class Email extends SugarBean {
             $this->raw_source = SugarCleaner::cleanHtml($this->raw_source, true);
 			$this->saveEmailText();
 			$this->saveEmailAddresses();
-
 			$GLOBALS['log']->debug('-------------------------------> Email called save()');
 
 			// handle legacy concatenation of date and time fields
@@ -1087,9 +1087,7 @@ class Email extends SugarBean {
  				    $this->date_sent = $date_sent_obj->asDb();
                  }
 			}
-
 			parent::save($check_notify);
-
 			if(!empty($this->parent_type) && !empty($this->parent_id)) {
                 if(!empty($this->fetched_row) && !empty($this->fetched_row['parent_id']) && !empty($this->fetched_row['parent_type'])) {
                     if($this->fetched_row['parent_id'] != $this->parent_id || $this->fetched_row['parent_type'] != $this->parent_type) {

@@ -2711,8 +2711,11 @@ class InboundEmail extends SugarBean {
 		$c = new aCase();
 		if($caseId = $this->getCaseIdFromCaseNumber($email->name, $c)) {
 			$c->retrieve($caseId);
+			$header_message_id = $email->header_message_id;
 			$email->retrieve($email->id);
+			$email->header_message_id = htmlspecialchars($header_message_id);
             //assign the case info to parent id and parent type so that the case can be linked to the email on Email Save
+
 			$email->parent_type = "Cases";
 			$email->parent_id = $caseId;
 			// assign the email to the case owner
@@ -3956,7 +3959,6 @@ class InboundEmail extends SugarBean {
 
 		$header = imap_headerinfo($this->conn, $msgNo);
 		$fullHeader = imap_fetchheader($this->conn, $msgNo); // raw headers
-
 		// reset inline images cache
 		$this->inlineImages = array();
 
@@ -3996,6 +3998,7 @@ class InboundEmail extends SugarBean {
 			$email = new Email();
 			$email->isDuplicate = ($dupeCheckResult) ? false : true;
 			$email->mailbox_id = $this->id;
+			$email->header_message_id = htmlspecialchars($header->message_id);
 			$message = array();
 			$email->id = create_guid();
 			$email->new_with_id = true; //forcing a GUID here to prevent double saves.
@@ -4084,7 +4087,6 @@ class InboundEmail extends SugarBean {
 			$email->intent			= $this->mailbox_type;
 
 			$email->message_id		= $this->compoundMessageId; // filled by importDupeCheck();
-			$email->header_message_id = $header->message_id;
 
 			$this->references = explode('::::', preg_replace('/\s+/', '::::', $header->references));
 
@@ -4203,7 +4205,7 @@ class InboundEmail extends SugarBean {
 		///////////////////////////////////////////////////////////////////////
 		////	TO SUPPORT EMAIL 2.0
 		$this->email = $email;
-
+		$this->email->header_message_id = htmlspecialchars($header->message_id);
 		if(empty($this->email->et)) {
 			$this->email->email2init();
 		}

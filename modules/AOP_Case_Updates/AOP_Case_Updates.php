@@ -135,6 +135,38 @@ class AOP_Case_Updates extends Basic
     }
 
     /**
+     * @return string message_id
+     */
+    public function getCaseLastMessageID() {
+        global $db;
+        $sql = <<<SQL
+            SELECT 
+             c.id
+            ,e.name
+            ,e.header_message_id
+            ,e.type
+            FROM 
+             cases c
+            LEFT OUTER JOIN emails_beans eb
+             ON c.id = eb.bean_id AND eb.bean_module = 'Cases'
+            LEFT OUTER JOIN emails e
+             ON e.id = eb.email_id
+            WHERE 
+             e.header_message_id IS NOT NULL
+            AND e.header_message_id != ''
+            AND c.id = '{$this->case_id}'
+            ORDER BY 
+             e.date_entered DESC
+            LIMIT 1;
+SQL;
+        $result = $db->fetchByAssoc($db->query($sql));
+        if ( $result && !empty($result['header_message_id']) ) {
+            return $result['header_message_id'];
+        }
+        return false;
+    }
+
+    /**
      * @return aCase
      */
     public function getCase()
@@ -289,6 +321,13 @@ class AOP_Case_Updates extends Basic
         $mailer->AltBody = $text['body_alt'] . $signaturePlain;
         $mailer->From = $emailSettings['from_address'];
         $mailer->FromName = $emailSettings['from_name'];
+        if ( !$this->internal ) {
+            $lastMessageId = $this->getCaseLastMessageID();
+            if ( $lastMessageId !== false ) {
+                $mailer->addCustomHeader('In-Reply-To', htmlspecialchars_decode($lastMessageId));
+                $mailer->addCustomHeader('References', htmlspecialchars_decode($lastMessageId));
+            }
+        }
         foreach ($emails as $email) {
             $mailer->addAddress($email);
         }
@@ -360,6 +399,7 @@ class AOP_Case_Updates extends Basic
                 $emailObj->modified_user_id = '1';
                 $emailObj->created_by = '1';
                 $emailObj->status = 'sent';
+                $emailObj->header_message_id = htmlspecialchars($mailer->getLastMessageID());
                 $emailObj->save();
 
                 return true;

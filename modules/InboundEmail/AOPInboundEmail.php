@@ -60,7 +60,7 @@ class AOPInboundEmail extends InboundEmail {
         $result = parent::getCaseIdFromCaseNumber($emailName, $aCase);
         if ( !$result ) { 
             if ( !empty($this->references) && is_array($this->references) ) {
-                $refs = "'".join("', '", $this->references)."'";
+                $refs = htmlspecialchars("'".join("', '", $this->references)."'");
                 $sql = "
                     SELECT 
                      eb.bean_id case_id
