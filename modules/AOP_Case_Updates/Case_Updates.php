@@ -89,7 +89,7 @@ function caseUpdates(record){
     loadingMessgPanl.render(document.body);
     loadingMessgPanl.show();
 
-    var update_data = encodeURIComponent(document.getElementById('update_text').value);
+    var update_data = tinyMCE.activeEditor.getContent();
     var checkbox = document.getElementById('internal').checked;
     var internal = "";
     if(checkbox){
@@ -112,8 +112,8 @@ function caseUpdates(record){
     fd.append("relate_to", "Cases");
     fd.append("relate_id", record);
     fd.append("offset", "1");
-    // fd.append("update_text", update_data);
-    // fd.append("internal", internal);
+    fd.append("update_text", update_data);
+    fd.append("internal", internal);
 
 
     var xmlhttp = new XMLHttpRequest();
@@ -129,24 +129,28 @@ function caseUpdates(record){
 
         if(xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             location.reload()
-//                showSubPanel('history', null, true);
-//                //Reload the case updates stream and history panels
-//    		    $("#LBL_AOP_CASE_UPDATES").load("index.php?module=Cases&action=DetailView&record="+record + " #LBL_AOP_CASE_UPDATES", function(){
-//
-//
-//                    //Collapse all except newest update
-//                    $('.caseUpdateImage').attr("src",showUpdateImage);
-//                    $('.caseUpdate').slideUp('fast');
-//
-//                    var id = $('.caseUpdate').last().attr('id');
-//                    if(id){
-//                        toggleCaseUpdate(id.replace('caseUpdate',''));
-//                    }
-//
-//
-//                    loadingMessgPanl.hide();
-//
-//                });
+            tinyMCE.init({
+                convert_urls:false,
+                valid_children:"+body[style]",
+                height:300,
+                width:"100%",
+                theme:"advanced",
+                theme_advanced_toolbar_align:"left",
+                theme_advanced_toolbar_location:"top",
+                theme_advanced_buttons1:"code,separator,bold,italic,underline,strikethrough,separator,bullist,numlist,separator, \
+                                     justifyleft,justifycenter,justifyright,justifyfull,separator,link,unlink,separator, \
+                                         forecolor,backcolor,separator,formatselect,fontselect,fontsizeselect,",
+                theme_advanced_buttons2:"",
+                theme_advanced_buttons3:"",
+                strict_loading_mode:true,
+                language:"en",
+                plugins:"advhr,insertdatetime,table,preview,paste,searchreplace,directionality",
+                selector:"textarea",
+                extended_valid_elements:"style[dir|lang|media|title|type],hr[class|width|size|noshade],@[class|style]",
+                content_css:"include/javascript/tiny_mce/themes/advanced/skins/default/content.css",
+                directionality:"ltr"
+            });
+
     	}
     }
 
@@ -192,14 +196,6 @@ $(document).ready(function() {
 </style>
 A;
 
-    $updates = $focus->get_linked_beans('aop_case_updates', 'AOP_Case_Updates');
-	$updates = array_merge($updates, $focus->get_linked_beans('emails', "Email"));
-    if (!$updates || is_null($focus->id)) {
-        $html .= quick_edit_case_updates($focus);
-
-        return $html;
-    }
-
     $html .= <<<EOD
 <script>
 $(document).ready(function(){
@@ -208,12 +204,39 @@ $(document).ready(function(){
     if(id){
         toggleCaseUpdate(id.replace('caseUpdate',''));
     }
+    tinyMCE.init({
+    convert_urls:false,
+    valid_children:"+body[style]",
+    height:300,
+    width:"100%",
+    theme:"advanced",
+    theme_advanced_toolbar_align:"left",
+    theme_advanced_toolbar_location:"top",
+    theme_advanced_buttons1:"code,separator,bold,italic,underline,strikethrough,separator,bullist,numlist,separator, \
+                 justifyleft,justifycenter,justifyright,justifyfull,separator,link,unlink,separator, \
+                 forecolor,backcolor,separator,formatselect,fontselect,fontsizeselect,",
+    theme_advanced_buttons2:"",
+    theme_advanced_buttons3:"",
+    strict_loading_mode:true,
+    language:"en",
+    plugins:"advhr,insertdatetime,table,preview,paste,searchreplace,directionality",
+    selector:"textarea",
+    extended_valid_elements:"style[dir|lang|media|title|type],hr[class|width|size|noshade],@[class|style]",
+    content_css:"include/javascript/tiny_mce/themes/advanced/skins/default/content.css",
+    directionality:"ltr"
+  });
 });
 </script>
 <a href='' onclick='collapseAllUpdates(); return false;'>{$mod_strings['LBL_CASE_UPDATES_COLLAPSE_ALL']}</a>
 <a href='' onclick='expandAllUpdates(); return false;'>{$mod_strings['LBL_CASE_UPDATES_EXPAND_ALL']}</a>
 <div class="case_updates_wrapper">
 EOD;
+    $updates = $focus->get_linked_beans('aop_case_updates', 'AOP_Case_Updates');
+    if (!$updates || is_null($focus->id)) {
+        $html .= quick_edit_case_updates($focus);
+
+        return $html;
+    }
 
     usort(
         $updates,
@@ -367,7 +390,7 @@ function display_single_update(AOP_Case_Updates $update)
         if ($update->internal) {
             $html = "<div id='caseStyleInternal'>" . getUpdateDisplayHead($update);
             $html .= "<div id='caseUpdate" . $update->id . "' class='caseUpdate'>";
-            $html .= nl2br(html_entity_decode($update->description));
+            $html .= (html_entity_decode($update->description));
             $html .= displayAttachedImages($update);
             $html .= '</div></div>';
 
@@ -375,7 +398,7 @@ function display_single_update(AOP_Case_Updates $update)
         } /*if standard update*/ else {
             $html = "<div id='lessmargin'><div id='caseStyleUser'>" . getUpdateDisplayHead($update);
             $html .= "<div id='caseUpdate" . $update->id . "' class='caseUpdate'>";
-            $html .= nl2br(html_entity_decode($update->description));
+            $html .= (html_entity_decode($update->description));
             $html .= displayAttachedImages($update);
             $html .= '</div></div></div>';
 
@@ -387,7 +410,7 @@ function display_single_update(AOP_Case_Updates $update)
     if($update->contact_id){
         $html = "<div id='extramargin'><div id='caseStyleContact'>".getUpdateDisplayHead($update);
         $html .= "<div id='caseUpdate".$update->id."' class='caseUpdate'>";
-        $html .= nl2br(html_entity_decode($update->description));
+        $html .= (html_entity_decode($update->description));
         $html .= displayAttachedImages($update);
         $html .= "</div></div></div>";
         return $html;
@@ -407,7 +430,7 @@ function display_single_update_email(Email $update){
     if($update->assigned_user_id){
         $html = "<div id='lessmargin'><div id='caseStyleUser'>" . getUpdateDisplayHead($update);
         $html .= "<div id='caseUpdate" . $update->id . "' class='caseUpdate'>";
-        $html .= nl2br(html_entity_decode($update->description));
+        $html .= (html_entity_decode($update->description));
         $html .= displayAttachedImages($update);
         $html .= "</div></div></div>";
         return $html;
@@ -417,7 +440,7 @@ function display_single_update_email(Email $update){
     if($update->contact_id){
         $html = "<div id='extramargin'><div id='caseStyleContact'>".getUpdateDisplayHead($update);
         $html .= "<div id='caseUpdate".$update->id."' class='caseUpdate'>";
-        $html .= nl2br(html_entity_decode($update->description));
+        $html .= (html_entity_decode($update->description));
         $html .= displayAttachedImages($update);
         $html .= "</div></div></div>";
         return $html;

@@ -83,7 +83,7 @@ class CaseUpdatesHook
             return;
         }
         global $current_user, $app_list_strings;
-        if (empty($case->fetched_row) || !$case->id) {
+        if ($_REQUEST['force_case_update'] !== '1' && (empty($case->fetched_row) || !$case->id)) {
             if (!$case->state) {
                 $case->state = $app_list_strings['case_state_default_key'];
             }
@@ -118,7 +118,7 @@ class CaseUpdatesHook
         if (strlen($text) > $this->slug_size) {
             $case_update->name = substr($text, 0, $this->slug_size) . '...';
         }
-        $case_update->description = nl2br($text);
+        $case_update->description = ($text);
         $case_update->case_id = $case->id;
         $case_update->save();
 
