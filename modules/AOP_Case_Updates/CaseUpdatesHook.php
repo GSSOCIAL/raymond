@@ -535,7 +535,7 @@ class CaseUpdatesHook
      *
      * @return bool
      */
-    function sendCreationEmail(aCase $bean, $contact)
+    function sendCreationEmail(aCase $bean, $contact, $references = null)
     {
 
 		static $bcc_send;
@@ -569,6 +569,10 @@ class CaseUpdatesHook
         $mailer->AltBody = $text['body_alt'];
         $mailer->From = $emailSettings['from_address'];
         $mailer->FromName = $emailSettings['from_name'];
+        if ( !empty($references) && is_array($references) ) {
+            $mailer->addCustomHeader('In-Reply-To', htmlspecialchars_decode($references[0]));
+            $mailer->addCustomHeader('References', htmlspecialchars_decode(impolde(' ', $references)));
+        }
         $email = $contact->emailAddress->getPrimaryAddress($contact);
         if (empty($email) && !empty($contact->email1)) {
             $email = $contact->email1;

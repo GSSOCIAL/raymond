@@ -319,7 +319,7 @@ class AOPInboundEmail extends InboundEmail {
             $mainContact->retrieve($c->contact_created_by_id);
 
             $hook = new CaseUpdatesHook();
-            $hook->sendCreationEmail($c, $mainContact);
+            $hook->sendCreationEmail($c, $mainContact, $this->references);
 
         } else {
             echo "First if not matching\n";
