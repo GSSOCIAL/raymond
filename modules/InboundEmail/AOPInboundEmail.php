@@ -319,6 +319,7 @@ class AOPInboundEmail extends InboundEmail {
             $mainContact->retrieve($c->contact_created_by_id);
 
             $hook = new CaseUpdatesHook();
+	    $this->references = array($this->email->header_message_id);
             $hook->sendCreationEmail($c, $mainContact, $this->references);
 
         } else {

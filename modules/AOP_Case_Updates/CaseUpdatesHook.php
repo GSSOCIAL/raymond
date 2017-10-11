@@ -570,8 +570,10 @@ class CaseUpdatesHook
         $mailer->From = $emailSettings['from_address'];
         $mailer->FromName = $emailSettings['from_name'];
         if ( !empty($references) && is_array($references) ) {
-            $mailer->addCustomHeader('In-Reply-To', htmlspecialchars_decode($references[0]));
-            $mailer->addCustomHeader('References', htmlspecialchars_decode(impolde(' ', $references)));
+		$repto = $references[0];
+		$refs = implode(' ', $references);
+            $mailer->addCustomHeader('In-Reply-To', htmlspecialchars_decode($repto));
+            $mailer->addCustomHeader('References', htmlspecialchars_decode($refs));
         }
         $email = $contact->emailAddress->getPrimaryAddress($contact);
         if (empty($email) && !empty($contact->email1)) {
