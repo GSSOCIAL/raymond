@@ -5,7 +5,7 @@ class hardwareHooks {
     #before save hooks
     function updateSerial($bean, $event, $arguments) {
         if (empty($bean->fetched_row)) {
-            global $db;
+            global $db, $sugar_config;
 
             $query = "
                 SELECT
@@ -19,7 +19,16 @@ class hardwareHooks {
             $result = $db->query($query, 1);
 
             if ($row = $db->fetchByAssoc($result)) {
-                $bean->name = 1 + $row['serial'];
+                $rank = $sugar_config['rank']; //количество знаков в Serial
+                
+                $serial = 1 + $row['serial'];
+                $iterations = $rank - strlen(round(abs($serial)));
+                $zero = '';
+                for ($i = 0; $i < $iterations; $i++){
+                    $zero .= '0';//если знаков в текущем serial меньше чем максимальное кол-во знаков, то дополняем слева нулями
+                }
+
+                $bean->name = $zero . $serial;
             }
         }
     }
