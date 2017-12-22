@@ -58,3 +58,6 @@ $GLOBALS['app_list_strings']['case_status_dom']=array (
   'Closed_Closed' => 'Completed',
   'Open_Reopen' => 'Reopen',
 );
+
+$app_strings['LBL_SAVE_BUTTON_FOR_CASE_UPDATE_TITLE'] = 'Send Email';
+$app_strings['LBL_SAVE_BUTTON_FOR_CASE_UPDATE_LABEL'] = 'Send Email';
