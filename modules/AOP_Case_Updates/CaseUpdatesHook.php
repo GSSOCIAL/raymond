@@ -656,7 +656,7 @@ class CaseUpdatesHook
     /**
      * @param AOP_Case_Updates $caseUpdate
      */
-    public function sendCaseUpdate(AOP_Case_Updates $caseUpdate)
+    public function sendCaseUpdate(AOP_Case_Updates $caseUpdate, $send_update)
     {
         global $current_user, $sugar_config;
         static $contacts_send;
@@ -679,8 +679,8 @@ class CaseUpdatesHook
                 // Если указана Роль пользователей для рассылки уведомлений о внутреннем сообщении в Обращении
                 $seedRole = new ACLRole();
                 $seedRole->retrieve($aop_config['support_internal_email_role_id']);
-                if(!empty($seedRole->id)) {
-                    // Если Роль корректно определена
+                if(!empty($seedRole->id) && $send_update) {
+                    // Если Роль корректно определена и это не удаление cases ($send_update определяет нужно ли отправлять (не нужно отправлять в случае если parent кейс удаляется))
 
                     // Пользователи в Роли
                     $role_users = $seedRole->getMembers();

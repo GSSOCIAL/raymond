@@ -129,7 +129,9 @@ class AOP_Case_Updates extends Basic
         } else {
             $hook = new CaseUpdatesHook();
         }
-        $hook->sendCaseUpdate($this);
+        //проверяем если case update новый, то разерешаем отправку
+        $send_update = (empty($this->fetched_row)) ? 1 : 0;
+        $hook->sendCaseUpdate($this, $send_update);
 
         return $this->id;
     }
