@@ -122,7 +122,7 @@ function confirmSendUpdate(record) {
     confirmDialog = new YAHOO.widget.SimpleDialog('confirmSendEmail', {
                     type: 'alert',
                     width: '300px',
-                    close: true,
+                    close: false,
                     modal: true,
                     visible: true,
                     fixedcenter: true,
