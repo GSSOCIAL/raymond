@@ -80,17 +80,18 @@ function toggleCaseUpdate(updateId){
 //  dialog with timer button START
 /////////
 
-var stopFlag = false; //стоп-флаг, для остановки рекурсии по нажатию на кнопки из диалога
-var secondsBeforeSend = 15; //количество секунд на отмену
+var stopFlag; //стоп-флаг, для остановки рекурсии по нажатию на кнопки из диалога
+var secondsBeforeSend ; //количество секунд на отмену
 
 //рекурсивная функция вызывающая сама себя кадую секунду если выполняется условияе
 function confirmSendUpdateTimer (record, confirmDialog) {
     var secondsObj = $('#secSendUpdateTimer'); //объект из кнопки "ОК" из диалогового окна
     var targettime = secondsObj.html(); //количество секунд из кнопки "ОК" из диалогового окна
+    
     targettime--; //уменьшаем счётчик секунд
     secondsObj.html(targettime); //записываем обратно в кнопку
     
-    if (!stopFlag) { //проверяем стопфлег
+    if (!stopFlag) { //проверяем стопфлаг
         if(targettime > 0 ) { //проверяем кол-во секунд
             setTimeout(function() {confirmSendUpdateTimer(record, confirmDialog)},1000); //запускаем снова функцию
         } else {
@@ -102,6 +103,9 @@ function confirmSendUpdateTimer (record, confirmDialog) {
 
 //функция инициализации диалога и старта функции с таймером.
 function confirmSendUpdate(record) {
+
+    stopFlag = false; //стоп-флаг, для остановки рекурсии по нажатию на кнопки из диалога
+    secondsBeforeSend = 15;  //количество секунд на отмену
 
     //обработчик "OK"
     var handleSubmit = function() {
