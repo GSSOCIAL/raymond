@@ -74,6 +74,73 @@ function toggleCaseUpdate(updateId){
     }
     updateElem.slideToggle('fast');
 }
+
+
+/////////
+//  dialog with timer button START
+/////////
+
+var stopFlag = false; //стоп-флаг, для остановки рекурсии по нажатию на кнопки из диалога
+var secondsBeforeSend = 15; //количество секунд на отмену
+
+//рекурсивная функция вызывающая сама себя кадую секунду если выполняется условияе
+function confirmSendUpdateTimer (record, confirmDialog) {
+    var secondsObj = $('#secSendUpdateTimer'); //объект из кнопки "ОК" из диалогового окна
+    var targettime = secondsObj.html(); //количество секунд из кнопки "ОК" из диалогового окна
+    targettime--; //уменьшаем счётчик секунд
+    secondsObj.html(targettime); //записываем обратно в кнопку
+    
+    if (!stopFlag) { //проверяем стопфлег
+        if(targettime > 0 ) { //проверяем кол-во секунд
+            setTimeout(function() {confirmSendUpdateTimer(record, confirmDialog)},1000); //запускаем снова функцию
+        } else {
+            confirmDialog.hide(); //закрываем диалог
+            caseUpdates(record); //выполняем запись caseUpdate
+        }
+    }
+}
+
+//функция инициализации диалога и старта функции с таймером.
+function confirmSendUpdate(record) {
+
+    //обработчик "OK"
+    var handleSubmit = function() {
+        this.hide();//хайдим диалог
+        stopFlag = true;//включам стопфалг, чтоб остановить рекурсию
+        caseUpdates(record);//выполняем запись caseUpdate
+    };
+    //Обработчик "Cancel"
+    var handleCancel = function() {
+        this.hide();//хайдим диалог
+        stopFlag = true;//включам стопфалг, чтоб остановить рекурсию
+    };
+    //Диалог подтверждения
+    confirmDialog = new YAHOO.widget.SimpleDialog('confirmSendEmail', {
+                    type: 'alert',
+                    width: '300px',
+                    close: true,
+                    modal: true,
+                    visible: true,
+                    fixedcenter: true,
+                    constraintoviewport: true,
+                    draggable: false,
+                    buttons : [ { text:"Ok (<span id='secSendUpdateTimer'>"+secondsBeforeSend+"</span>)", handler:handleSubmit, isDefault:true }, 
+	                          { text:"Cancel", handler:handleCancel } ] 
+                });
+    confirmDialog.setHeader('Confirm send email');
+    confirmDialog.setBody('Do you want to send email?');
+    confirmDialog.render(document.body);
+    confirmDialog.show();
+    
+    confirmSendUpdateTimer(record, confirmDialog);//запуск рекурсивной функции.
+    
+}
+
+/////////
+//  dialog with timer button STOP
+/////////
+
+
 function caseUpdates(record){
     loadingMessgPanl = new YAHOO.widget.SimpleDialog('loading', {
                     width: '200px',
@@ -534,7 +601,7 @@ function quick_edit_case_updates($case)
     </div>
     
     
-    <input type='button' value='$saveBtn' onclick="caseUpdates('$record')" title="$saveTitle" name="button"> </input>
+    <input type='button' value='$saveBtn' onclick="confirmSendUpdate('$record')" title="$saveTitle" name="button" style="margin-left: 0px;"> </input>
 
 
     </br>
