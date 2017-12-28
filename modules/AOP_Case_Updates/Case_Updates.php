@@ -134,7 +134,7 @@ function caseUpdates(record){
                 valid_children:"+body[style]",
                 height:300,
                 width:"100%",
-                theme:"advanced",
+                theme:"modern",
                 theme_advanced_toolbar_align:"left",
                 theme_advanced_toolbar_location:"top",
                 theme_advanced_buttons1:"code,separator,bold,italic,underline,strikethrough,separator,bullist,numlist,separator, \
@@ -144,11 +144,14 @@ function caseUpdates(record){
                 theme_advanced_buttons3:"",
                 strict_loading_mode:true,
                 language:"en",
-                plugins:"advhr,insertdatetime,table,preview,paste,searchreplace,directionality",
+                plugins:"insertdatetime,table,preview,paste,searchreplace,directionality",
                 selector:"textarea",
                 extended_valid_elements:"style[dir|lang|media|title|type],hr[class|width|size|noshade],@[class|style]",
-                content_css:"include/javascript/tiny_mce/themes/advanced/skins/default/content.css",
-                directionality:"ltr"
+//                content_css:"include/javascript/tiny_mce/themes/advanced/skins/default/content.css",
+                directionality:"ltr",
+                external_plugins: {"nanospell": "plugins/nanospell/plugin.js"},
+                 nanospell_server: "php", // choose "php" "asp" "asp.net" or "java"
+                 nanospell_autostart:true,
             });
 
     	}
@@ -209,7 +212,7 @@ $(document).ready(function(){
     valid_children:"+body[style]",
     height:300,
     width:"100%",
-    theme:"advanced",
+    theme:"modern",
     theme_advanced_toolbar_align:"left",
     theme_advanced_toolbar_location:"top",
     theme_advanced_buttons1:"code,separator,bold,italic,underline,strikethrough,separator,bullist,numlist,separator, \
@@ -219,11 +222,14 @@ $(document).ready(function(){
     theme_advanced_buttons3:"",
     strict_loading_mode:true,
     language:"en",
-    plugins:"advhr,insertdatetime,table,preview,paste,searchreplace,directionality",
+    plugins:"insertdatetime,table,preview,paste,searchreplace,directionality",
     selector:"textarea",
     extended_valid_elements:"style[dir|lang|media|title|type],hr[class|width|size|noshade],@[class|style]",
-    content_css:"include/javascript/tiny_mce/themes/advanced/skins/default/content.css",
-    directionality:"ltr"
+//    content_css:"include/javascript/tiny_mce/themes/advanced/skins/default/content.css",
+    directionality:"ltr",
+    external_plugins: {"nanospell": "plugins/nanospell/plugin.js"},
+     nanospell_server: "php", // choose "php" "asp" "asp.net" or "java"
+     nanospell_autostart:true,
   });
 });
 </script>
