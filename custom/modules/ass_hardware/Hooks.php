@@ -4,7 +4,7 @@ class hardwareHooks {
 
     #before save hooks
     function updateSerial($bean, $event, $arguments) {
-        if (empty($bean->fetched_row)) {
+        if (empty($bean->fetched_row) && empty($bean->name)) {
             global $db, $sugar_config;
 
             $query = "
