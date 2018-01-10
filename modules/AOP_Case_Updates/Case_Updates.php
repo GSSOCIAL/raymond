@@ -513,8 +513,10 @@ function quick_edit_case_updates($case)
         $internalChecked = "checked='checked'";
     //}
     $internal = $mod_strings['LBL_AOP_INTERNAL'];
-    $saveBtn = $app_strings['LBL_SAVE_BUTTON_LABEL'];
-    $saveTitle = $app_strings['LBL_SAVE_BUTTON_TITLE'];
+//    $saveBtn = $app_strings['LBL_SAVE_BUTTON_LABEL'];
+//    $saveTitle = $app_strings['LBL_SAVE_BUTTON_TITLE'];
+    $saveBtn = $app_strings['LBL_SAVE_BUTTON_FOR_CASE_UPDATE_LABEL'];
+    $saveTitle = $app_strings['LBL_SAVE_BUTTON_FOR_CASE_UPDATE_TITLE'];
 
     $update_file_html = display_update_form('DetailView');
 
@@ -534,7 +536,7 @@ function quick_edit_case_updates($case)
     </div>
     
     
-    <input type='button' value='$saveBtn' onclick="caseUpdates('$record')" title="$saveTitle" name="button"> </input>
+    <input type='button' value='$saveBtn' onclick="caseUpdates('$record')" title="$saveTitle" name="button" style="margin-left: 0px;"> </input>
 
 
     </br>
