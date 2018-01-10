@@ -44,10 +44,10 @@ class ass_licViewEdit extends ViewEdit
 {
  	function preDisplay()
 	{
-//		if (!empty($this->bean->lic_key)) {
-//			$this->ss->assign('ReadOnly', 'readonly');
-//			$this->bean->lic_key = str_replace("\n", '<br>', $this->bean->lic_key);
-//		}
+		if (!empty($this->bean->lic_key)) {
+			$this->ss->assign('ReadOnly', 'readonly');
+			$this->bean->lic_key = str_replace("\n", '<br>', $this->bean->lic_key);
+		}
 		parent::preDisplay();
 	}
 

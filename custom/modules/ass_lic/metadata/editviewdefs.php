@@ -82,7 +82,7 @@ array (
             'name' => 'lic_key',
             'studio' => 'visible',
             'label' => 'LBL_LIC_KEY',
-//            'displayParams'=>array('readonly'=>true)
+            'displayParams'=>array('readonly'=>true)
           ),
           1 =>
           array (
