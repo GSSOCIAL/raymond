@@ -35,10 +35,10 @@ array (
         array (
           'file' => 'modules/Cases/js/copyToClipboard.js',
         ),
-        1 => array (
+        1 => 
+        array (
           'file' => 'include/javascript/tiny_mce/tiny_mce.js',
         ),
-
       ),
       'useTabs' => true,
       'tabDefs' => 
@@ -109,18 +109,27 @@ array (
             'customCode' => '{$fields.date_modified.value} {$APP.LBL_BY} {$fields.modified_by_name.value}',
           ),
         ),
-          5 =>
-              array (
-                  0 => 'resolution',
-              ),
-        6 => array (
-          0 => array (
-            'name' => 'copyWebPassword',
-            'customCode' => '{$COPY_WEB_PASSWORD_BUTTON}'
+        5 => 
+        array (
+          0 => 'resolution',
+          1 => 
+          array (
+            'name' => 'last_action_c',
+            'studio' => 'visible',
+            'label' => 'LBL_LAST_ACTION',
           ),
-          1 => array (
+        ),
+        6 => 
+        array (
+          0 => 
+          array (
+            'name' => 'copyWebPassword',
+            'customCode' => '{$COPY_WEB_PASSWORD_BUTTON}',
+          ),
+          1 => 
+          array (
             'name' => 'copyRootPassword',
-            'customCode' => '{$COPY_ROOT_PASSWORD_BUTTON}'
+            'customCode' => '{$COPY_ROOT_PASSWORD_BUTTON}',
           ),
         ),
       ),

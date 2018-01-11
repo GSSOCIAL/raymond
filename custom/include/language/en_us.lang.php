@@ -61,3 +61,17 @@ $GLOBALS['app_list_strings']['case_status_dom']=array (
 
 $app_strings['LBL_SAVE_BUTTON_FOR_CASE_UPDATE_TITLE'] = 'Send Email';
 $app_strings['LBL_SAVE_BUTTON_FOR_CASE_UPDATE_LABEL'] = 'Send Email';
+
+$GLOBALS['app_list_strings']['document_subcategory_dom']=array (
+  '' => '',
+  'Product Brochures' => 'Product Brochures',
+  'FAQ' => 'FAQ',
+  'SOW' => 'Statement of work',
+  'Other' => 'Other',
+);
+$GLOBALS['app_list_strings']['last_action_list']=array (
+  'internal' => 'Internal',
+  'external' => 'External',
+);
+$app_strings['LBL_GROUPTAB0_1515599126'] = 'New Group';
+?>

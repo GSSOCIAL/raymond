@@ -56,12 +56,22 @@ array (
         array (
           0 => 
           array (
+            'name' => 'name',
+            'displayParams' => 
+            array (
+            ),
+          ),
+        ),
+        1 => 
+        array (
+          0 => 
+          array (
             'name' => 'case_number',
             'type' => 'readonly',
           ),
           1 => 'priority',
         ),
-        1 => 
+        2 => 
         array (
           0 => 
           array (
@@ -71,12 +81,12 @@ array (
           ),
           1 => 'status',
         ),
-        2 => 
+        3 => 
         array (
           0 => 'type',
           1 => 'account_name',
         ),
-        3 => 
+        4 => 
         array (
           0 => 'assigned_user_name',
           1 => 
@@ -108,12 +118,18 @@ array (
                                 ',
           ),
         ),
-        4 => 
+        5 => 
         array (
           0 => 
           array (
             'name' => 'resolution',
             'nl2br' => true,
+          ),
+          1 => 
+          array (
+            'name' => 'last_action_c',
+            'studio' => 'visible',
+            'label' => 'LBL_LAST_ACTION',
           ),
         ),
       ),

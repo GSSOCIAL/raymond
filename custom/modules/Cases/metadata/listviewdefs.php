@@ -50,6 +50,14 @@ array (
     'label' => 'LBL_LIST_PRIORITY',
     'default' => true,
   ),
+  'LAST_ACTION_C' => 
+  array (
+    'type' => 'enum',
+    'default' => true,
+    'studio' => 'visible',
+    'label' => 'LBL_LAST_ACTION',
+    'width' => '10%',
+  ),
   'DATE_ENTERED' => 
   array (
     'width' => '10%',

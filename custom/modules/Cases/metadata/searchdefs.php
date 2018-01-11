@@ -29,6 +29,15 @@ array (
         'default' => true,
         'width' => '10%',
       ),
+      'last_action_c' => 
+      array (
+        'type' => 'enum',
+        'default' => true,
+        'studio' => 'visible',
+        'label' => 'LBL_LAST_ACTION',
+        'width' => '10%',
+        'name' => 'last_action_c',
+      ),
       'current_user_only' => 
       array (
         'name' => 'current_user_only',
@@ -103,6 +112,15 @@ array (
         'name' => 'status',
         'default' => true,
         'width' => '10%',
+      ),
+      'last_action_c' => 
+      array (
+        'type' => 'enum',
+        'default' => true,
+        'studio' => 'visible',
+        'label' => 'LBL_LAST_ACTION',
+        'width' => '10%',
+        'name' => 'last_action_c',
       ),
       'state' => 
       array (
