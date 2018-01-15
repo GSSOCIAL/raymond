@@ -96,6 +96,8 @@ function confirmSendUpdateTimer (record, confirmDialog) {
             setTimeout(function() {confirmSendUpdateTimer(record, confirmDialog)},1000); //запускаем снова функцию
         } else {
             confirmDialog.hide(); //закрываем диалог
+            $(window).unbind('beforeunload');//удялем обработчик стандартного диалога что потерям данные когда покинем страницу
+            $("#caseUpdateSaveBtn").prop("disabled", false);//разблокируем кнопку
             caseUpdates(record); //выполняем запись caseUpdate
         }
     }
@@ -103,7 +105,8 @@ function confirmSendUpdateTimer (record, confirmDialog) {
 
 //функция инициализации диалога и старта функции с таймером.
 function confirmSendUpdate(record) {
-
+    $(window).on('beforeunload', function(){return '';}); //биндим стандартный диалог что данные не сохранятся, если покинуть страницу
+    
     stopFlag = false; //стоп-флаг, для остановки рекурсии по нажатию на кнопки из диалога
     secondsBeforeSend = 15;  //количество секунд на отмену
 
@@ -111,23 +114,32 @@ function confirmSendUpdate(record) {
     var handleSubmit = function() {
         this.hide();//хайдим диалог
         stopFlag = true;//включам стопфалг, чтоб остановить рекурсию
+        $(window).unbind('beforeunload');//удялем обработчик стандартного диалога что потерям данные когда покинем страницу
+        $("#caseUpdateSaveBtn").prop("disabled", false);//разблокируем кнопку
         caseUpdates(record);//выполняем запись caseUpdate
     };
     //Обработчик "Cancel"
     var handleCancel = function() {
         this.hide();//хайдим диалог
+        $(window).unbind('beforeunload');//удялем обработчик стандартного диалога что потерям данные когда покинем страницу
+        $("#caseUpdateSaveBtn").prop("disabled", false);//разблокируем кнопку
         stopFlag = true;//включам стопфалг, чтоб остановить рекурсию
     };
     //Диалог подтверждения
+    
+    var dialog_x = $(window).width() - 320;
+    var dialog_y = $(window).height() - 110;
     confirmDialog = new YAHOO.widget.SimpleDialog('confirmSendEmail', {
+                    xy:[dialog_x, dialog_y],
+                    zIndex: 100500,
                     type: 'alert',
                     width: '300px',
                     close: false,
-                    modal: true,
-                    visible: true,
-                    fixedcenter: true,
-                    constraintoviewport: true,
-                    draggable: false,
+                    modal: false,
+                    visible: false,
+                    fixedcenter: false,
+                    constraintoviewport: false,
+                    draggable: true,
                     buttons : [ { text:"Ok (<span id='secSendUpdateTimer'>"+secondsBeforeSend+"</span>)", handler:handleSubmit, isDefault:true }, 
 	                          { text:"Cancel", handler:handleCancel } ] 
                 });
@@ -135,7 +147,8 @@ function confirmSendUpdate(record) {
     confirmDialog.setBody('Do you want to send email?');
     confirmDialog.render(document.body);
     confirmDialog.show();
-    
+    $('#confirmSendEmail_c').css('position', 'fixed');
+    $("#caseUpdateSaveBtn").prop("disabled", true);//блок кнопки отправки case update
     confirmSendUpdateTimer(record, confirmDialog);//запуск рекурсивной функции.
     
 }
@@ -231,6 +244,9 @@ function caseUpdates(record){
 
 }
 $(document).ready(function() {
+    
+    var handler = function() {};
+
     $('.caseUpdate').find('img[class!=attachment_thumb]').replaceWith(function() { return '<a href="' + $(this).attr('src') + '" data-lightbox="attachement">' + this.outerHTML + '</a>'; });
 
     lightbox.option({
@@ -605,7 +621,7 @@ function quick_edit_case_updates($case)
     </div>
     
     
-    <input type='button' value='$saveBtn' onclick="confirmSendUpdate('$record')" title="$saveTitle" name="button" style="margin-left: 0px;"> </input>
+    <input type='button' value='$saveBtn' id='caseUpdateSaveBtn' onclick="confirmSendUpdate('$record')" title="$saveTitle" name="button" style="margin-left: 0px;"> </input>
 
 
     </br>
