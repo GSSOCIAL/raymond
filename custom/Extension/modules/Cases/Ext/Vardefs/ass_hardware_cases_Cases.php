@@ -21,6 +21,8 @@ $dictionary["Case"]["fields"]["ass_hardware_cases_name"] = array (
   'table' => 'ass_hardware',
   'module' => 'ass_hardware',
   'rname' => 'name',
+//    'populate_list' => array('name', 'id', 'ip_eth0'),
+//    'field_list' => array('ass_hardware_cases_name', 'ass_hardware_casesass_hardware_ida', 'ip_eth0'),
 );
 $dictionary["Case"]["fields"]["ass_hardware_casesass_hardware_ida"] = array (
   'name' => 'ass_hardware_casesass_hardware_ida',
