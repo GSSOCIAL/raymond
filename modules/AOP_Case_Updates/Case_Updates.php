@@ -238,6 +238,12 @@ EOD;
         return $html;
     }
 
+    $em = $focus->get_linked_beans('emails', 'Emails');
+
+    if (isset($em) && !empty($em)){
+        $updates = array_merge($updates, $em);
+    }
+
     usort(
         $updates,
         function ($a, $b) {
