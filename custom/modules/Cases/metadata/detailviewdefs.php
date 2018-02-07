@@ -35,9 +35,8 @@ array (
         array (
           'file' => 'modules/Cases/js/copyToClipboard.js',
         ),
-        1 => 
-        array (
-          'file' => 'include/javascript/tiny_mce/tiny_mce.js',
+        1 => array (
+          'file' => 'include/javascript/tinymce/tinymce.min.js',
         ),
       ),
       'useTabs' => true,
