@@ -436,7 +436,7 @@ function display_single_update_email(Email $update){
     if($update->assigned_user_id){
         $html = "<div id='lessmargin'><div id='caseStyleUser'>" . getUpdateDisplayHead($update);
         $html .= "<div id='caseUpdate" . $update->id . "' class='caseUpdate'>";
-        $html .= (html_entity_decode($update->description));
+        $html .= (html_entity_decode($update->description_html));
         $html .= displayAttachedImages($update);
         $html .= "</div></div></div>";
         return $html;
