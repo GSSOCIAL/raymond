@@ -114,7 +114,7 @@ function confirmSendUpdate(record) {
     confirmDialog.show();
     
     $("#caseUpdateSaveBtn").prop("disabled", true);//блок кнопки отправки case update
-    confirmSendUpdateTimer(record, confirmDialog);//запуск рекурсивной функции.
+    confirmSendUpdateTimer(record, confirmDialog);//запуск рекурсивной функции..
     
 }
 
