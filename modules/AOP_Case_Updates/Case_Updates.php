@@ -110,44 +110,9 @@ function confirmSendUpdate(record) {
     stopFlag = false; //стоп-флаг, для остановки рекурсии по нажатию на кнопки из диалога
     secondsBeforeSend = 15;  //количество секунд на отмену
 
-    //обработчик "OK"
-    var handleSubmit = function() {
-        this.hide();//хайдим диалог
-        stopFlag = true;//включам стопфалг, чтоб остановить рекурсию
-        $(window).unbind('beforeunload');//удялем обработчик стандартного диалога что потерям данные когда покинем страницу
-        $("#caseUpdateSaveBtn").prop("disabled", false);//разблокируем кнопку
-        caseUpdates(record);//выполняем запись caseUpdate
-    };
-    //Обработчик "Cancel"
-    var handleCancel = function() {
-        this.hide();//хайдим диалог
-        $(window).unbind('beforeunload');//удялем обработчик стандартного диалога что потерям данные когда покинем страницу
-        $("#caseUpdateSaveBtn").prop("disabled", false);//разблокируем кнопку
-        stopFlag = true;//включам стопфалг, чтоб остановить рекурсию
-    };
-    //Диалог подтверждения
     
-    var dialog_x = $(window).width() - 320;
-    var dialog_y = $(window).height() - 110;
-    confirmDialog = new YAHOO.widget.SimpleDialog('confirmSendEmail', {
-                    xy:[dialog_x, dialog_y],
-                    zIndex: 100500,
-                    type: 'alert',
-                    width: '300px',
-                    close: false,
-                    modal: false,
-                    visible: false,
-                    fixedcenter: false,
-                    constraintoviewport: false,
-                    draggable: true,
-                    buttons : [ { text:"Ok (<span id='secSendUpdateTimer'>"+secondsBeforeSend+"</span>)", handler:handleSubmit, isDefault:true }, 
-	                          { text:"Cancel", handler:handleCancel } ] 
-                });
-    confirmDialog.setHeader('Confirm send email');
-    confirmDialog.setBody('Do you want to send email?');
-    confirmDialog.render(document.body);
     confirmDialog.show();
-    $('#confirmSendEmail_c').css('position', 'fixed');
+    
     $("#caseUpdateSaveBtn").prop("disabled", true);//блок кнопки отправки case update
     confirmSendUpdateTimer(record, confirmDialog);//запуск рекурсивной функции.
     
@@ -252,6 +217,51 @@ $(document).ready(function() {
     lightbox.option({
       'positionFromTop': $('.navbar').length ? $('.navbar').height() + 30 : 50
     });
+    
+    // ДИАЛОГ ПОДТВРЕЖДЕНИЯ
+    stopFlag = false; //стоп-флаг, для остановки рекурсии по нажатию на кнопки из диалога
+    secondsBeforeSend = 15;  //количество секунд на отмену
+    
+    //обработчик "OK"
+    var handleSubmit = function() {
+        this.hide();//хайдим диалог
+        stopFlag = true;//включам стопфалг, чтоб остановить рекурсию
+        $(window).unbind('beforeunload');//удялем обработчик стандартного диалога что потерям данные когда покинем страницу
+        $("#caseUpdateSaveBtn").prop("disabled", false);//разблокируем кнопку
+        caseUpdates(record);//выполняем запись caseUpdate
+    };
+    //Обработчик "Cancel"
+    var handleCancel = function() {
+        this.hide();//хайдим диалог
+        $(window).unbind('beforeunload');//удялем обработчик стандартного диалога что потерям данные когда покинем страницу
+        $("#caseUpdateSaveBtn").prop("disabled", false);//разблокируем кнопку
+        stopFlag = true;//включам стопфалг, чтоб остановить рекурсию
+    };
+    //Диалог подтверждения
+    
+    var dialog_x = $(window).width() - 320;
+    var dialog_y = $(window).height() - 110;
+    confirmDialog = new YAHOO.widget.Dialog('confirmSendEmail', {
+                    zIndex: 100500,
+                    type: 'alert',
+                    width: '300px',
+                    close: false,
+                    modal: false,
+                    visible: false,
+                    fixedcenter: false,
+                    constraintoviewport: false,
+                    draggable: true,
+                    buttons : [ { text:"Ok (<span id='secSendUpdateTimer'>"+secondsBeforeSend+"</span>)", handler:handleSubmit, isDefault:true }, 
+	                          { text:"Cancel", handler:handleCancel } ] 
+                });
+    confirmDialog.setHeader('Confirm send email');
+    confirmDialog.setBody('Do you want to send email?');
+    confirmDialog.render();
+    $('#confirmSendEmail_c').css('position', 'fixed');
+    $('#confirmSendEmail_c').css('top', dialog_y);
+    $('#confirmSendEmail_c').css('left', dialog_x);
+    
+    
 });
 </script>
 <link href="modules/AOP_Case_Updates/assets/lightbox/css/lightbox.min.css" rel="stylesheet">
@@ -623,6 +633,7 @@ function quick_edit_case_updates($case)
     
     <input type='button' value='$saveBtn' id='caseUpdateSaveBtn' onclick="confirmSendUpdate('$record')" title="$saveTitle" name="button" style="margin-left: 0px;"> </input>
 
+    <div id='confirmSendEmail'></div>
 
     </br>
     </form>
