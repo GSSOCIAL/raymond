@@ -108,7 +108,7 @@ function confirmSendUpdate(record) {
     $(window).on('beforeunload', function(){return '';}); //биндим стандартный диалог что данные не сохранятся, если покинуть страницу
     
     stopFlag = false; //стоп-флаг, для остановки рекурсии по нажатию на кнопки из диалога
-    secondsBeforeSend = 115;  //количество секунд на отмену
+    secondsBeforeSend = 15;  //количество секунд на отмену
 
     //обработчик "OK"
     var handleSubmit = function() {
