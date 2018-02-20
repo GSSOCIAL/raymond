@@ -118,7 +118,22 @@ array (
             'label' => 'LBL_LAST_ACTION',
           ),
         ),
-        6 => 
+          6 =>
+              array (
+                  0 =>
+                      array (
+                          'name' => 'ip_eth0',
+                          'studio' => 'visible',
+                          'label' => 'LBL_IP_ETH0',
+                      ),
+                  1 =>
+                      array (
+                          'name' => 'instal_name',
+                          'studio' => 'visible',
+                          'label' => 'LBL_INSTAL_NAME',
+                      ),
+              ),
+        7 =>
         array (
           0 => 
           array (
