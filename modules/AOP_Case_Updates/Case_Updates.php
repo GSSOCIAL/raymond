@@ -105,8 +105,17 @@ function confirmSendUpdateTimer (record, confirmDialog) {
 
 //функция инициализации диалога и старта функции с таймером.
 function confirmSendUpdate(record) {
-    $(window).on('beforeunload', function(){return '';}); //биндим стандартный диалог что данные не сохранятся, если покинуть страницу
-    
+//    $(window).bind('beforeunload', function(){return '';}); //биндим стандартный диалог что данные не сохранятся, если покинуть страницу
+    window.onbeforeunload = function (evt) {
+        var message = "Email not sent yet. You will lost the changes if you leave the page.";
+        if (typeof evt == "undefined") {
+            evt = window.event;
+        }
+        if (evt) {
+            evt.returnValue = message;
+        }
+        return message;
+    }
     stopFlag = false; //стоп-флаг, для остановки рекурсии по нажатию на кнопки из диалога
     secondsBeforeSend = 15;  //количество секунд на отмену
 
