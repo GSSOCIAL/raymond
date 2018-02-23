@@ -96,7 +96,7 @@ function confirmSendUpdateTimer (record, confirmDialog) {
             setTimeout(function() {confirmSendUpdateTimer(record, confirmDialog)},1000); //запускаем снова функцию
         } else {
             confirmDialog.hide(); //закрываем диалог
-            $(window).unbind('beforeunload');//удялем обработчик стандартного диалога что потерям данные когда покинем страницу
+            window.onbeforeunload = null;//удялем обработчик стандартного диалога что потерям данные когда покинем страницу
             $("#caseUpdateSaveBtn").prop("disabled", false);//разблокируем кнопку
             caseUpdates(record); //выполняем запись caseUpdate
         }
@@ -123,14 +123,14 @@ function confirmSendUpdate(record) {
     var handleSubmit = function() {
         this.hide();//хайдим диалог
         stopFlag = true;//включам стопфалг, чтоб остановить рекурсию
-        $(window).unbind('beforeunload');//удялем обработчик стандартного диалога что потерям данные когда покинем страницу
+        window.onbeforeunload = null;//удялем обработчик стандартного диалога что потерям данные когда покинем страницу
         $("#caseUpdateSaveBtn").prop("disabled", false);//разблокируем кнопку
         caseUpdates(record);//выполняем запись caseUpdate
     };
     //Обработчик "Cancel"
     var handleCancel = function() {
         this.hide();//хайдим диалог
-        $(window).unbind('beforeunload');//удялем обработчик стандартного диалога что потерям данные когда покинем страницу
+        window.onbeforeunload = null;//удялем обработчик стандартного диалога что потерям данные когда покинем страницу
         $("#caseUpdateSaveBtn").prop("disabled", false);//разблокируем кнопку
         stopFlag = true;//включам стопфалг, чтоб остановить рекурсию
     };
