@@ -74,6 +74,102 @@ function toggleCaseUpdate(updateId){
     }
     updateElem.slideToggle('fast');
 }
+
+
+/////////
+//  dialog with timer button START
+/////////
+
+var stopFlag; //стоп-флаг, для остановки рекурсии по нажатию на кнопки из диалога
+var secondsBeforeSend ; //количество секунд на отмену
+
+//рекурсивная функция вызывающая сама себя кадую секунду если выполняется условияе
+function confirmSendUpdateTimer (record, confirmDialog) {
+    var secondsObj = $('#secSendUpdateTimer'); //объект из кнопки "ОК" из диалогового окна
+    var targettime = secondsObj.html(); //количество секунд из кнопки "ОК" из диалогового окна
+    
+    targettime--; //уменьшаем счётчик секунд
+    secondsObj.html(targettime); //записываем обратно в кнопку
+    
+    if (!stopFlag) { //проверяем стопфлаг
+        if(targettime > 0 ) { //проверяем кол-во секунд
+            setTimeout(function() {confirmSendUpdateTimer(record, confirmDialog)},1000); //запускаем снова функцию
+        } else {
+            confirmDialog.hide(); //закрываем диалог
+            window.onbeforeunload = null;//удялем обработчик стандартного диалога что потерям данные когда покинем страницу
+            $("#caseUpdateSaveBtn").prop("disabled", false);//разблокируем кнопку
+            caseUpdates(record); //выполняем запись caseUpdate
+        }
+    }
+}
+
+//функция инициализации диалога и старта функции с таймером.
+function confirmSendUpdate(record) {
+//    $(window).bind('beforeunload', function(){return '';}); //биндим стандартный диалог что данные не сохранятся, если покинуть страницу
+    window.onbeforeunload = function (evt) {
+        var message = "Email not sent yet. You will lost the changes if you leave the page.";
+        if (typeof evt == "undefined") {
+            evt = window.event;
+        }
+        if (evt) {
+            evt.returnValue = message;
+        }
+        return message;
+    }
+    stopFlag = false; //стоп-флаг, для остановки рекурсии по нажатию на кнопки из диалога
+    secondsBeforeSend = 15;  //количество секунд на отмену
+
+    //обработчик "OK"
+    var handleSubmit = function() {
+        this.hide();//хайдим диалог
+        stopFlag = true;//включам стопфалг, чтоб остановить рекурсию
+        window.onbeforeunload = null;//удялем обработчик стандартного диалога что потерям данные когда покинем страницу
+        $("#caseUpdateSaveBtn").prop("disabled", false);//разблокируем кнопку
+        caseUpdates(record);//выполняем запись caseUpdate
+    };
+    //Обработчик "Cancel"
+    var handleCancel = function() {
+        this.hide();//хайдим диалог
+        window.onbeforeunload = null;//удялем обработчик стандартного диалога что потерям данные когда покинем страницу
+        $("#caseUpdateSaveBtn").prop("disabled", false);//разблокируем кнопку
+        stopFlag = true;//включам стопфалг, чтоб остановить рекурсию
+    };
+    //Диалог подтверждения
+    
+    var dialog_x = $(window).width() - 320;
+    var dialog_y = $(window).height() - 110;
+    confirmDialog = new YAHOO.widget.SimpleDialog('confirmSendEmail', {
+                    xy:[dialog_x, dialog_y],
+                    zIndex: 100500,
+                    type: 'alert',
+                    width: '300px',
+                    close: false,
+                    modal: false,
+                    visible: false,
+                    fixedcenter: false,
+                    constraintoviewport: false,
+                    draggable: true,
+                    buttons : [ { text:"Ok (<span id='secSendUpdateTimer'>"+secondsBeforeSend+"</span>)", handler:handleSubmit, isDefault:true }, 
+	                          { text:"Cancel", handler:handleCancel } ] 
+                });
+    confirmDialog.setHeader('Confirm send email');
+    confirmDialog.setBody('Do you want to send email?');
+    confirmDialog.render(document.body);
+    $('#confirmSendEmail_c').css('position', 'fixed');
+    $('#confirmSendEmail_c').css('top', dialog_y);
+    $('#confirmSendEmail_c').css('left', dialog_x);
+    confirmDialog.show();
+    $('#confirmSendEmail_c').css('position', 'fixed');
+    $("#caseUpdateSaveBtn").prop("disabled", true);//блок кнопки отправки case update
+    confirmSendUpdateTimer(record, confirmDialog);//запуск рекурсивной функции.
+    
+}
+
+/////////
+//  dialog with timer button STOP
+/////////
+
+
 function caseUpdates(record){
     loadingMessgPanl = new YAHOO.widget.SimpleDialog('loading', {
                     width: '200px',
@@ -157,6 +253,9 @@ function caseUpdates(record){
 
 }
 $(document).ready(function() {
+    
+    var handler = function() {};
+
     $('.caseUpdate').find('img[class!=attachment_thumb]').replaceWith(function() { return '<a href="' + $(this).attr('src') + '" data-lightbox="attachement">' + this.outerHTML + '</a>'; });
 
     lightbox.option({
@@ -536,7 +635,7 @@ function quick_edit_case_updates($case)
     </div>
     
     
-    <input type='button' value='$saveBtn' onclick="caseUpdates('$record')" title="$saveTitle" name="button" style="margin-left: 0px;"> </input>
+    <input type='button' value='$saveBtn' id='caseUpdateSaveBtn' onclick="confirmSendUpdate('$record')" title="$saveTitle" name="button" style="margin-left: 0px;"> </input>
 
 
     </br>
