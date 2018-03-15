@@ -94,3 +94,5 @@ $dictionary["Case"]["fields"]['instal_name'] =
 //    'size' => '20',
 //);
 
+
+$dictionary['Case']['fields']['description']['dbType']='longtext';
