@@ -2709,7 +2709,7 @@ class InboundEmail extends SugarBean {
 
 	function handleCaseAssignment($email) {
 		$c = new aCase();
-		if($caseId = $this->getCaseIdFromCaseNumber($email->name, $c)) {
+		if($caseId = $this->getCaseIdFromCaseNumber($email, $c)) {
 			$c->retrieve($caseId);
 			$header_message_id = $email->header_message_id;
 			$email->retrieve($email->id);
@@ -2773,7 +2773,7 @@ class InboundEmail extends SugarBean {
 		$mod_strings = return_module_language($current_language, "Emails");
 		$GLOBALS['log']->debug('In handleCreateCase');
 		$c = new aCase();
-		$this->getCaseIdFromCaseNumber($email->name, $c);
+		$this->getCaseIdFromCaseNumber($email, $c);
 
 		if (!$this->handleCaseAssignment($email) && $this->isMailBoxTypeCreateCase()) {
 			// create a case
@@ -4661,12 +4661,16 @@ eoq;
     /**
      * For mailboxes of type "Support" parse for '[CASE:%1]'
      *
-     * @param string $emailName The subject line of the email
+     * @param string $email The subject line of the email
      * @param aCase  $aCase     A Case object
      *
      * @return string|boolean   Case ID or FALSE if not found
      */
-	function getCaseIdFromCaseNumber($emailName, $aCase) {
+	function getCaseIdFromCaseNumber($email, $aCase) {
+
+		$emailName = $email->name;
+		if(empty($emailName) AND isset($email->Subject)) $emailName = $email->Subject;
+
 		//$emailSubjectMacro
 		$exMacro = explode('%1', $aCase->getEmailSubjectMacro());
 		$open = $exMacro[0];
@@ -4692,6 +4696,54 @@ eoq;
                 }
             }
         }
+
+		// Стандартными средствами не нашли
+		// Далее будем искать все открытые обращения, закрепленные любым емайл в письме
+		// Где название присутствует в теме письма
+
+		// Перечень емайл
+		$emails = [];
+		if(isset($email->from_addr) AND !empty($email->from_addr) AND $email->from_addr != '') $emails[] = "'" . strtoupper($email->from_addr) . "'";
+		if(isset($email->reply_to_email) AND !empty($email->reply_to_email) AND $email->reply_to_email != '') $emails[] = "'" . strtoupper($email->reply_to_email) . "'";
+		$emails = array_unique($emails);
+
+		$sql = "
+				SELECT
+					`cases`.`id`,
+					`cases`.`name`
+				FROM
+					`cases`
+				# Подключаем Контакты
+				INNER JOIN
+					`contacts_cases`
+					ON `contacts_cases`.`case_id` = `cases`.`id`
+					AND `contacts_cases`.`deleted` = 0
+				INNER JOIN
+					`contacts`
+					ON `contacts`.`id` = `contacts_cases`.`contact_id`
+					AND `contacts`.`deleted` = 0
+				# Подключаем адреса Емайл
+				INNER JOIN
+					`email_addr_bean_rel`
+					ON `email_addr_bean_rel`.`bean_id` = `contacts`.`id`
+					AND `email_addr_bean_rel`.`bean_module` = 'Contacts'
+					AND `email_addr_bean_rel`.`deleted` = 0
+				INNER JOIN
+					`email_addresses`
+					ON `email_addresses`.`id` = `email_addr_bean_rel`.`email_address_id`
+					AND `email_addresses`.`deleted` = 0
+					AND `email_addresses`.`email_address_caps` IN (".implode(",",$emails).")
+				WHERE
+					`cases`.`deleted` = 0
+					AND `cases`.`state` NOT IN ('Closed')
+		";
+		$result = $this->db->query($sql, true);
+		while ($row = $this->db->fetchByAssoc($result)) {
+			if(mb_strpos($emailName, $row['name']) !== false) {
+				// Кейс найден
+				return $row['id'];
+			}
+		}
 
         return false;
     }
