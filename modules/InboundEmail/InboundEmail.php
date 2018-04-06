@@ -4705,6 +4705,7 @@ eoq;
 		$emails = [];
 		if(isset($email->from_addr) AND !empty($email->from_addr) AND $email->from_addr != '') $emails[] = "'" . strtoupper($email->from_addr) . "'";
 		if(isset($email->reply_to_email) AND !empty($email->reply_to_email) AND $email->reply_to_email != '') $emails[] = "'" . strtoupper($email->reply_to_email) . "'";
+		if(isset($email->cc_addrs) AND !empty($email->cc_addrs) AND $email->cc_addrs != '') $emails[] = "'" . strtoupper($email->cc_addrs) . "'";
 		$emails = array_unique($emails);
 
 		$sql = "
