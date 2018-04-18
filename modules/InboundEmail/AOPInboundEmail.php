@@ -55,9 +55,9 @@ class AOPInboundEmail extends InboundEmail {
         return $string;
     }
 
-    public function getCaseIdFromCaseNumber($emailName, $aCase) {
+    public function getCaseIdFromCaseNumber($email, $aCase) {
         global $db;
-        $result = parent::getCaseIdFromCaseNumber($emailName, $aCase);
+        $result = parent::getCaseIdFromCaseNumber($email, $aCase);
         if ( !$result ) { 
             if ( !empty($this->references) && is_array($this->references) ) {
                 $refs = htmlspecialchars("'".join("', '", $this->references)."'");
@@ -99,7 +99,7 @@ class AOPInboundEmail extends InboundEmail {
         $mod_strings = return_module_language($current_language, "Emails");
         $GLOBALS['log']->debug('In handleCreateCase in AOPInboundEmail');
         $c = new aCase();
-        $case_id = $this->getCaseIdFromCaseNumber($email->name, $c);
+        $case_id = $this->getCaseIdFromCaseNumber($email, $c);
 
         $GLOBALS['handleCreateCase'] = true;
 

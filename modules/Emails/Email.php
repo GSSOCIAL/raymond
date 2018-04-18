@@ -929,7 +929,7 @@ class Email extends SugarBean {
 					}
 					else{
 						$c = new aCase();
-						if($caseId = InboundEmail::getCaseIdFromCaseNumber($mail->Subject, $c)) {
+						if($caseId = InboundEmail::getCaseIdFromCaseNumber($mail, $c)) {
 							$c->retrieve($caseId);
 							$c->load_relationship('emails');
 							$c->emails->add($this->id);
