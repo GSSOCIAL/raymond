@@ -4143,7 +4143,9 @@ class InboundEmail extends SugarBean {
 				$email->name = replace4byte($email->name);
 				$email->description = replace4byte($email->description);
 				$email->description_html = replace4byte($email->description_html);
-
+				print_array('$email->name = ' . var_export($email->name,1),0,1);
+				print_array('$email->description = ' . var_export($email->description,1),0,1);
+				print_array('$email->description_html = ' . var_export($email->description_html,1),0,1);
 				$email->save();
 
 				$email->new_with_id = false; // to allow future saves by UPDATE, instead of INSERT
