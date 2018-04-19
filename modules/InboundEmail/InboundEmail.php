@@ -40,6 +40,7 @@ if(!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point');
 
 
 require_once('include/OutboundEmail/OutboundEmail.php');
+require_once('custom/include/custom_utils.php');
 
 function this_callback($str) {
 	foreach($str as $match) {
@@ -4139,6 +4140,10 @@ class InboundEmail extends SugarBean {
 			}
 
 			if(!$forDisplay) {
+				$email->name = replace4byte($email->name);
+				$email->description = replace4byte($email->description);
+				$email->description_html = replace4byte($email->description_html);
+
 				$email->save();
 
 				$email->new_with_id = false; // to allow future saves by UPDATE, instead of INSERT
