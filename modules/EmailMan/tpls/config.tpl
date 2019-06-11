@@ -400,6 +400,29 @@ function change_state(radiobutton) {
 				<td>&nbsp;</td>
 		</tr>
 </table>
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="edit view">
+	<tr>
+		<th align="left" scope="row" colspan="4"><h4>Advanced Email Options</h4></th>
+	</tr>
+	<tr>
+		<td align="left" scope="row" colspan="4"></td>
+	</tr>
+	{if $InboundAccounts|count > 0}
+	<tr>
+		<td valign="middle" valign="top" scope="row" colspan="3">
+			Monitor Inbound Email address
+		</td>
+		<td width="10%" NOWRAP valign="top" >
+			<select name="inbound_email_address">
+			<option value=" ">-</option>
+			{foreach from=$InboundAccounts key=addr_id item=addr}
+				<option {if $InboundAccount eq $addr_id}selected{/if} value="{$addr_id}">{$addr}</option>
+			{/foreach}
+			</select>
+		</td>
+	</tr>
+	{/if}
+</table>
 </td>
 </tr>
 </table>

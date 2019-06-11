@@ -7,3 +7,17 @@ function replace4byte($string) {
         | \xF4[\x80-\x8F][\x80-\xBF]{2}      # plane 16
     )%xs', '', $string);
 }
+/**
+ * Generate random string eg key
+ * @param number $length code length
+ * @return string 
+ */
+function generateCode($length=6){
+	$chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHI_JKLMNOPRQSTUVWXYZ0123456789";
+	$code = "";
+	$clen = strlen($chars) - 1;  
+	while (strlen($code) < $length) {
+		$code .= $chars[mt_rand(0,$clen)];  
+	}
+	return $code;
+}
