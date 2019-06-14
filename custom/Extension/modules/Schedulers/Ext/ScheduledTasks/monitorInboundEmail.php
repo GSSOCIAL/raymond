@@ -101,6 +101,9 @@ function monitorInboundEmail(){
         $system_mail->prepForOutbound();  
         $system_mail->AddAddress($defaults['email']);  
         @$system_mail->Send();
+        echo("Email settings fault to verify. Please contact administrator");
+    }else{
+        echo("Email settings verified success");
     }
     return true;
 }
