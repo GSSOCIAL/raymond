@@ -1,6 +1,4 @@
 <?php 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 if(!defined('sugarEntry'))define('sugarEntry', true);
 require_once('include/entryPoint.php');
 require_once(__DIR__."/custom/modules/Schedulers/Ext/ScheduledTasks/scheduledtasks.ext.php");
