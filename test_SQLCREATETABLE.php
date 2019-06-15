@@ -7,17 +7,23 @@ require_once('include/entryPoint.php');
 if(!empty($_POST["submit"]) && !empty($_POST["query"])){
     global $db;
     $q = $db->query($_POST["query"]);
-    switch($_POST["mode"]){
+    if(!$q){
+        echo("\n<b>Query error. <a href=\"test_viewlog.php\">View</a> suitecrm.log for details</b>:\n");
+    }else{
+        switch($_POST["mode"]){
         case "unique":
             var_dump($q);
         break;
         case "show_results":
             var_dump($q);
+            if($q){
             echo("\n<b>Results:</b>:\n");
-            while($row = $db->fetchByAssocc($q)){
-                var_dump($row);
+                while($row = $db->fetchByAssoc($q)){
+                    var_dump($row);
+                }
             }
         break;
+        }
     }
 }
 ?>
