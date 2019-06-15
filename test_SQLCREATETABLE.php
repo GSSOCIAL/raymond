@@ -9,6 +9,7 @@ if(!empty($_POST["submit"]) && !empty($_POST["query"])){
     $q = $db->query($_POST["query"]);
     if(!$q){
         echo("\n<b>Query error. <a href=\"test_viewlog.php\">View</a> suitecrm.log for details</b>:\n");
+        var_dump($db->database);
     }else{
         switch($_POST["mode"]){
         case "unique":
