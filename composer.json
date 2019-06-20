@@ -8,7 +8,9 @@
   "config": {
     "vendor-dir": "vendor"
   },
-  "require": {},
+  "require": {
+    "google/apiclient": "2.0"
+  },
   "require-dev": {
     "leafo/scssphp": "dev-master",
     "phpunit/phpunit": "^3.7",
