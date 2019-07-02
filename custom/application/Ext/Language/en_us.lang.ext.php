@@ -69,5 +69,6 @@ $app_list_strings['lic_type_list'][3] = 'Cluster';
 $app_list_strings['lic_type_list'][4] = 'Priors Puller';
 $app_list_strings['lic_type_list'][5] = 'IHE Gateway';
 $app_list_strings['lic_type_list'][6] = 'Vendor Neutral Archive';
+$app_list_strings['lic_type_list'][6] = 'Dicom Editor';
 
 ?>

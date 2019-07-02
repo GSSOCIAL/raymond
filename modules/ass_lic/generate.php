@@ -66,16 +66,21 @@ if(empty($_REQUEST["bean_id"])){
     $License = BeanFactory::newBean("ass_lic");
     $License->name=$data->name;
     $License->hard_id=$data->id;
-    $License->end_date=$data->end_date;
+    if(!empty($data->duraction) && intval($data->duraction)>0){
+        $License->end_date=date("Y-m-d",strtotime("+ {$data->duraction} days"));
+    }else{
+        $License->end_date=$data->end_date;
+    }
     if(!empty($data->hardware_id)){
         $License->ass_hardware_ass_licass_hardware_ida=$data->hardware_id;
     }
     $License->lic_type="^".implode("^,^",$data->type)."^";
     if($id = $License->save()){
         $response["status"]=true;
+        $License = $License->retrieve($id);
         $response["body"]=array(
             "id"=>$id,
-            "name"=>$data->name
+            "name"=>$License->name
         );
     }
 }
