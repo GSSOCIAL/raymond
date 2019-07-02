@@ -301,6 +301,43 @@ function mark_relationships_deleted($id){
             $this->$name = $value;
         }
     }
+
+    /**
+     * Return a list of all members of a role
+     */
+    function getMembers()
+    {
+        global $db;
+
+        $sql = "
+                SELECT
+                    `users`.`id`,
+                    `users`.`user_name`,
+                    `users`.`first_name`,
+                    `users`.`last_name`
+                FROM
+                    `users`
+                INNER JOIN
+                    `acl_roles_users`
+                    ON `acl_roles_users`.`user_id` = `users`.`id`
+                    AND `acl_roles_users`.`deleted` = 0
+                INNER JOIN
+                    `acl_roles`
+                    ON `acl_roles`.`id` = `acl_roles_users`.`role_id`
+                    AND `acl_roles`.`deleted` = 0
+                    AND `acl_roles`.`id` = '{$this->id}'
+                WHERE
+                    `users`.`deleted` = 0
+        ";
+
+        $user_array = Array();
+        $result = $db->query($sql);
+        while(($row=$db->fetchByAssoc($result)) != null) {
+            $user_array[$row['id']] = $row;
+        }
+
+        return $user_array;
+    }
 }
 
 ?>

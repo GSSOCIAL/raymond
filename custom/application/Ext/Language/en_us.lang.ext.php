@@ -70,5 +70,6 @@ $app_list_strings['lic_type_list'][4] = 'Priors Puller';
 $app_list_strings['lic_type_list'][5] = 'IHE Gateway';
 $app_list_strings['lic_type_list'][6] = 'Vendor Neutral Archive';
 $app_list_strings['lic_type_list'][6] = 'Dicom Editor';
-
+$app_list_strings['moduleList']['QCRM_SavedSearch'] = 'QuickCRM SavedSearches';
+$app_list_strings['moduleList']['QCRM_Homepage'] = 'QuickCRM Homepage';
 ?>

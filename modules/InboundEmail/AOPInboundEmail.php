@@ -38,27 +38,70 @@ class AOPInboundEmail extends InboundEmail {
             return $string;
         }
         $matches = array();
-        preg_match('/cid:([[:alnum:]-]*)/',$string,$matches);
-        if(!$matches){
+        preg_match_all('/cid:([[:alnum:]-]*)/i',$string,$matches);
+        if(!isset($matches[1]) OR !count($matches[1])){
             return $string;
         }
-        array_shift($matches);
+        $matches = $matches[1];
+        //array_shift($matches);
         $matches = array_unique($matches);
         foreach($matches as $match){
-            if(in_array($match,$noteIds)){
-                $string = str_replace('cid:'.$match,$sugar_config['site_url']."/index.php?entryPoint=download&id={$match}&type=Notes&",$string);
+            $id = strtolower($match);
+            if(in_array($id,$noteIds)){
+                //$string = str_replace('cid:'.$match,$sugar_config['site_url']."/index.php?entryPoint=download&id={$id}&type=Notes&",$string);
+                $string = str_replace('cid:'.$match,$sugar_config['site_url']."/upload/{$id}?",$string);
             }
         }
         return $string;
     }
 
+    public function getCaseIdFromCaseNumber($email, $aCase) {
+        global $db;
+        $result = parent::getCaseIdFromCaseNumber($email, $aCase);
+        if ( !$result ) { 
+            if ( !empty($this->references) && is_array($this->references) ) {
+                $refs = htmlspecialchars("'".join("', '", $this->references)."'");
+                $sql = "
+                    SELECT 
+                     eb.bean_id case_id
+                    FROM 
+                     emails e 
+                    ,emails_beans eb
+                    ,cases c
+                    WHERE 
+                     e.header_message_id IN ({$refs})
+                    AND e.deleted = 0
+                    AND e.parent_type = 'Cases'
+                    AND eb.email_id = e.id
+                    AND eb.deleted = 0
+                    AND c.id = eb.bean_id
+                    AND c.deleted = 0
+                    ORDER BY 
+                     e.date_entered DESC
+                    LIMIT 1";
+                $res = $db->query($sql);
+                $row = $db->fetchByAssoc($res);
+                if ( !empty($row['case_id']) && $refs != "''") {
+                    return $row['case_id'];
+                }
+            }
+        }
+        return $result;
+    }
+
 
     function handleCreateCase($email, $userId) {
         global $current_user, $mod_strings, $current_language;
+        global $sugar_config;
+        global $db;
+        require_once('custom/modules/Cases/CasesHooks.php');
+        CasesHooks::$disable_change_status_hook = true;
         $mod_strings = return_module_language($current_language, "Emails");
         $GLOBALS['log']->debug('In handleCreateCase in AOPInboundEmail');
         $c = new aCase();
-        $this->getCaseIdFromCaseNumber($email->name, $c);
+        $case_id = $this->getCaseIdFromCaseNumber($email, $c);
+
+        $GLOBALS['handleCreateCase'] = true;
 
         if (!$this->handleCaseAssignment($email) && $this->isMailBoxTypeCreateCase()) {
             // create a case
@@ -79,7 +122,7 @@ class AOPInboundEmail extends InboundEmail {
             $c->assigned_user_id = $userId;
             $c->name = $email->name;
             $c->status = 'New';
-            $c->priority = 'P1';
+            $c->priority = 'P2';
 
             if(!empty($email->reply_to_email)) {
                 $contactAddr = $email->reply_to_email;
@@ -88,8 +131,17 @@ class AOPInboundEmail extends InboundEmail {
             }
 
             $GLOBALS['log']->debug('finding related accounts with address ' . $contactAddr);
-            if($accountIds = $this->getRelatedId($contactAddr, 'accounts')) {
+            if($accountIds = $this->getRelatedId($contactAddr, 'accounts', true, $email)) {
                 if (sizeof($accountIds) == 1) {
+
+                    if ($accountIds[0] == $sugar_config['spamAccountID']) {
+                        // Текущий Контрагент - Контрагент со спамерами
+                        // Удаляем письмо
+                        $email->mark_deleted($email->id); // Если надо удалить - раскомментировать
+                        // Выход из функции создания Обращения
+                        return;
+                    }
+
                     $c->account_id = $accountIds[0];
 
                     $acct = new Account();
@@ -97,13 +149,53 @@ class AOPInboundEmail extends InboundEmail {
                     $c->account_name = $acct->name;
                 } // if
             } // if
-            $contactIds = $this->getRelatedId($contactAddr, 'contacts');
+            $contactIds = $this->getRelatedId($contactAddr, 'contacts', true, $email);
             if(!empty($contactIds)) {
                 $c->contact_created_by_id = $contactIds[0];
             }
-
             $c->save(true);
+            $c->retrieve($c->id);
+            if(!empty($c->contact_created_by_id)) {
+                // Если указан контакт основной
+                // Добавляем его как основной в список контактов
+                $c->load_relationship('contacts');
+                $c->contacts->add($c->contact_created_by_id,array('contact_role'=>'Primary Contact'));
+            }
             $caseId = $c->id;
+
+            // Наполняем кейс контактами из To и CC
+
+            $emails = array();
+            if(!empty($email->to_addrs)) {
+                // Если есть To
+                $to_emails = explode(",", $email->to_addrs);
+                $emails = array_merge($emails, $to_emails);
+            }
+            if(!empty($email->cc_addrs)) {
+                // Если есть CC
+                $cc_emails = explode(",", $email->cc_addrs);
+                $emails = array_merge($emails, $cc_emails);
+            }
+
+            // Проверяем наличие СС
+            if(count($emails)) {
+                // Если есть To и СС
+                foreach ($emails as $emailAddr) {
+                    $emailAddr = trim($emailAddr);
+                    $contactIds1 = $this->getRelatedId($emailAddr, 'contacts', true, $email);
+                    if(isset($contactIds1[0]) AND !empty($contactIds1[0])) {
+                        // Контакт найден
+                        // Добавляем Контак с ролью СС
+                        $c->load_relationship('contacts');
+                        $c->contacts->add($contactIds1[0],array('contact_role'=>'Alternate Contact'));
+
+                    }
+                }
+
+            }
+
+
+
             $c = new aCase();
             $c->retrieve($caseId);
             if($c->load_relationship('emails')) {
@@ -114,12 +206,23 @@ class AOPInboundEmail extends InboundEmail {
                         $contact = BeanFactory::getBean('Contacts', $contactIds[0]);
                         if ($contact->load_relationship('accounts')) {
                             $acct = $contact->accounts->get();
+
+                            if ($acct[0] == $sugar_config['spamAccountID']) {
+                                // Текущий Контрагент - Контрагент со спамерами
+                                // Удаляем письмо
+                                $email->mark_deleted($email->id); // Если надо удалить - раскомментировать
+                                // Удаляем текущий кейс
+                                $c->mark_deleted($c->id);
+                                // Выход из функции создания Обращения
+                                return;
+                            }
+
                             if ($c->load_relationship('accounts') && !empty($acct[0])) {
                                 $c->accounts->add($acct[0]);
                             }
                         }
                     }
-                    $c->contacts->add($contactIds);
+                    //$c->contacts->add($contactIds);
                 } // if
             foreach($notes as $note){
                 //Link notes to case also
@@ -211,15 +314,73 @@ class AOPInboundEmail extends InboundEmail {
                 $reply->send();
             } // if
 
+            // Отправляем уведомление о создании
+            $mainContact = new Contact();
+            $mainContact->retrieve($c->contact_created_by_id);
+
+            $hook = new CaseUpdatesHook();
+	    $this->references = array($this->email->header_message_id);
+            $hook->sendCreationEmail($c, $mainContact, $this->references);
+
         } else {
             echo "First if not matching\n";
+
+            // Обработка To и СС
+            $GLOBALS['case_CC_only'] = true;
+            $email->retrieve($email->id);
+            $c->retrieve($case_id);
+            // Все текущие контакты кейса
+            $contacts = $c->getContacts();
+
+            $emails = array();
+            if(!empty($email->to_addrs)) {
+                // Если есть To
+                $to_emails = explode(",", $email->to_addrs);
+                $emails = array_merge($emails, $to_emails);
+            }
+            if(!empty($email->cc_addrs)) {
+                // Если есть CC
+                $cc_emails = explode(",", $email->cc_addrs);
+                $emails = array_merge($emails, $cc_emails);
+            }
+
+
+            if(count($emails) > 0) {
+                // Если есть ящики для анализа
+                foreach ($emails as $emailAddr) {
+                    $emailAddr = trim($emailAddr);
+                    $contactIds = $this->getRelatedId($emailAddr, 'contacts', true, $email);
+                    if(isset($contactIds[0]) AND !empty($contactIds[0])) {
+                        // Контакт найден
+                        // Проверяем, что такого контакта пока нет у кейса
+                        $is_search = false;
+                        foreach ($contacts as $seedContact) {
+                            if($seedContact->id == $contactIds[0]) {
+                                $is_search = true;
+                                break;
+                            }
+                        }
+                        if(!$is_search) {
+                            // Если текущего контакта пока не указано у кейса
+                            // Добавляем Контак с ролью СС
+                            $c->load_relationship('contacts');
+                            $c->contacts->add($contactIds[0],array('contact_role'=>'Alternate Contact'));
+                        }
+
+                    }
+                }
+
+            }
+
             if(!empty($email->reply_to_email)) {
                 $contactAddr = $email->reply_to_email;
             } else {
                 $contactAddr = $email->from_addr;
             }
             $this->handleAutoresponse($email, $contactAddr);
+            $c->save();//сохраняем кейс для перезаписи date_modified 
         }
+        CasesHooks::$disable_change_status_hook = false;
         echo "End of handle create case\n";
 
     } // fn

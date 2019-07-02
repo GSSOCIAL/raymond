@@ -187,7 +187,7 @@ function pollMonitoredInboxes()
                                                 $lastRobin = $users[0];
                                             }
                                         } // else
-                                    } else {
+                                    } elseif ($distributionMethod != 'donotAssign') {
                                         if (sizeof($users) == 1) {
                                             foreach ($users as $k => $value) {
                                                 $userId = $value;

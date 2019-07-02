@@ -240,6 +240,9 @@ class aCase extends Basic
                 $this->account_id = $account_info['account_id'];
             }
         }
+
+		$this->description = !empty($this->description) ? from_html($this->description) : $this->description;
+
     }
 
     /** Returns a list of the associated contacts
@@ -264,6 +267,26 @@ class aCase extends Basic
 
         return $this->build_related_list2($query, new Contact(), $temp);
     }
+
+	/**
+	 * Получить список Контактов с возможностью выбрать роль
+	 * @param $role
+	 * @return SugarBean[]
+	 */
+	public function getContacts($role = 'all') {
+		if($role == 'all') {
+			// Все Контакты по Обращению
+			return $this->get_linked_beans("contacts","Contacts");
+		} else {
+			// Контакты с заданной ролью
+			if($role == 'Primary Contact') {
+				// Для основных контактов
+				return $this->get_linked_beans("contacts","Contacts", '', 0, -1, 0, "(contact_role = '{$role}' OR contact_role IS NULL)");
+			} else {
+				return $this->get_linked_beans("contacts","Contacts", '', 0, -1, 0, "contact_role = '{$role}'");
+			}
+		}
+	}
 
     /**
      * @return array
@@ -296,8 +319,30 @@ class aCase extends Basic
                 translate('LBL_LIST_CLOSE', 'Cases')
             ) .
             '</a>';
-
+		if(!empty($this->account_id)) {
+			// Если Контрагент присутствует
+            if(isset($_REQUEST['module']) AND $_REQUEST['module'] == 'Home' AND ((isset($_REQUEST['action']) AND $_REQUEST['action'] == 'index') OR (isset($_REQUEST['DynamicAction']) AND $_REQUEST['DynamicAction'] == 'displayDashlet')))  {
+				// Если получение данных для дашлета
+				$seedAccount = new Account();
+				$seedAccount->retrieve($this->account_id);
+				if(!empty($seedAccount->id)) {
+					// Если Контрагент корректно найден
+					if($seedAccount->important) {
+						// Если контрагент важный
+						$temp_array["ACCOUNT_NAME"] = '<span class="btn-danger">!</span> ' . $temp_array["ACCOUNT_NAME"];
+					}
+				}
+			}
+		}
         //$temp_array['ACCOUNT_NAME'] = $this->account_name; //overwrites the account_name value returned from the cases table.
+		if(!empty($this->description)) {
+			// Если указано описание
+			if (isset($_REQUEST['module']) AND $_REQUEST['module'] == 'Home' AND isset($_REQUEST['action']) AND $_REQUEST['action'] == 'index') {
+				// Если получение данных для дашлета
+				$temp_array["DESCRIPTION"] = from_html($this->description);
+
+			}
+		}
         return $temp_array;
     }
 

@@ -173,6 +173,8 @@ class UsersViewDetail extends ViewDetail {
     }
 
     function display() {
+        require_once('include/MySugar/MySugar.php');
+        global $sugar_config;
         if ($this->bean->portal_only == 1 || $this->bean->is_group == 1 ) {
             $this->options['show_subpanels'] = false;
             $this->dv->formName = 'DetailViewGroup';
@@ -181,7 +183,62 @@ class UsersViewDetail extends ViewDetail {
 
 	    //handle request to reset the homepage
         if(isset($_REQUEST['reset_homepage'])){
+            // Скидываем настройки
             $this->bean->resetPreferences('Home');
+            // Копируем настройки из дефолтного пользователя
+            if(isset($sugar_config['dashletDefaultUserID'])) {
+                $seedUser = new User();
+                $seedUser->retrieve($sugar_config['dashletDefaultUserID']);
+                if(!empty($seedUser->id)) {
+                    // Если дефолтный юзер корректно найден
+
+
+                    // Дашлеты
+                    $dashletsDashboard = $seedUser->getPreference('dashlets', 'Home');
+
+                    $newDashletsDashboard = array();
+                    $dashletsIDSMap = array();
+
+                    foreach ($dashletsDashboard as $dashletID => $dashletInfo) {
+                        $newDashletID = create_guid();
+                        $dashletsIDSMap[$dashletID] = $newDashletID;
+                        $myDashlet = new MySugar($dashletInfo['module']);
+                        $displayDashlet = $myDashlet->checkDashletDisplay();
+                        $options = isset($dashletInfo['options']) ? $dashletInfo['options'] : array();
+                        $newDashletsDashboard[$newDashletID] = array('className' => $dashletInfo['className'],
+                            'module' => $dashletInfo['module'],
+                            'forceColumn' => $dashletInfo['forceColumn'],
+                            'fileLocation' => $dashletInfo['fileLocation'],
+                            'options' => $options,
+                            );
+                    }
+                    $dictionary['Account']['fields']['resp_usr_cat'] = array();
+
+                    // Страницы
+                    $pagesDashboard = $seedUser->getPreference('pages', 'Home');
+                    foreach ($pagesDashboard as $tabKey => $tabInfo) {
+                        foreach ($tabInfo['columns'] as $columnKey => $columnInfo) {
+                            foreach ($columnInfo['dashlets'] as $dashletKey => $dashletOldID) {
+                                $pagesDashboard[$tabKey]['columns'][$columnKey]['dashlets'][$dashletKey] = $dashletsIDSMap[$dashletOldID];
+                            }
+                        }
+                    }
+
+                    // Обовляем прямо в базе, так как $this->bean->setPreference почему то не работает
+                    // может кешируется как то?
+                    // а разбираться с этим долго
+                    $sql = "UPDATE `user_preferences` SET `deleted` = 1 WHERE `assigned_user_id` = '{$this->bean->id}' AND `category` = 'Home' AND `deleted` = 0";
+                    $this->bean->db->query($sql, true);
+                    $contents = base64_encode(serialize(array('dashlets' => $newDashletsDashboard, 'pages' => $pagesDashboard)));
+                    $sql = "INSERT INTO `user_preferences` SET `id` = '".create_guid()."', `category` = 'Home', `deleted` = 0, `date_entered` = '".gmdate("Y-m-d H:i:s")."', `date_modified` = '".gmdate("Y-m-d H:i:s")."', `assigned_user_id` = '{$this->bean->id}', `contents` = '{$contents}'";
+                    $this->bean->db->query($sql, true);
+
+                    // А можно было бы сделать так:
+                    //$this->bean->setPreference('dashlets', $newDashletsDashboard, 1, 'Home');
+                    //$this->bean->setPreference('pages', $pagesDashboard, 0, 'Home');
+                }
+
+            }
             global $current_user;
             if($this->bean->id == $current_user->id) {
                 $_COOKIE[$current_user->id . '_activePage'] = '0';
