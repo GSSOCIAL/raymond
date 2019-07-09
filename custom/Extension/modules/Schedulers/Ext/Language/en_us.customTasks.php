@@ -1,2 +1,2 @@
 <?php
-$mod_strings['LBL_EXPORTHARDWARETOSPREADSHEETS'] = 'Hardware Synchronization with Spreadsheets';
+$mod_strings['LBL_MONITORINBOUNDEMAIL'] = 'Monitor inbound Email';
