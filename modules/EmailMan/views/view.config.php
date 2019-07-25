@@ -86,7 +86,7 @@ class ViewConfig extends SugarView
         global $app_list_strings;
         global $app_strings;
         global $current_user;
-        global $sugar_config;
+        global $sugar_config,$db;
 
         echo $this->getModuleTitle(false);
         global $currentModule;
@@ -101,7 +101,19 @@ class ViewConfig extends SugarView
         $this->ss->assign("RETURN_MODULE", "Administration");
         $this->ss->assign("RETURN_ACTION", "index");
 
+        /*
+        https://trello.com/c/ZSsv4opE
+        Add Select field to select monitor inbound email address 
+        */
         $this->ss->assign("MODULE", $currentModule);
+        $inboundAccounts = array();
+        $inboundAccountsQ = $db->query("SELECT e.name,e.id FROM inbound_email e WHERE e.deleted=0 AND e.status='Active'");
+        while($a = $db->fetchByAssoc($inboundAccountsQ)){
+            $inboundAccounts[$a["id"]]=$a["name"];
+        }
+        $this->ss->assign("InboundAccount",$db->getOne("SELECT c.value FROM config c WHERE c.name='inbound_email_address' AND c.category='system'"));
+
+        $this->ss->assign("InboundAccounts", $inboundAccounts);
         $this->ss->assign("PRINT_URL", "index.php?".$GLOBALS['request_string']);
         $this->ss->assign("HEADER", get_module_title("EmailMan", "{MOD.LBL_CONFIGURE_SETTINGS}", true));
         $this->ss->assign("notify_fromaddress", $focus->settings['notify_fromaddress']);
