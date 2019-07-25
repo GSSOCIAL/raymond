@@ -199,5 +199,43 @@
             break;
         }
     });
+    $(document).on("blur","div.license-container-wrapper input",function(e){
+        switch($(e.target).closest("input").attr("name")){
+            case "license[end_date]":
+            case "license[expires]":
+                var data = {
+                    end_date:$(e.target).closest("div.license-container-wrapper").find("input[name$='[end_date]']").val(),
+                    duraction:$(e.target).closest("div.license-container-wrapper").find("input[name$='[expires]']").val(),
+                    focus:$(e.target).closest("input").attr("name")=="license[end_date]"?"end_date":"expires"
+                }
+                if(data.focus == "expires" && (parseInt(data.duraction)==0 || data.duraction.toString().length==0)){
+                    return false;
+                }
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST','index.php?module=ass_lic&action=api&to_pdf=true&method=calc_end_date',false);
+                xhr.onloadend = function(res){
+                    if(res.target.status == 200){
+                        var response = JSON.parse(res.target.responseText);
+                        switch(response.status){
+                            case true:
+                                switch(response.body.type){
+                                    case "end_date":
+                                        $(e.target).closest("div.license-container-wrapper").find("input[name$='[expires]']").val(response.body.duraction);
+                                    break;
+                                    case "expires":
+                                        $(e.target).closest("div.license-container-wrapper").find("input[name$='[end_date]']").val(response.body.date);
+                                    break;
+                                }
+                            break;
+                            case false:
+                                alert(response.message);
+                            break;
+                        }
+                    }
+                }
+                xhr.send(JSON.stringify(data));
+            break;
+        }
+    });
 </script>
 {/literal}

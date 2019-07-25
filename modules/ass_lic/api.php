@@ -78,6 +78,44 @@ if(empty($_REQUEST["method"])){
         break;
         case "generate":
         break;
+        case "calc_end_date":
+            switch($data->focus){
+                case "expires":
+                    if($end_point=strtotime("+ {$data->duraction} days")){
+                        $response["status"]=true;
+                        $response["body"]=array(
+                            "time"=>$end_point,
+                            "type"=>"expires",
+                            "date"=>date("Y-m-d",$end_point)
+                        );
+                    }else{
+                        $response["message"] = "Could create date";
+                    }
+                break;
+                case "end_date":
+                    if($end_point = strtotime($data->end_date)){
+                        $d1 = new DateTime(date("Y-m-d",strtotime("today")));
+                        $d2 = new DateTime(date("Y-m-d",$end_point));
+                        $diff = $d1->diff($d2);
+                        //The end date is earlier than today.
+                        if($diff->invert){
+                            $response["status"] = true;
+                            $response["body"]=array(
+                                "duraction"=>0
+                            );
+                        }else{
+                            $response["status"] = true;
+                            $response["body"]=array(
+                                "duraction"=>$diff->days,
+                                "type"=>"end_date"
+                            );
+                        }
+                    }else{
+                        $response["message"] = "Could convert end date";
+                    }
+                break;
+            }
+        break;
     }
 }
 exit(json_encode($response));
