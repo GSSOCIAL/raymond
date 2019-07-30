@@ -64,18 +64,39 @@ if(empty($_REQUEST["bean_id"])){
     }
     //Create record.
     $License = BeanFactory::newBean("ass_lic");
-    $License->name=$data->name;
+    $name = array();
     $License->hard_id=$data->id;
-    $License->end_date=$data->end_date;
+    if(!empty($data->duraction) && intval($data->duraction)>0){
+        $License->end_date=date("Y-m-d",strtotime("+ {$data->duraction} days"));
+    }else{
+        $License->end_date=$data->end_date;
+    }
     if(!empty($data->hardware_id)){
         $License->ass_hardware_ass_licass_hardware_ida=$data->hardware_id;
     }
     $License->lic_type="^".implode("^,^",$data->type)."^";
+    //Generate serial
+    $duraction = 0;
+    $t1 = new DateTime(date("Y-m-d",strtotime("today")));
+    $t2 = new DateTime(date("Y-m-d",strtotime($License->end_date)));
+    $diff = $t1->diff($t2);
+    
+    $name[]=$License->end_date;
+    $name[]=$diff->days;
+    global $app_list_strings;
+    $types = "";
+    foreach($data->type as $index){
+        $types .= ".{$app_list_strings['lic_type_list'][$index]}";
+    }
+    $name[]=str_replace(" ","",$types);
+
+    $License->name=implode("_",$name);
     if($id = $License->save()){
         $response["status"]=true;
+        $License = $License->retrieve($id);
         $response["body"]=array(
             "id"=>$id,
-            "name"=>$data->name
+            "name"=>$License->name
         );
     }
 }
