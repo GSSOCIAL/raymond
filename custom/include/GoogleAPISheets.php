@@ -20,7 +20,7 @@ class GoogleAPISheets{
     var $service;
     var $spreadsheetId;
 
-    public function __construct($url)
+    public function __construct($url="")
     {
 
         // Get the API client and construct the service object.
