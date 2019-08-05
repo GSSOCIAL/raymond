@@ -11,6 +11,15 @@ $viewdefs['Cases'] = array(
                     4 => array(
                         'customCode' => '<input type="submit" class="button" title="{$MOD.LBL_CONVERT_TO_XML}" onclick="window.bean_server.export(\'xml\');return false;" value="{$MOD.LBL_CONVERT_TO_XML_BUTTON}"/>',
                     ),
+                    5 => array(
+                        'customCode' => '<input type="submit" class="button" title="{$MOD.LBL_CONVERT_TO_CSV}" onclick="window.bean_server.export(\'csv\');return false;" value="{$MOD.LBL_CONVERT_TO_CSV_BUTTON}"/>',
+                    ),
+                    6 => array(
+                        'customCode' => '<input type="submit" class="button" title="{$MOD.LBL_CONVERT_TO_HTML}" onclick="window.bean_server.export(\'html\');return false;" value="{$MOD.LBL_CONVERT_TO_HTML_BUTTON}"/>',
+                    ),
+                    7 => array(
+                        'customCode' => '<input type="submit" class="button" title="{$MOD.LBL_CONVERT_TO_DOCX}" onclick="window.bean_server.export(\'docx\');return false;" value="{$MOD.LBL_CONVERT_TO_DOCX_BUTTON}"/>',
+                    ),
                 ),
             ),
             'maxColumns' => '2',

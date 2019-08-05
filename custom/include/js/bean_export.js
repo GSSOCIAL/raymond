@@ -17,7 +17,17 @@ class BeanServer{
         var frame = document.createElement("iframe");
         frame.style.display = "none";
         document.body.appendChild(frame);
-        frame.src = "index.php?module=Home&action=beanServer&method=export&to_pdf=true&mod="+this.module_name+"&record="+this.id+"&to_format="+to_type;
+        frame.src = "index.php?module=Home&action=beanServer&method=export&to_pdf=true&mod="+this.module_name+"&record="+this.id+"&to_format="+to_type+"&download=true";
+        frame.onload = function(e){
+            var ctx = JSON.parse($(frame).contents().eq(0).text());
+            if(ctx){
+                switch(ctx.status){
+                    case false:
+                        alert(ctx.message);
+                    break;
+                }
+            }
+        }
         return true;
     }
     __input(a){

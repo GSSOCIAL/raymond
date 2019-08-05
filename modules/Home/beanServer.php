@@ -20,13 +20,16 @@ if(!empty($allowed_methods[$_REQUEST["method"]])&&$allowed_methods[$_REQUEST["me
             require_once "custom/include/beanExport.php";
             if(empty($_REQUEST["mod"]) || empty($_REQUEST["record"]) || empty($_REQUEST["to_format"])){
                 $response["errors"][] = $response["message"] = "Required arguments dont passed";
+                $GLOBALS["log"]->error("BeanExport fault: Required arguments dont passed. modules/Home/beanServer.php at 23");
                 exit(json_encode($response));
             }
             if(array_search($_REQUEST["to_format"],BeanExport::extension_supported)===false){
                 $response["errors"][] = $response["message"] = "Extension \"{$_REQUEST['to_format']}\" not supported";
+                $GLOBALS["log"]->error(sprintf("BeanExport fault: Extension \"{$_REQUEST['to_format']}\" not supported! Supported: %s. modules/Home/beanServer.php at 28",implode(",",array_values(BeanExport::extension_supported))));
                 exit(json_encode($response));
             }
             $BeanExport = new BeanExport($_REQUEST["mod"],$_REQUEST["record"]);
+            $BeanExport->force_download = !empty($_REQUEST["download"]) && $_REQUEST["download"] == "true";
             if($content = $BeanExport->{"to_".$_REQUEST["to_format"]}()){
                 $response["status"] = true;
                 $response["body"]=$content;
