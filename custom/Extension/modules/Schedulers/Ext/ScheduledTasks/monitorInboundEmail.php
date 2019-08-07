@@ -52,12 +52,27 @@ function monitorInboundEmail(){
                     foreach ($newMsgs as $k => $msgNo){
                         //Filter each email by subject
                         $header = imap_headerinfo($ieX->conn,$msgNo);
-                        if($header && str_replace(array(" "),array(""),trim(strtolower($header->subject)))==str_replace(array(" "),array(""),trim(strtolower($Subject)))){
-                            //this is thru. Search in DB for key and verify it
-                            if($key_id = $db->getOne(sprintf("SELECT k.id FROM verification_keys k WHERE k.code='%s'",md5(trim(imap_body($ieX->conn,$msgNo))))) ){
-                                //Key passed - delete.
-                                $VerificationPassed=true;
-                                $db->query("DELETE FROM `verification_keys` WHERE `id`='{$key_id}'");
+                        if($header){
+                            if(str_replace(array(" "),array(""),trim(strtolower($header->subject)))==str_replace(array(" "),array(""),trim(strtolower($Subject)))){
+                                //this is thru. Search in DB for key and verify it
+                                if($key_id = $db->getOne(sprintf("SELECT k.id FROM verification_keys k WHERE k.code='%s'",md5(trim(imap_body($ieX->conn,$msgNo))))) ){
+                                    //Key passed - delete.
+                                    $VerificationPassed=true;
+                                    $db->query("DELETE FROM `verification_keys` WHERE `id`='{$key_id}'");
+                                }
+                            }else{
+                                //Custom subject here. Check if Case Updates
+                                $body = trim(imap_body($ieX->conn,$msgNo));
+                                preg_match_all('/\[RECORD:(.+)\]\[CODE:(.+)\]/',$body,$out);
+                                if($out && count($out)>2){
+                                    $record = is_array($out[1])?$out[1][0]:$out[1];
+                                    $code = is_array($out[2])?$out[2][0]:$out[2];
+                                    //Second type. Find code & record 
+                                    if($key_id = $db->getOne(sprintf("SELECT k.id FROM verification_keys k WHERE k.code='%s' AND k.activated=0 AND k.bean='%s'",md5($code),$record))){
+                                        //Key passed
+                                        $db->query("UPDATE `verification_keys` SET `activated`=1 WHERE `id`='{$key_id}'");
+                                    }
+                                }
                             }
                         }
                     }
