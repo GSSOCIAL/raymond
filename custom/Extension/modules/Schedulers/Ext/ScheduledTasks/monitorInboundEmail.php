@@ -13,9 +13,12 @@ $job_strings[] = 'monitorInboundEmail';
 function monitorInboundEmail(){
     require_once('include/SugarPHPMailer.php');  
     global $db;
-    $InboundSystemAddressPrefs = $db->query("SELECT e.name AS `addr`,c.value AS `id` FROM config c INNER JOIN inbound_email e ON e.id=c.value WHERE c.name='inbound_email_address' AND c.category='system'");
-    $InboundSystemAddressPrefs = (Object)$db->fetchByAssoc($InboundSystemAddressPrefs);
+    $InboundSystemAddressPrefs = getEmailVerifierAddr(true);
     $Subject = "Inbound Email Verification"; //Letter subject. We will compare incoming mail subjects with this one
+    $DDATA = array(
+        "mailbox_access"=>false,
+        "has_unread_messages"=>false
+    );
     $VerificationPassed=false;
     if($InboundSystemAddressPrefs && $InboundSystemAddressPrefs->addr){
         //Address exists. Check emails
@@ -45,10 +48,12 @@ function monitorInboundEmail(){
                 $connectToMailServer = true;
             }
             if($connectToMailServer){
+                $DDATA["mailbox_access"]=true;
                 if(!$ieX->isPop3Protocol()) {
                     $newMsgs = $ieX->getNewMessageIds();
                 }
                 if(is_array($newMsgs)){
+                    $DDATA["has_unread_messages"]=true;
                     foreach ($newMsgs as $k => $msgNo){
                         //Filter each email by subject
                         $header = imap_headerinfo($ieX->conn,$msgNo);
@@ -112,7 +117,11 @@ function monitorInboundEmail(){
         $system_mail->From = $defaults['email'];  
         $system_mail->FromName = $defaults['name'];  
         $system_mail->Subject = "Inbound mailboxes error. Couldnt verify code";
-        $system_mail->Body = "System cant verify mailboxes. Please check that email works and contact administrator";
+        $Body = "System cant verify mailboxes. Please check that email service works and contact administrator.\n\nDebug data:\n";
+        $Body .= "email account: ".(!empty($InboundSystemAddressPrefs)?$InboundSystemAddressPrefs->addr . " ({$InboundSystemAddressPrefs->id})":" EMPTY")."\n";
+        $Body .= "mailbox access: ".($DDATA["mailbox_access"]===true?"y":"n")."\n";
+        $Body .= "unread messages: ".($DDATA["has_unread_messages"]===true?"y":"n")."\n";
+        $system_mail->Body = $Body;
         $system_mail->prepForOutbound();  
         $system_mail->AddAddress($defaults['email']);  
         @$system_mail->Send();

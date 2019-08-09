@@ -29,7 +29,7 @@ function generateCode($length=6){
  */
 function getEmailVerifierAddr($with_id=false){
 	global $db;
-	$InboundSystemAddressPrefs = $db->query("SELECT e.name AS `addr`,c.value AS `id` FROM config c INNER JOIN inbound_email e ON e.id=c.value WHERE c.name='inbound_email_address' AND c.category='system'");
+	$InboundSystemAddressPrefs = $db->query("SELECT e.email_user AS `addr`,c.value AS `id` FROM config c INNER JOIN inbound_email e ON e.id=c.value WHERE c.name='inbound_email_address' AND c.category='system'");
 	$InboundSystemAddressPrefs = (Object)$db->fetchByAssoc($InboundSystemAddressPrefs);
-	return !empty($InboundSystemAddressPrefs->addr)?($with_id===false?$InboundSystemAddressPrefs->addr:array("id"=>$InboundSystemAddressPrefs->id,"addr"=>$InboundSystemAddressPrefs->addr)):NULL;
+	return !empty($InboundSystemAddressPrefs->addr)?($with_id===false?$InboundSystemAddressPrefs->addr:(Object)array("id"=>$InboundSystemAddressPrefs->id,"addr"=>$InboundSystemAddressPrefs->addr)):NULL;
 }
