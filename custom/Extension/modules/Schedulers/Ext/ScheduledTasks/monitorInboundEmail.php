@@ -7,7 +7,7 @@ https://trello.com/c/ZSsv4opE
 Check if Inbound Emails works. Send and compare emails for spec keys
 
 CREATE TABLE SYNTAX - important
-CREATE TABLE `dcmsys`.`verification_keys` ( `id` INT(12) UNSIGNED NOT NULL AUTO_INCREMENT , `code` VARCHAR(32) NOT NULL , `thru` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP , `activated` BOOLEAN NOT NULL DEFAULT FALSE , PRIMARY KEY (`id`)) ENGINE = InnoDB;
+CREATE TABLE `dcmsys`.`verification_keys` ( `id` INT(12) UNSIGNED NOT NULL AUTO_INCREMENT , `code` VARCHAR(32) NOT NULL , `thru` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP , `activated` BOOLEAN NOT NULL DEFAULT FALSE ,`bean` VARCHAR(42) NULL, PRIMARY KEY (`id`)) ENGINE = InnoDB;
 */ 
 $job_strings[] = 'monitorInboundEmail';
 function monitorInboundEmail(){
@@ -19,6 +19,8 @@ function monitorInboundEmail(){
         "mailbox_access"=>false,
         "has_unread_messages"=>false
     );
+    $KeysTableExist = $db->query("DESCRIBE `verification_keys`");
+    $DDATA["table_exist"] = $KeysTableExist !== false;
     $VerificationPassed=false;
     if($InboundSystemAddressPrefs && $InboundSystemAddressPrefs->addr){
         //Address exists. Check emails
@@ -121,6 +123,7 @@ function monitorInboundEmail(){
         $Body .= "email account: ".(!empty($InboundSystemAddressPrefs)?$InboundSystemAddressPrefs->addr . " ({$InboundSystemAddressPrefs->id})":" EMPTY")."\n";
         $Body .= "mailbox access: ".($DDATA["mailbox_access"]===true?"y":"n")."\n";
         $Body .= "unread messages: ".($DDATA["has_unread_messages"]===true?"y":"n")."\n";
+        $Body .= "key table exists: ".($DDATA["table_exist"]===true?"y":"n")."\n";
         $system_mail->Body = $Body;
         $system_mail->prepForOutbound();  
         $system_mail->AddAddress($defaults['email']);  
