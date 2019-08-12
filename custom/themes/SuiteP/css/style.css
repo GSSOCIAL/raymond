@@ -95,3 +95,30 @@ body li.sugar_action_button.hover.opened{
 body .subpanel-table .SugarActionMenu .sugar_action_button{
     max-height:32px;
 }
+/**/
+.navbar-toggle{
+    height:60px;
+}
+.mobileheader, .mobileheader .modulelinks{
+    height:60px;
+}
+@media (min-width: 751px){
+    .modulename {
+        line-height:60px;
+    }
+    .tablet-bar>.toolbar>li{
+        vertical-align: middle;
+    }
+    .tablet-bar>.toolbar>li>a{
+        line-height:40px;
+    }
+    .tablet-bar>.toolbar>li{
+        height: 60px;
+        padding:10px 0px;
+        vertical-align: top;
+    }
+    .tablet-bar .navbar-search.open .dropdown-menu{
+        padding:10px 0px;
+        height:60px;
+    }
+}
