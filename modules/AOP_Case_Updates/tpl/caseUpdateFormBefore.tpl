@@ -1,28 +1,34 @@
 {literal}
     <style type="text/css">
+    .toolbar > li.float_buttons{
+        position: relative;
+        height:22px;
+    }
     div#S99hl1Ib_float_buttons{
-        position: absolute;
         z-index: 2;
-        left: -250px;
-        top:60px;
         width: auto;
-        max-width: 216px;
         display:none;
+        position: absolute;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
     }
     div#S99hl1Ib_float_buttons div.rail_inside{
-        display: flex;
         flex-direction: column;
     }
     div#S99hl1Ib_float_buttons:not(.panel-fixed) div.rail_inside{
         padding-top:0px !important;
+        padding-right: 15px;
+        display: flex;
+        flex-direction: row;
     }
     div#S99hl1Ib_float_buttons button{
-        float: none;
-        clear: both;
+        float: left;
         max-width: 100%;
     }
     div#S99hl1Ib_float_buttons button:last-child{
         margin-bottom:0px;
+        margin-left:10px;
     }
     </style>
 {/literal}
@@ -42,32 +48,10 @@
     <script type="text/javascript">
     $(document).ready(function(){
         if(panelS99hl1Ib = $("#S99hl1Ib_float_buttons")){
-            window.panelS99hl1Ibdata = {
-                panel:panelS99hl1Ib,
-                offset:0,
-                rail:$("#aop_case_updates_threaded_span").parent()
-            };
-            $(window).on("resize",function(){
-                window.panelS99hl1Ibdata.offset = $("#S99hl1Ib_float_buttons").closest(".detail-view-row-item").find(".col-1-label").eq(0).outerHeight();
-                $("#S99hl1Ib_float_buttons").css({
-                    "width":$("#S99hl1Ib_float_buttons").closest(".detail-view-row-item").find(".col-1-label").eq(0).width()+"px"
-                });
-            });
-            $(window).on("scroll",function(){
-                if(window.panelS99hl1Ibdata.rail.get(0).getBoundingClientRect().top - $("#toolbar").height() <= 0 || window.panelS99hl1Ibdata.rail.get(0).getBoundingClientRect().top - window.innerHeight > 0){
-                    //Calculate offset
-                    if(window.innerHeight - window.panelS99hl1Ibdata.rail.get(0).getBoundingClientRect().bottom <= 0){
-                        window.panelS99hl1Ibdata.panel.addClass("panel-fixed").find(".rail_inside").css({
-                            "padding-top":-1*(window.panelS99hl1Ibdata.rail.get(0).getBoundingClientRect().top - $("#toolbar").height())+"px"
-                        });
-                    }
-                }else{
-                    window.panelS99hl1Ibdata.panel.removeClass("panel-fixed");
-                }
-            });
+            
             //Display panel
+            $(document.createElement("li")).addClass("float_buttons").append($("#S99hl1Ib_float_buttons")).insertBefore($("div.desktop-bar #quickcreatetop"));
             $("#S99hl1Ib_float_buttons").show();
-            $(window).resize();
         }
     });
     </script>
