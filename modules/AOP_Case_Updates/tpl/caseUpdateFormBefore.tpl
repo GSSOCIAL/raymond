@@ -28,7 +28,10 @@
     }
     div#S99hl1Ib_float_buttons button:last-child{
         margin-bottom:0px;
-        margin-left:10px;
+        margin-left:5px;
+    }
+    .ui-tooltip{
+        z-index:15032;
     }
     </style>
 {/literal}
