@@ -1,4 +1,4 @@
-<?php 
+<?php
 if(!defined('sugarEntry'))define('sugarEntry', true);
 require_once('include/entryPoint.php');
 require_once(__DIR__."/custom/modules/Schedulers/Ext/ScheduledTasks/scheduledtasks.ext.php");
