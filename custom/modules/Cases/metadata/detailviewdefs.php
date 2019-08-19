@@ -31,9 +31,8 @@ array (
       ),
       'includes' => 
       array (
-        0 => 
-        array (
-          'file' => 'modules/Cases/js/copyToClipboard.js',
+        0 => array(
+          'file' => "modules/Cases/js/copyToClipboard.js",
         ),
         1 => array (
           'file' => 'include/javascript/tinymce/tinymce.min.js',
