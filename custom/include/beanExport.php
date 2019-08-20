@@ -19,11 +19,17 @@ class BeanExport{
      */
     public function retrieve($module,$record){
         global $sugar_config;
+        /**Requested Module name e.g Accounts,Cases*/
         $this->module_name = $module;
+        /**Single object name e.g Account,Document (simillar with classname) */
         $this->object_name = BeanFactory::getObjectName($this->module_name);
+        /**Requested record id */
         $this->record_id = $record;
+        /**JSON context for future convert */
         $this->context = array();
+        /**JSON table data for future export */
         $this->table_context = array();
+        /**Single bean object */
         $this->bean = BeanFactory::getBean($this->module_name,$this->record_id);
         if(!$this->bean){
             $this->content["message"] = "Couldnt retrieve \"{$this->module_name}\" record {$this->record_id}";
@@ -45,7 +51,7 @@ class BeanExport{
                 $this->context["properties"]["account_id"]=$this->bean->account_id;
                 //Get Case Updates records
                 $this->context["case_updates"] = array();
-                global $db;
+                global $db,$app_list_strings;
                 $query = $db->query("SELECT t.id,t.description AS `message`,t.assigned_user_id,t.internal,t.date_entered AS `created`,t.date_modified AS `modified`,t.contact_id FROM aop_case_updates t WHERE t.deleted=0 AND t.case_id='{$this->record_id}'");
                 if($query && $query->num_rows>0){
                     $this->table_context[] = array("id","message","assigned_user_id","internal update");
@@ -59,6 +65,26 @@ class BeanExport{
                         $this->context["case_updates"][]=$item;
                     }
                 }
+            break;
+            case "ass_hardware":
+                $this->context["properties"]["Serial #"]=$this->val("name",$this->bean->name);
+                $this->context["properties"]["Installation Site Name"]=$this->val("instal_name",$this->bean->instal_name);
+                $this->context["properties"]["Status"]=$this->val("status",$this->bean->status);
+                $this->context["properties"]["Account"]=$this->val("ass_hardware_accountsaccounts_ida",$this->bean->ass_hardware_accountsaccounts_ida);
+                //Info about hardware
+                $this->context["properties"]["Hardware Type"]=!empty($this->bean->hd_type)?$this->val("hd_type",$this->bean->hd_type):"undefined";
+                $this->context["properties"]["Product Version"]=$this->val("dcmsys_ver",$this->bean->dcmsys_ver);
+                $this->context["properties"]["OS Version"]=$this->val("os",$this->bean->os);
+                $this->context["properties"]["description"]=$this->val("description",$this->bean->description);
+                //Sens info
+                $this->context["SensInfo"]=array(
+                    "Password for Web"=>$this->val("pass_w"),
+                    "Password for root"=>$this->val("pass_r"),
+                    "Customer Shell Account"=>$this->val("ssh_user"),
+                    "Customer Shell Password"=>$this->val("ssh_pass"),
+                    "Hostname"=>$this->val("hostname"),
+                    "Hardware id"=>$this->val("hard_id"),
+                );
             break;
         }
         return $this;
@@ -149,7 +175,7 @@ class BeanExport{
      * Convert Bean Data to CSV
      */
     public function to_html(){
-        if(empty($this->table_context) || empty($this->context)) return NULL;
+        if(empty($this->context)) return NULL;
         $title = "{$this->record_id} - {$this->module_name}";
         if($this->bean && !empty($this->bean->name)){
             $title = "{$this->bean->name} - {$this->module_name}";
@@ -226,7 +252,8 @@ class BeanExport{
                 }
             break;
             case "string":
-                $node->addChild($name,htmlspecialchars($content));
+                $name = str_replace(array(" ","#","\n","<br/>"),array("","","",""),htmlspecialchars($name));
+                $node->addChild(trim($name),htmlspecialchars($content));
             break;
         }
         return $node;
@@ -255,14 +282,6 @@ class BeanExport{
                 $node .= "<tr><td><b>{$name}</b></td><td>{$content}</td></tr>";
             break;
         }
-        /**
-         * echo("<table>");
-                foreach($b as $c=>$d){
-                    if(is_array($d)) continue;
-                    echo("<tr><td><b>{$c}</b></td><td>{$d}</td></tr>");
-                }
-                echo("</table>");
-         */
         return $node;
     }
     private function buildDocumentContent($type="doc",$node=NULL,$node_name="",$body=""){
@@ -290,6 +309,24 @@ class BeanExport{
             break;
         }
         return $node;
+    }
+    private function val($field_name,$value=NULL){
+        global $app_list_strings;
+        $value = empty($value)?$this->bean->{$field_name}:"";
+        if(!empty($this->bean) && !empty($this->bean->field_name_map) && !empty($this->bean->field_name_map[$field_name])){
+            switch($this->bean->field_name_map[$field_name]["type"]){
+                case "enum":
+                    $options = !empty($app_list_strings[$this->bean->field_name_map[$field_name]["options"]])?$app_list_strings[$this->bean->field_name_map[$field_name]["options"]]:null;
+                    if(!empty($options) && !empty($options[$value])){
+                        $value = $options[$value];
+                    }
+                break;
+                default:
+                    $value = trim($value);
+                break;
+            }
+        }
+        return $value;
     }
 }
 ?>
