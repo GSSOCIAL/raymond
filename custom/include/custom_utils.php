@@ -33,3 +33,11 @@ function getEmailVerifierAddr($with_id=false){
 	$InboundSystemAddressPrefs = (Object)$db->fetchByAssoc($InboundSystemAddressPrefs);
 	return !empty($InboundSystemAddressPrefs->addr)?($with_id===false?$InboundSystemAddressPrefs->addr:(Object)array("id"=>$InboundSystemAddressPrefs->id,"addr"=>$InboundSystemAddressPrefs->addr)):NULL;
 }
+
+/**
+ * Get email addr which set as "Report email adress". Important errors will send to this email
+*/
+function getEmailNotifyAddr(){
+	global $db;
+	return $db->getOne("SELECT c.value FROM config c WHERE c.name='email_report_addr' AND c.category='system'");
+}

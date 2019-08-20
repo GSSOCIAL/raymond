@@ -412,8 +412,8 @@ function change_state(radiobutton) {
 		<td valign="middle" valign="top" scope="row" colspan="3">
 			Monitor Inbound Email address
 		</td>
-		<td width="10%" NOWRAP valign="top" >
-			<select name="inbound_email_address">
+		<td width="60%" NOWRAP valign="top" >
+			<select style="width:100%" name="inbound_email_address">
 			<option value=" ">-</option>
 			{foreach from=$InboundAccounts key=addr_id item=addr}
 				<option {if $InboundAccount eq $addr_id}selected{/if} value="{$addr_id}">{$addr}</option>
@@ -422,6 +422,20 @@ function change_state(radiobutton) {
 		</td>
 	</tr>
 	{/if}
+	<tr>
+		<td valign="middle" valign="top" scope="row" colspan="3"></td>
+		<td width="60%" NOWRAP valign="top"></td>
+	</tr>
+	<tr>
+		<td valign="middle" valign="top" scope="row" colspan="3">Report email adress</td>
+		<td width="60%" NOWRAP valign="top" >
+			<input style="width:100%" type="text" name="email_report_addr" value="{$email_report_addr}" placeholder="" title="System will send notification emails (debug data, important errors) to this email address"/>
+		</td>
+	</tr>
+	<tr>
+		<td valign="middle" valign="top" scope="row" colspan="3"></td>
+		<td width="60%" NOWRAP valign="top"></td>
+	</tr>
 </table>
 </td>
 </tr>

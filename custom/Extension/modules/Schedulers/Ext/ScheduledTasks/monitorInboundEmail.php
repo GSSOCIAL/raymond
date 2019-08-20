@@ -7,7 +7,7 @@ https://trello.com/c/ZSsv4opE
 Check if Inbound Emails works. Send and compare emails for spec keys
 
 CREATE TABLE SYNTAX - important
-CREATE TABLE `dcmsys`.`verification_keys` ( `id` INT(12) UNSIGNED NOT NULL AUTO_INCREMENT , `code` VARCHAR(32) NOT NULL , `thru` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP , `activated` BOOLEAN NOT NULL DEFAULT FALSE ,`bean` VARCHAR(42) NULL, PRIMARY KEY (`id`)) ENGINE = InnoDB;
+CREATE TABLE `verification_keys` ( `id` INT(12) UNSIGNED NOT NULL AUTO_INCREMENT , `code` VARCHAR(32) NOT NULL , `thru` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP , `activated` INT(3) NOT NULL DEFAULT 0 ,`bean` VARCHAR(42) NULL, PRIMARY KEY (`id`)) ENGINE = InnoDB;
 */ 
 $job_strings[] = 'monitorInboundEmail';
 function monitorInboundEmail(){
@@ -71,11 +71,10 @@ function monitorInboundEmail(){
                                 //Custom subject here. Check if Case Updates
                                 $body = trim(imap_body($ieX->conn,$msgNo));
                                 preg_match_all('/\[RECORD:(.+)\]\[CODE:(.+)\]/',$body,$out);
-                                if($out && count($out)>2){
+                                if($out){
                                     $record = is_array($out[1])?$out[1][0]:$out[1];
                                     $code = is_array($out[2])?$out[2][0]:$out[2];
-                                    //Second type. Find code & record 
-                                    if($key_id = $db->getOne(sprintf("SELECT k.id FROM verification_keys k WHERE k.code='%s' AND k.activated=0 AND k.bean='%s'",md5($code),$record))){
+                                    if($key_id = $db->getOne(sprintf("SELECT k.id FROM verification_keys k WHERE k.code='%s' AND k.activated=0 OR k.activated=2 AND k.bean='%s'",md5($code),$record))){
                                         //Key passed
                                         $db->query("UPDATE `verification_keys` SET `activated`=1 WHERE `id`='{$key_id}'");
                                     }
@@ -111,27 +110,35 @@ function monitorInboundEmail(){
         $GLOBALS["log"]->error("Monitor Inbound emails failed. Address failed");
     }
     if(!$VerificationPassed){
+        //Write to log
         $GLOBALS["log"]->error("Monitor Inbound emails failed.  Couldnt verify code");
-        $Email = new Email();  
-        $defaults = $Email->getSystemDefaultEmail();  
-        $system_mail = new SugarPHPMailer();  
-        $system_mail->setMailerForSystem();  
-        $system_mail->From = $defaults['email'];  
-        $system_mail->FromName = $defaults['name'];  
-        $system_mail->Subject = "Inbound mailboxes error. Couldnt verify code";
-        $Body = "System cant verify mailboxes. Please check that email service works and contact administrator.\n\nDebug data:\n";
-        $Body .= "email account: ".(!empty($InboundSystemAddressPrefs)?$InboundSystemAddressPrefs->addr . " ({$InboundSystemAddressPrefs->id})":" EMPTY")."\n";
-        $Body .= "mailbox access: ".($DDATA["mailbox_access"]===true?"y":"n")."\n";
-        $Body .= "unread messages: ".($DDATA["has_unread_messages"]===true?"y":"n")."\n";
-        $Body .= "key table exists: ".($DDATA["table_exist"]===true?"y":"n")."\n";
-        $system_mail->Body = $Body;
-        $system_mail->prepForOutbound();  
-        $system_mail->AddAddress($defaults['email']);  
-        @$system_mail->Send();
+        //Send email
+        if($naddress = getEmailNotifyAddr()){
+            $Email = new Email();  
+            $defaults = $Email->getSystemDefaultEmail();  
+            $system_mail = new SugarPHPMailer();  
+            $system_mail->setMailerForSystem();  
+            $system_mail->From = $defaults['email'];  
+            $system_mail->FromName = $defaults['name'];  
+            $system_mail->Subject = "Inbound mailboxes error. Couldnt verify code";
+            $Body = "System cant verify mailboxes. Please check that email service works and contact administrator.\n\nDebug data:\n";
+            $Body .= "email account: ".(!empty($InboundSystemAddressPrefs)?$InboundSystemAddressPrefs->addr . " ({$InboundSystemAddressPrefs->id})":" EMPTY")."\n";
+            $Body .= "mailbox access: ".($DDATA["mailbox_access"]===true?"y":"n")."\n";
+            $Body .= "unread messages: ".($DDATA["has_unread_messages"]===true?"y":"n")."\n";
+            $Body .= "key table exists: ".($DDATA["table_exist"]===true?"y":"n")."\n";
+            $system_mail->Body = $Body;
+            $system_mail->prepForOutbound();  
+            $system_mail->AddAddress(getEmailNotifyAddr());  
+            @$system_mail->Send();
+        }
+        //Create Task
+        
         echo("Email settings fault to verify. Please contact administrator");
     }else{
         echo("Email settings verified success");
     }
+    //Set all codes status - checked
+    $db->query("UPDATE `verification_keys` SET `activated`='2' WHERE `activated`='0' AND `bean` IS NOT NULL");
     return true;
 }
 

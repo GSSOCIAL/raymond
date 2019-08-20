@@ -295,13 +295,16 @@ $(document).ready(function() {
         border-radius: 100%;
         width: 7px;
         height: 7px;
-        background-color: #534d64;
+        background-color: rgba(83, 77, 100, 0.36);
     }
     #caseStyleInternal div.read-mark{
         display:none;
     }
-    div.update-activated div.read-mark{
+    div.update-activated:not(.update-delivery-status-2) div.read-mark{
         display:none !important;
+    }
+    div.update-activated.update-delivery-status-2 div.read-mark{
+        background-color: #534d64;
     }
 </style>
 A;
@@ -446,10 +449,17 @@ function getUpdateDisplayHead(SugarBean $update)
     $html = "<a href='' onclick='toggleCaseUpdate(\"".$update->id."\");return false;'>";
     $html .= "<img  id='caseUpdate".$update->id."Image' class='caseUpdateImage' src='".SugarThemeRegistry::current()->getImageURL('basic_search.gif')."'>";
     $html .= "</a>";
-    if(isset($update->internal)) {
-        $html .= "<a href=\"#\" title=\"Probably undelivered\"><div class=\"read-mark\"><span></span></div></a><span>" . ($update->internal ? "<strong>" . $mod_strings['LBL_INTERNAL'] . "</strong> " : '') . $name . " " . $update->date_entered . "</span><br>";
+    if(!empty($update->internal)) {
+        $html .= "<span>" . ($update->internal ? "<strong>" . $mod_strings['LBL_INTERNAL'] . "</strong> " : '') . $name . " " . $update->date_entered . "</span><br>";
     } else {
-        $html .= "<a href=\"#\" title=\"Probably undelivered\"><div class=\"read-mark\"><span></span></div></a><span>" . $name . " " . $update->date_entered . "</span><br>";
+        switch($update->delivered){
+            case "2":
+                $html .= "<a href=\"#\" title=\"Probably undelivered\"><div class=\"read-mark\"><span></span></div></a><span>" . $name . " " . $update->date_entered . "</span><br>";
+            break;
+            default:
+                $html .= "<a href=\"#\" title=\"On check\"><div class=\"read-mark\"><span></span></div></a><span>" . $name . " " . $update->date_entered . "</span><br>";
+            break;
+        }
     }
 
     $notes = $update->get_linked_beans('notes','Notes');
@@ -499,7 +509,9 @@ function display_single_update(AOP_Case_Updates $update)
     global $db;
     $update->delivered = $db->getOne("SELECT k.activated FROM verification_keys k WHERE k.bean='{$update->id}'");
     $classNames = array();
-    if($update->delivered != false) $classNames[] = "update-activated";
+    if($update->delivered != false){
+        $classNames[] = "update-activated update-delivery-status-{$update->delivered}";
+    }
     /*if assigned user*/
     if ($update->assigned_user_id) {
         /*if internal update*/
