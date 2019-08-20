@@ -312,7 +312,7 @@ class BeanExport{
     }
     private function val($field_name,$value=NULL){
         global $app_list_strings;
-        $value = empty($value)?$this->bean->{$field_name}:"";
+        $value = empty($value)?$this->bean->{$field_name}:$value;
         if(!empty($this->bean) && !empty($this->bean->field_name_map) && !empty($this->bean->field_name_map[$field_name])){
             switch($this->bean->field_name_map[$field_name]["type"]){
                 case "enum":
