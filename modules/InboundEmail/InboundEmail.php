@@ -40,6 +40,7 @@ if(!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point');
 
 
 require_once('include/OutboundEmail/OutboundEmail.php');
+require_once('custom/include/custom_utils.php');
 
 function this_callback($str) {
 	foreach($str as $match) {
@@ -86,6 +87,8 @@ class InboundEmail extends SugarBean {
 	var $group_id;
 	var $is_personal;
 	var $groupfolder_id;
+	var $references;
+	var $partToNotesMap = array();
 
 	// email 2.0
 	var $pop3socket;
@@ -1665,7 +1668,7 @@ class InboundEmail extends SugarBean {
 		global $sugar_config;
 		global $current_user;
 
-		$showFolders = sugar_unserialize(base64_decode($current_user->getPreference('showFolders', 'Emails')));
+		$showFolders = unserialize(base64_decode($current_user->getPreference('showFolders', 'Emails')));
 
 		if(empty($showFolders)) {
 			$showFolders = array();
@@ -2034,7 +2037,7 @@ class InboundEmail extends SugarBean {
 		$criteria .= (!empty($dateTo)) ? ' BEFORE "'.$timedate->fromString($dateTo)->format('d-M-Y').'"' : "";
 		//$criteria .= (!empty($from)) ? ' FROM "'.$from.'"' : "";
 
-		$showFolders = sugar_unserialize(base64_decode($current_user->getPreference('showFolders', 'Emails')));
+		$showFolders = unserialize(base64_decode($current_user->getPreference('showFolders', 'Emails')));
 
 		$out = array();
 
@@ -2707,10 +2710,13 @@ class InboundEmail extends SugarBean {
 
 	function handleCaseAssignment($email) {
 		$c = new aCase();
-		if($caseId = $this->getCaseIdFromCaseNumber($email->name, $c)) {
+		if($caseId = $this->getCaseIdFromCaseNumber($email, $c)) {
 			$c->retrieve($caseId);
+			$header_message_id = $email->header_message_id;
 			$email->retrieve($email->id);
+			$email->header_message_id = htmlspecialchars($header_message_id);
             //assign the case info to parent id and parent type so that the case can be linked to the email on Email Save
+
 			$email->parent_type = "Cases";
 			$email->parent_id = $caseId;
 			// assign the email to the case owner
@@ -2764,10 +2770,11 @@ class InboundEmail extends SugarBean {
 
 	function handleCreateCase($email, $userId) {
 		global $current_user, $mod_strings, $current_language;
+		global $sugar_config;
 		$mod_strings = return_module_language($current_language, "Emails");
 		$GLOBALS['log']->debug('In handleCreateCase');
 		$c = new aCase();
-		$this->getCaseIdFromCaseNumber($email->name, $c);
+		$this->getCaseIdFromCaseNumber($email, $c);
 
 		if (!$this->handleCaseAssignment($email) && $this->isMailBoxTypeCreateCase()) {
 			// create a case
@@ -2778,7 +2785,7 @@ class InboundEmail extends SugarBean {
 			$c->assigned_user_id = $userId;
 			$c->name = $email->name;
 			$c->status = 'New';
-			$c->priority = 'P1';
+			$c->priority = 'P2';
 
 			if(!empty($email->reply_to_email)) {
 				$contactAddr = $email->reply_to_email;
@@ -2787,8 +2794,17 @@ class InboundEmail extends SugarBean {
 			}
 
 			$GLOBALS['log']->debug('finding related accounts with address ' . $contactAddr);
-			if($accountIds = $this->getRelatedId($contactAddr, 'accounts')) {
+			if($accountIds = $this->getRelatedId($contactAddr, 'accounts', true)) {
 				if (sizeof($accountIds) == 1) {
+
+					if($accountIds[0] == $sugar_config['spamAccountID']) {
+						// Текущий Контрагент - Контрагент со спамерами
+						// Удаляем письмо
+						$email->mark_deleted($email->id); // Если надо удалить - раскомментировать
+						// Выход из функции создания Обращения
+						return;
+					}
+					
 					$c->account_id = $accountIds[0];
 
 					$acct = new Account();
@@ -2803,12 +2819,24 @@ class InboundEmail extends SugarBean {
 			if($c->load_relationship('emails')) {
 				$c->emails->add($email->id);
 			} // if
-			if($contactIds = $this->getRelatedId($contactAddr, 'contacts')) {
+
+			if($contactIds = $this->getRelatedId($contactAddr, 'contacts', true)) {
 				if(!empty($contactIds) && $c->load_relationship('contacts')) {
                     if (!$accountIds && count($contactIds) == 1) {
                         $contact = BeanFactory::getBean('Contacts', $contactIds[0]);
                         if ($contact->load_relationship('accounts')) {
                             $acct = $contact->accounts->get();
+
+							if ($acct[0] == $sugar_config['spamAccountID']) {
+								// Текущий Контрагент - Контрагент со спамерами
+								// Удаляем письмо
+								//$email->mark_deleted($email->id); // Если надо удалить - раскомментировать
+								// Удаляем текущий кейс
+								$c->mark_deleted($c->id);
+								// Выход из функции создания Обращения
+								return;
+							}
+
                             if ($c->load_relationship('accounts') && !empty($acct[0])) {
                                 $c->accounts->add($acct[0]);
                             }
@@ -3464,6 +3492,7 @@ class InboundEmail extends SugarBean {
 						$attach->name = urlencode($this->retrieveAttachmentNameFromStructure($part));
 					}
 					$attach->filename = $attach->name;
+
 					if (empty($attach->filename)) {
 						continue;
 					}
@@ -3476,6 +3505,9 @@ class InboundEmail extends SugarBean {
 					} else {
 						// only save if doing a full import, else we want only the binaries
 						$attach->save();
+					}
+					if ( !empty($part->id) ) {
+						$this->partToNotesMap[str_replace(array('<', '>'), array('',''), $part->id)] = $attach->id;
 					}
 				} // end if disposition type 'attachment'
 			}// end ifdisposition
@@ -3928,7 +3960,6 @@ class InboundEmail extends SugarBean {
 
 		$header = imap_headerinfo($this->conn, $msgNo);
 		$fullHeader = imap_fetchheader($this->conn, $msgNo); // raw headers
-
 		// reset inline images cache
 		$this->inlineImages = array();
 
@@ -3945,7 +3976,7 @@ class InboundEmail extends SugarBean {
 				$q = "DELETE FROM email_cache WHERE message_id = '{$queryUID}' AND ie_id = '{$this->id}' AND mbox = '{$this->mailbox}'";
 			} else {
 				$this->email->name = $app_strings['LBL_EMAIL_ERROR_IMAP_MESSAGE_DELETED'];
-				$q = "DELETE FROM email_cache WHERE imap_uid = '{$queryUID}' AND ie_id = '{$this->id}' AND mbox = '{$this->mailbox}'";
+				$q = "DELETE FROM email_cache WHERE imap_uid = {$queryUID} AND ie_id = '{$this->id}' AND mbox = '{$this->mailbox}'";
 			} // else
 			// delete local cache
 			$r = $this->db->query($q);
@@ -3968,6 +3999,7 @@ class InboundEmail extends SugarBean {
 			$email = new Email();
 			$email->isDuplicate = ($dupeCheckResult) ? false : true;
 			$email->mailbox_id = $this->id;
+			$email->header_message_id = htmlspecialchars($header->message_id);
 			$message = array();
 			$email->id = create_guid();
 			$email->new_with_id = true; //forcing a GUID here to prevent double saves.
@@ -4057,6 +4089,9 @@ class InboundEmail extends SugarBean {
 
 			$email->message_id		= $this->compoundMessageId; // filled by importDupeCheck();
 
+			$this->references = explode('::::', preg_replace('/\s+/', '::::', $header->references));
+
+
 			$oldPrefix = $this->imagePrefix;
 			if(!$forDisplay) {
 				// Store CIDs in imported messages, convert on display
@@ -4065,6 +4100,10 @@ class InboundEmail extends SugarBean {
 			// handle multi-part email bodies
 			$email->description_html= $this->getMessageText($msgNo, 'HTML', $structure, $fullHeader,$clean_email); // runs through handleTranserEncoding() already
 			$email->description	= $this->getMessageText($msgNo, 'PLAIN', $structure, $fullHeader,$clean_email); // runs through handleTranserEncoding() already
+			if ( !empty($this->partToNotesMap) ) {
+				$email->description_html = str_ireplace(array_keys($this->partToNotesMap), $this->partToNotesMap, $email->description_html);
+				$email->description = str_ireplace(array_keys($this->partToNotesMap), $this->partToNotesMap, $email->description);
+			}
 			$this->imagePrefix = $oldPrefix;
 
 			// empty() check for body content
@@ -4101,6 +4140,12 @@ class InboundEmail extends SugarBean {
 			}
 
 			if(!$forDisplay) {
+				$email->name = replace4byte($email->name);
+				$email->description = replace4byte($email->description);
+				$email->description_html = replace4byte($email->description_html);
+				print_array('$email->name = ' . var_export($email->name,1),0,1);
+				print_array('$email->description = ' . var_export($email->description,1),0,1);
+				print_array('$email->description_html = ' . var_export($email->description_html,1),0,1);
 				$email->save();
 
 				$email->new_with_id = false; // to allow future saves by UPDATE, instead of INSERT
@@ -4167,7 +4212,7 @@ class InboundEmail extends SugarBean {
 		///////////////////////////////////////////////////////////////////////
 		////	TO SUPPORT EMAIL 2.0
 		$this->email = $email;
-
+		$this->email->header_message_id = htmlspecialchars($header->message_id);
 		if(empty($this->email->et)) {
 			$this->email->email2init();
 		}
@@ -4401,7 +4446,140 @@ class InboundEmail extends SugarBean {
 			$a = $this->db->fetchByAssoc($r);
 			return $a['id'];
 		} else {
-			return false;
+
+			// Стандартный способ поиска не сработал
+			if($createdIfEmpty AND $module == 'contacts') {
+				// Если указана необходимость автоматической привязки
+				// Ищем Контрагента по домену
+
+				// Определяем домен
+				$domain = preg_replace("|(.*)@|is", "", str_replace("'", "", $email));
+				$domain = strtoupper($domain);
+
+				$account_id = null;
+
+				if (in_array(strtolower($domain), $sugar_config['unassignedDomainStop'])) {
+					// Если домен отправителя в списке зарезервированных стоп-доменов
+					// Значит нам по домену не определить
+					// Указываем текущего Контрагента как Unassigned
+					$account_id = $sugar_config['unassignedDomainID'];
+				} else {
+					// Если какой то произвольный домен
+					// Пытаемся его найти среди доменов, указанных у контрагентов
+					$sql = "
+							SELECT
+								`id`
+							FROM
+								`accounts`
+							WHERE
+								`deleted` = 0
+								AND (
+									UPPER(`website`) = '{$domain}'
+									OR UPPER(`website`) = '{$domain}/'
+									OR UPPER(`website`) = 'HTTP://{$domain}'
+									OR UPPER(`website`) = 'HTTP://{$domain}/'
+									OR UPPER(`website`) = 'HTTPS://{$domain}'
+									OR UPPER(`website`) = 'HTTPS://{$domain}/'
+									OR UPPER(`website`) = 'WWW.{$domain}'
+									OR UPPER(`website`) = 'WWW.{$domain}/'
+									OR UPPER(`website`) = 'HTTP://www.{$domain}'
+									OR UPPER(`website`) = 'HTTP://www.{$domain}/'
+									OR UPPER(`website`) = 'HTTPS://www.{$domain}'
+									OR UPPER(`website`) = 'HTTPS://www.{$domain}/'
+								)
+					";
+					$result = $this->db->query($sql, true);
+					while ($row = $this->db->fetchByAssoc($result)) {
+						$account_id = $row['id'];
+						break; // Первый попавшийся Контрагент
+					}
+
+					if (!empty($account_id)) {
+						// Если Контрагент по домену найден
+					} else {
+						// Если контрагента не смогли найти по домену
+						// Привязываем текущего отправителя к Unassigned
+						$account_id = $sugar_config['unassignedDomainID'];
+					}
+				}
+
+				if ($moduleOrigin == 'accounts') {
+					// Если искали Контрагента
+
+					$retArr[] = $account_id;
+
+				} elseif ($moduleOrigin == 'contacts') {
+					// Если искали Контакт
+
+					// Создаем новый Контакт
+					$seedContact = new Contact();
+
+					$seedContact->email1 = strtolower(str_replace("'", "", $email));
+					$seedContact->account_id = $account_id;
+
+
+					// Определение ФИО
+					if(!empty($seedEmail) AND $seedEmail !== false) {
+						// Доступно исходное письмо
+
+						// Получаем отправителя
+						if(!empty($seedEmail->cc_addrs) AND substr_count(strtolower($seedEmail->cc_addrs), strtolower($emailOrigin))) {
+							// Если текущий емайл находится в составе СС
+							// Имя создаваемого контакта не известно - значит по названию его емайла
+							$fullName = $emailOrigin;
+						} elseif (!empty($seedEmail->reply_to_name)) {
+							$fullName = $seedEmail->reply_to_name;
+						} else {
+							$fullName = $seedEmail->from_name;
+						}
+
+						$fullName = str_replace(" <$emailOrigin>", "", $fullName);
+
+						// Парсим отправителя по запятой
+						$name = explode(",", $fullName);
+						if(count($name) == 1) {
+							// Если нет запятых
+							// Пробуем разбить по пробелу
+							$name = explode(" ", $fullName);
+
+							if(count($name) == 1) {
+								// Только одно слово
+								// Фамилия
+								$seedContact->last_name = $fullName;
+							} elseif(count($name) >= 2) {
+								// Имя и Фамилия
+								$seedContact->first_name = $name[0];
+								unset($name[0]);
+								$seedContact->last_name = implode(" ", $name);
+							} else {
+								// Вообще нет имени
+								$seedContact->last_name = $emailOrigin;
+							}
+						} elseif (count($name) >= 2) {
+							// Есть запятые в названии
+
+							$seedContact->first_name = $name[0];
+							$seedContact->last_name = $name[1];
+						}
+					} else {
+						// Письмо нам по какой то причине не доступно
+						$seedContact->last_name = $emailOrigin;
+					}
+
+
+					$seedContact->save();
+
+					$retArr[] = $seedContact->id;
+
+				}
+
+				return $retArr;
+			} else {
+				// Стандартное поведение
+				return false;
+			}
+
+
 		}
 	}
 
@@ -4490,37 +4668,85 @@ eoq;
     /**
      * For mailboxes of type "Support" parse for '[CASE:%1]'
      *
-     * @param string $emailName The subject line of the email
+     * @param string $email The subject line of the email
      * @param aCase  $aCase     A Case object
      *
      * @return string|boolean   Case ID or FALSE if not found
      */
-	function getCaseIdFromCaseNumber($emailName, $aCase) {
+	function getCaseIdFromCaseNumber($email, $aCase) {
+		$emailName = $email->name;
+		if(empty($emailName) AND isset($email->Subject)) $emailName = $email->Subject;
+		/**
+		 * https://trello.com/c/dfQlIzYy
+		 * Parse case id from subject
+		 */
+		$pattern = $aCase->getEmailSubjectMacro();
+		$escape_chars = array('\\',"[","]","(",")",",",".","*","+","|","{","}","?","^","&"); //Array of chars that need escaped for regex.
 		//$emailSubjectMacro
-		$exMacro = explode('%1', $aCase->getEmailSubjectMacro());
-		$open = $exMacro[0];
-		$close = $exMacro[1];
-
-		if($sub = stristr($emailName, $open)) { // eliminate everything up to the beginning of the macro and return the rest
-			// $sub is [CASE:XX] xxxxxxxxxxxxxxxxxxxxxx
-			$sub2 = str_replace($open, '', $sub);
-			// $sub2 is XX] xxxxxxxxxxxxxx
-			$sub3 = substr($sub2, 0, strpos($sub2, $close));
-
-            // case number is supposed to be numeric
-            if (ctype_digit($sub3)) {
+		foreach($escape_chars as $char){
+			$pattern = str_replace($char,"\\".$char,$pattern);
+		}
+		$pattern = str_replace(array("%1"),array("(\d+)"),$pattern);
+		preg_match_all("/".$pattern."/",$emailName,$matches);
+		if(!empty($matches[1])){ // eliminate everything up to the beginning of the macro and return the rest
+			$match = is_array($matches[1]) && ctype_digit($matches[1][0])?intval($matches[1][0]):(ctype_digit($matches[1])?intval($matches[1]):NULL);
+			if($match){
                 // filter out deleted records in order to create a new case
                 // if email is related to deleted one (bug #49840)
                 $query = 'SELECT id FROM cases WHERE case_number = '
-                    . $this->db->quoted($sub3)
+                    . $this->db->quoted($match)
                     . ' and deleted = 0';
                 $r = $this->db->query($query, true);
-                $a = $this->db->fetchByAssoc($r);
+				$a = $this->db->fetchByAssoc($r);
                 if (!empty($a['id'])) {
                     return $a['id'];
                 }
             }
         }
+		
+		// Search for simillar emails
+		$emails = [];
+		if(isset($email->from_addr) AND !empty($email->from_addr) AND $email->from_addr != '') $emails[] = "'" . strtoupper($email->from_addr) . "'";
+		if(isset($email->reply_to_email) AND !empty($email->reply_to_email) AND $email->reply_to_email != '') $emails[] = "'" . strtoupper($email->reply_to_email) . "'";
+		if(isset($email->cc_addrs) AND !empty($email->cc_addrs) AND $email->cc_addrs != '') $emails[] = "'" . strtoupper($email->cc_addrs) . "'";
+		$emails = array_unique($emails);
+
+		$sql = "
+				SELECT
+					`cases`.`id`,
+					`cases`.`name`
+				FROM
+					`cases`
+				# Подключаем Контакты
+				INNER JOIN
+					`contacts_cases`
+					ON `contacts_cases`.`case_id` = `cases`.`id`
+					AND `contacts_cases`.`deleted` = 0
+				INNER JOIN
+					`contacts`
+					ON `contacts`.`id` = `contacts_cases`.`contact_id`
+					AND `contacts`.`deleted` = 0
+				# Подключаем адреса Емайл
+				INNER JOIN
+					`email_addr_bean_rel`
+					ON `email_addr_bean_rel`.`bean_id` = `contacts`.`id`
+					AND `email_addr_bean_rel`.`bean_module` = 'Contacts'
+					AND `email_addr_bean_rel`.`deleted` = 0
+				INNER JOIN
+					`email_addresses`
+					ON `email_addresses`.`id` = `email_addr_bean_rel`.`email_address_id`
+					AND `email_addresses`.`deleted` = 0
+					AND `email_addresses`.`email_address_caps` IN (".implode(",",$emails).")
+				WHERE
+					`cases`.`deleted` = 0
+					AND `cases`.`state` NOT IN ('Closed')
+		";
+		$result = $this->db->query($sql, true);
+		while ($row = $this->db->fetchByAssoc($result)) {
+			if(mb_strpos($emailName, $row['name']) !== false) {
+				return $row['id'];
+			}
+		}
 
         return false;
     }
@@ -4548,7 +4774,12 @@ eoq;
 	 * @param	$email		the email address to match
 	 * @param	$table		which table to query
 	 */
-	function getRelatedId($email, $module) {
+	function getRelatedId($email, $module, $createdIfEmpty = false, $seedEmail = false) {
+		global $sugar_config;
+
+		$emailOrigin = $email;
+		$moduleOrigin = $module;
+
 		$email = trim(strtoupper($email));
 		if(strpos($email, ',') !== false) {
 			$emailsArray = explode(',', $email);
@@ -4565,6 +4796,20 @@ eoq;
 		} // else
 		$module = $this->db->quoted(ucfirst($module));
 
+		if(isset($sugar_config['internalEmails']) AND is_array($sugar_config['internalEmails'])) {
+			$is_internal = false;
+			foreach($sugar_config['internalEmails'] as $internalEmail) {
+				if(strtolower($internalEmail) == strtolower(str_replace("'", "", $email))) {
+					$is_internal = true;
+					break;
+				}
+			}
+			if($is_internal) {
+				// Текущий емайл в списке зарезервированных внутренних емайлов системы
+				return false;
+			}
+		}
+
 		$q = "SELECT bean_id FROM email_addr_bean_rel eabr
 				JOIN email_addresses ea ON (eabr.email_address_id = ea.id)
 				WHERE bean_module = $module AND ea.email_address_caps in ( {$email} ) AND eabr.deleted=0";
@@ -4578,7 +4823,180 @@ eoq;
 		if(count($retArr) > 0) {
 			return $retArr;
 		} else {
-			return false;
+
+			// Стандартный способ поиска не сработал
+			if($createdIfEmpty AND $moduleOrigin == 'contacts') {
+				// Если указана необходимость автоматической привязки
+				// Ищем Контрагента по домену
+
+				// Определяем домен
+				$domain = preg_replace("|(.*)@|is", "", str_replace("'", "", $email));
+				$domain = strtoupper($domain);
+
+				$account_id = null;
+
+				if (in_array(strtolower($domain), $sugar_config['unassignedDomainStop'])) {
+					// Если домен отправителя в списке зарезервированных стоп-доменов
+					// Значит нам по домену не определить
+					// Указываем текущего Контрагента как Unassigned
+					$account_id = $sugar_config['unassignedDomainID'];
+				} else {
+					// Если какой то произвольный домен
+					// Пытаемся его найти среди доменов, указанных у контрагентов
+					$sql = "
+							SELECT
+								`id`
+							FROM
+								`accounts`
+							WHERE
+								`deleted` = 0
+								AND (
+									UPPER(`website`) = '{$domain}'
+									OR UPPER(`website`) = '{$domain}/'
+									OR UPPER(`website`) = 'HTTP://{$domain}'
+									OR UPPER(`website`) = 'HTTP://{$domain}/'
+									OR UPPER(`website`) = 'HTTPS://{$domain}'
+									OR UPPER(`website`) = 'HTTPS://{$domain}/'
+									OR UPPER(`website`) = 'WWW.{$domain}'
+									OR UPPER(`website`) = 'WWW.{$domain}/'
+									OR UPPER(`website`) = 'HTTP://www.{$domain}'
+									OR UPPER(`website`) = 'HTTP://www.{$domain}/'
+									OR UPPER(`website`) = 'HTTPS://www.{$domain}'
+									OR UPPER(`website`) = 'HTTPS://www.{$domain}/'
+								)
+					";
+					$result = $this->db->query($sql, true);
+					while ($row = $this->db->fetchByAssoc($result)) {
+						$account_id = $row['id'];
+						break; // Первый попавшийся Контрагент
+					}
+
+					if (!empty($account_id)) {
+						// Если Контрагент по домену найден
+					} else {
+						// Если контрагента не смогли найти по домену
+						// Привязываем текущего отправителя к Unassigned
+						$account_id = $sugar_config['unassignedDomainID'];
+					}
+				}
+
+				if ($moduleOrigin == 'accounts') {
+					// Если искали Контрагента
+
+					$retArr[] = $account_id;
+
+				} elseif ($moduleOrigin == 'contacts') {
+					// Если искали Контакт
+
+					// Создаем новый Контакт
+					$seedContact = new Contact();
+
+					$seedContact->email1 = strtolower(str_replace("'", "", $email));
+					$seedContact->account_id = $account_id;
+
+
+					// Определение ФИО
+					$fullName = '';
+					if(!empty($seedEmail) AND $seedEmail !== false) {
+						// Доступно исходное письмо
+
+						// Получаем отправителя
+						if(!empty($seedEmail->to_addrs)) {
+							// Проверяем нахождение Email в TO
+							$to_emails = explode(",", $seedEmail->to_addrs);
+							foreach ($to_emails as $key => $toEmail) {
+								if(trim($toEmail) == $emailOrigin) {
+									// Если текущий емайл находится в TO
+									// Вытаскиваем его название
+									if(!empty($seedEmail->to_addrs_names)) {
+										$to_names = explode(",", $seedEmail->to_addrs_names);
+										if(isset($to_names[$key])) {
+											$fullName = trim($to_names[$key]);
+										} else {
+											$fullName = $toEmail;
+										}
+									} else {
+										$fullName = $toEmail;
+									}
+								}
+							}
+						}
+						if(!empty($seedEmail->cc_addrs)) {
+							// Проверяем нахождение Email в CC
+							$cc_emails = explode(",", $seedEmail->cc_addrs);
+							foreach ($cc_emails as $key => $ccEmail) {
+								if(trim($ccEmail) == $emailOrigin) {
+									// Если текущий емайл находится в CC
+									// Вытаскиваем его название
+									if(!empty($seedEmail->cc_addrs_names)) {
+										$to_names = explode(",", $seedEmail->cc_addrs_names);
+										if(isset($to_names[$key])) {
+											$fullName = trim($to_names[$key]);
+										} else {
+											$fullName = $ccEmail;
+										}
+									} else {
+										$fullName = $ccEmail;
+									}
+								}
+							}
+						}
+
+						if($fullName == '') {
+							if(!empty($seedEmail->reply_to_name)) {
+								$fullName = $seedEmail->reply_to_name;
+							} else {
+								$fullName = $seedEmail->from_name;
+							}
+						}
+
+						$fullName = str_replace(" <$emailOrigin>", "", $fullName);
+
+						// Парсим отправителя по запятой
+						$name = explode(",", $fullName);
+						if(count($name) == 1) {
+							// Если нет запятых
+							// Пробуем разбить по пробелу
+							$name = explode(" ", $fullName);
+
+							if(count($name) == 1) {
+								// Только одно слово
+								// Фамилия
+								$seedContact->last_name = $fullName;
+							} elseif(count($name) >= 2) {
+								// Имя и Фамилия
+								$seedContact->first_name = $name[0];
+								unset($name[0]);
+								$seedContact->last_name = implode(" ", $name);
+							} else {
+								// Вообще нет имени
+								$seedContact->last_name = $emailOrigin;
+							}
+						} elseif (count($name) >= 2) {
+							// Есть запятые в названии
+
+							$seedContact->first_name = $name[0];
+							$seedContact->last_name = $name[1];
+						}
+					} else {
+						// Письмо нам по какой то причине не доступно
+						$seedContact->last_name = $emailOrigin;
+					}
+
+
+					$seedContact->save();
+
+					$retArr[] = $seedContact->id;
+
+				}
+
+				return $retArr;
+			} else {
+				// Стандартное поведение
+				return false;
+			}
+
+
 		}
 	}
 
@@ -5034,7 +5452,7 @@ eoq;
 		if(empty($user)) $user = $current_user;
 
 		$emailSettings = $current_user->getPreference('emailSettings', 'Emails');
-		$emailSettings = is_string($emailSettings) ? sugar_unserialize($emailSettings) : $emailSettings;
+		$emailSettings = is_string($emailSettings) ? unserialize($emailSettings) : $emailSettings;
 
 		$this->autoImport = (isset($emailSettings['autoImport']) && !empty($emailSettings['autoImport'])) ? true : false;
 		return $this->autoImport;
@@ -5559,6 +5977,7 @@ eoq;
 	 * @param string String of uids, comma delimited
 	 */
 	function deleteMessageFromCache($uids) {
+		global $sugar_config;
 		global $app_strings;
 
 		// delete message cache file and email_cache file
@@ -5570,7 +5989,7 @@ eoq;
 			if ($this->isPop3Protocol()) {
 				$q = "DELETE FROM email_cache WHERE message_id = '{$queryUID}' AND ie_id = '{$this->id}'";
 			} else {
-				$q = "DELETE FROM email_cache WHERE imap_uid = '{$queryUID}' AND ie_id = '{$this->id}'";
+				$q = "DELETE FROM email_cache WHERE imap_uid = {$queryUID} AND ie_id = '{$this->id}'";
 			}
 			$r = $this->db->query($q);
 			if ($this->isPop3Protocol()) {
@@ -5919,7 +6338,7 @@ eoq;
 		$direction = 'desc';
 		$sortSerial = $current_user->getPreference('folderSortOrder', 'Emails');
 		if(!empty($sortSerial) && !empty($_REQUEST['ieId']) && !empty($_REQUEST['mbox'])) {
-			$sortArray = sugar_unserialize($sortSerial);
+			$sortArray = unserialize($sortSerial);
 			$sort = $sortArray[$_REQUEST['ieId']][$_REQUEST['mbox']]['current']['sort'];
 			$direction = $sortArray[$_REQUEST['ieId']][$_REQUEST['mbox']]['current']['direction'];
 		}
@@ -5974,7 +6393,7 @@ eoq;
 	    $usersList = $team->get_team_members(true);
 	    foreach($usersList as $userObject)
 	    {
-	        $previousSubscriptions = sugar_unserialize(base64_decode($userObject->getPreference('showFolders', 'Emails',$userObject)));
+	        $previousSubscriptions = unserialize(base64_decode($userObject->getPreference('showFolders', 'Emails',$userObject)));
 	        if($previousSubscriptions === FALSE)
 	            $previousSubscriptions = array();
 

@@ -71,7 +71,6 @@ class CaseUpdatesHook
                 $_FILES['case_update_file' . $index][$key] = $val;
             }
         }
-
         return $count;
     }
 
@@ -84,7 +83,7 @@ class CaseUpdatesHook
             return;
         }
         global $current_user, $app_list_strings;
-        if (empty($case->fetched_row) || !$case->id) {
+        if ($_REQUEST['force_case_update'] !== '1' && (empty($case->fetched_row) || !$case->id)) {
             if (!$case->state) {
                 $case->state = $app_list_strings['case_state_default_key'];
             }
@@ -101,7 +100,7 @@ class CaseUpdatesHook
 
             return;
         }
-        if ($_REQUEST['module'] === 'Import') {
+        if ($_REQUEST['module'] === 'Import' && $_REQUEST['module'] === 'MergeRecords') {
             return;
         }
         //Grab the update field and create a new update with it.
@@ -119,7 +118,7 @@ class CaseUpdatesHook
         if (strlen($text) > $this->slug_size) {
             $case_update->name = substr($text, 0, $this->slug_size) . '...';
         }
-        $case_update->description = nl2br($text);
+        $case_update->description = ($text);
         $case_update->case_id = $case->id;
         $case_update->save();
 
@@ -245,6 +244,7 @@ class CaseUpdatesHook
             return;
         }
 
+        $contact = BeanFactory::getBean("Contact");
         $ea = new SugarEmailAddress();
         $beans = $ea->getBeansByEmailAddress($email->from_addr);
         $contact_id = null;
@@ -255,13 +255,15 @@ class CaseUpdatesHook
             }
         }
         $caseUpdate = new AOP_Case_Updates();
+        $caseUpdate->id = create_guid();
+        $caseUpdate->new_with_id = true;
         $caseUpdate->name = $email->name;
         $caseUpdate->contact_id = $contact_id;
         $updateText = $this->unquoteEmail($email->description_html ? $email->description_html : $email->description);
         $caseUpdate->description = $updateText;
         $caseUpdate->internal = false;
         $caseUpdate->case_id = $email->parent_id;
-        $caseUpdate->save();
+        //$caseUpdate->save();
         $notes = $email->get_linked_beans('notes', 'Notes');
         foreach ($notes as $note) {
             //Link notes to case update also
@@ -272,10 +274,17 @@ class CaseUpdatesHook
             $newNote->parent_type = 'AOP_Case_Updates';
             $newNote->parent_id = $caseUpdate->id;
             $newNote->save();
+            $note_ids[] = $note->id;
+            $note_ids[] = $newNote->id;
             $srcFile = "upload://{$note->id}";
             $destFile = "upload://{$newNote->id}";
             copy($srcFile, $destFile);
         }
+        // Чиним баг с неотображением картинок
+        $updateText = AOPInboundEmail::processImageLinks($updateText, $note_ids);
+        $caseUpdate->retrieve($caseUpdate->id);
+        $caseUpdate->description = $updateText;
+        $caseUpdate->save();
 
         $this->updateCaseStatus($caseUpdate->case_id);
     }
@@ -296,7 +305,7 @@ class CaseUpdatesHook
             return;
         }
         $case = BeanFactory::getBean('Cases', $caseId);
-        if (!empty($case->id)) {
+        if (empty($case->id)) {
             return;
         }
         if (array_key_exists($case->status, $statusMap)) {
@@ -330,7 +339,7 @@ class CaseUpdatesHook
      */
     public function closureNotifyPrep($case)
     {
-        if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'Import') {
+        if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'Import' && $_REQUEST['module'] === 'MergeRecords') {
             return;
         }
         $case->send_closure_email = true;
@@ -344,7 +353,7 @@ class CaseUpdatesHook
      */
     public function closureNotify($case)
     {
-        if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'Import') {
+        if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'Import' && $_REQUEST['module'] === 'MergeRecords') {
             return;
         }
         if ($case->state !== 'Closed' || !$case->send_closure_email) {
@@ -376,14 +385,17 @@ class CaseUpdatesHook
         $aop_config = $this->getAOPConfig();
         $emailTemplate->retrieve($aop_config['case_closure_email_template_id']);
 
-        if (!$emailTemplate) {
+        if ( empty($emailTemplate->id) ) {
             $GLOBALS['log']->warn('CaseUpdatesHook: sendClosureEmail template is empty');
 
             return false;
         }
 
-        $contact = $case->get_linked_beans('contacts', 'Contact');
-        if ($contact) {
+        // Определяем основного получателя
+        $contact = $case->getContacts('Primary Contact');
+        //$contact = $bean->get_linked_beans("contacts","Contact");
+
+        if(isset($contact[0])){
             $contact = $contact[0];
         } else {
             return false;
@@ -402,6 +414,13 @@ class CaseUpdatesHook
         $email = $contact->emailAddress->getPrimaryAddress($contact);
 
         $mailer->addAddress($email);
+		
+		// Определяем все СС
+        $contactsCC = $case->getContacts('Alternate Contact');
+        foreach ($contactsCC as $seedContactCC) {
+            $email = $seedContactCC->emailAddress->getPrimaryAddress($seedContactCC);
+            $mailer->addCC($email);
+        }
 
         try {
             if ($mailer->send()) {
@@ -428,7 +447,7 @@ class CaseUpdatesHook
      */
     public function creationNotify($bean, $event, $arguments)
     {
-        if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'Import') {
+        if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'Import' && $_REQUEST['module'] === 'MergeRecords') {
             return;
         }
         if ($arguments['module'] !== 'Cases' || $arguments['related_module'] !== 'Contacts') {
@@ -437,14 +456,21 @@ class CaseUpdatesHook
         if (!$bean->fetched_row) {
             return;
         }
+        if (isset($GLOBALS['case_CC_only'])) {
+            // Происходит добавление CC после получения письма по существующему кейсу
+            return;
+        }
         if (!empty($arguments['related_bean'])) {
             $contact = $arguments['related_bean'];
         } else {
             $contact = BeanFactory::getBean('Contacts', $arguments['related_id']);
         }
-        $this->sendCreationEmail($bean, $contact);
+        if (isset($GLOBALS['handleCreateCase']) AND $GLOBALS['handleCreateCase']) {
+            // Уведомление о создании должно уйти только когда идет обработка почты
+            // чтобы исключить отправку уведомлений при добавлении CC вручную
+            $this->sendCreationEmail($bean, $contact);
+        }
     }
-
     /**
      * @param EmailTemplate $template
      * @param aCase $bean
@@ -464,15 +490,16 @@ class CaseUpdatesHook
         $ret = array();
         $ret['subject'] = from_html(aop_parse_template($template->subject, $beans));
         $ret['body'] = from_html(
-            $app_strings['LBL_AOP_EMAIL_REPLY_DELIMITER'] . aop_parse_template(
+            '<html><head></head><body width="100%"><style>img { max-width: 100% }</style>'.$app_strings['LBL_AOP_EMAIL_REPLY_DELIMITER'] . aop_parse_template(
                 str_replace(
                     '$sugarurl',
                     $sugar_config['site_url'],
                     $template->body_html
                 ),
                 $beans
-            )
+            ).'</body></html>'
         );
+
         $ret['body_alt'] = strip_tags(
             from_html(
                 aop_parse_template(
@@ -508,8 +535,11 @@ class CaseUpdatesHook
      *
      * @return bool
      */
-    private function sendCreationEmail(aCase $bean, $contact)
+    function sendCreationEmail(aCase $bean, $contact, $references = null)
     {
+
+		static $bcc_send;
+
         if (!isAOPEnabled()) {
             return true;
         }
@@ -539,11 +569,39 @@ class CaseUpdatesHook
         $mailer->AltBody = $text['body_alt'];
         $mailer->From = $emailSettings['from_address'];
         $mailer->FromName = $emailSettings['from_name'];
+        if ( !empty($references) && is_array($references) ) {
+		$repto = $references[0];
+		$refs = implode(' ', $references);
+            $mailer->addCustomHeader('In-Reply-To', htmlspecialchars_decode($repto));
+            $mailer->addCustomHeader('References', htmlspecialchars_decode($refs));
+        }
         $email = $contact->emailAddress->getPrimaryAddress($contact);
         if (empty($email) && !empty($contact->email1)) {
             $email = $contact->email1;
         }
         $mailer->addAddress($email);
+
+		// Добаляем СС
+        $contactsCC = $bean->getContacts('Alternate Contact');
+        foreach ($contactsCC as $seedContactCC) {
+            $email = $seedContactCC->emailAddress->getPrimaryAddress($seedContactCC);
+            if(empty($email) && !empty($seedContactCC->email1)){
+                $email = $seedContactCC->email1;
+            }
+            $mailer->addCC($email);
+        }
+        // ДОбавляем BCC
+        global $sugar_config;
+        if (isset($sugar_config['bcc_email']) && !empty($sugar_config['bcc_email'])) {
+            if(!in_array($mailer->Subject, $bcc_send)) {
+                $bcc_send[]=  $mailer->Subject;
+                print_array('2: ' . __DIR__,0,1);
+                print_array('$email:' . $email,0,1);
+                print_array('subject:' . $mailer->Subject,0,1);
+                $mailer->addBCC($sugar_config['bcc_email']);
+            }
+        }
+
 
         try {
             if ($mailer->send()) {
@@ -598,59 +656,127 @@ class CaseUpdatesHook
     /**
      * @param AOP_Case_Updates $caseUpdate
      */
-    public function sendCaseUpdate(AOP_Case_Updates $caseUpdate)
+    public function sendCaseUpdate(AOP_Case_Updates $caseUpdate, $send_update)
     {
         global $current_user, $sugar_config;
+        static $contacts_send;
         $email_template = new EmailTemplate();
-        if ($_REQUEST['module'] === 'Import') {
+        if ($_REQUEST['module'] === 'Import' || $_REQUEST['module'] === 'MergeRecords' ) {
             //Don't send email on import
             return;
         }
         if (!isAOPEnabled()) {
             return;
         }
-        if ($caseUpdate->internal) {
-            return;
-        }
+
+        $aop_config = $sugar_config['aop'];
         $signature = array();
         $addDelimiter = true;
-        $aop_config = $sugar_config['aop'];
-        if ($caseUpdate->assigned_user_id) {
-            if ($aop_config['contact_email_template_id']) {
+
+        if($caseUpdate->internal){
+            // Внутренняя заметка
+            if(isset($aop_config['support_internal_email_role_id']) AND $aop_config['support_internal_email_role_id']) {
+                // Если указана Роль пользователей для рассылки уведомлений о внутреннем сообщении в Обращении
+                $seedRole = new ACLRole();
+                $seedRole->retrieve($aop_config['support_internal_email_role_id']);
+                if(!empty($seedRole->id) && $send_update) {
+                    // Если Роль корректно определена и это не удаление cases ($send_update определяет нужно ли отправлять (не нужно отправлять в случае если parent кейс удаляется))
+
+                    // Пользователи в Роли
+                    $role_users = $seedRole->getMembers();
+                    $emails = array();
+                    foreach ($role_users as $user_id => $user_name) {
+                        $user = BeanFactory::getBean('Users', $user_id);
+
+                        if ($user) {
+                            $emails[] = $user->emailAddress->getPrimaryAddress($user);
+                        }
+                    }
+
+                    if (isset($aop_config['support_internal_email_template_id']) AND $aop_config['support_internal_email_template_id']) {
+                        // Если существует конфиг с указанием шаблона письма
+                        $email_template = $email_template->retrieve($aop_config['support_internal_email_template_id']);
+
+                        $addDelimiter = false;
+                        if ($emails && $email_template) {
+                            $GLOBALS['log']->info("AOPCaseUpdates: Calling send internal email");
+                            $res = $caseUpdate->sendEmail($emails, $email_template, $signature, $caseUpdate->case_id, $addDelimiter, $caseUpdate->contact_id);
+
+                        }
+
+                    }
+
+
+                }
+            }
+
+            return;
+        }
+
+        if($caseUpdate->assigned_user_id){
+            if($aop_config['contact_email_template_id']){
                 $email_template = $email_template->retrieve($aop_config['contact_email_template_id']);
                 $signature = $current_user->getDefaultSignature();
             }
-            if ($email_template) {
-                foreach ($caseUpdate->getContacts() as $contact) {
-                    $GLOBALS['log']->info('AOPCaseUpdates: Calling send email');
+            if($email_template) {
+                // Пытаемся определить все СС
+                $emailsCC = array();
+                foreach ($caseUpdate->getContacts('Alternate Contact') as $contact) {
+                    $emailsCC[] = $contact->emailAddress->getPrimaryAddress($contact);
+                }
+                foreach ($caseUpdate->getContacts('Primary Contact') as $contact) {
+                    $GLOBALS['log']->info("AOPCaseUpdates: Calling send email");
                     $emails = array();
                     $emails[] = $contact->emailAddress->getPrimaryAddress($contact);
-                    $caseUpdate->sendEmail(
-                        $emails,
-                        $email_template,
-                        $signature,
-                        $caseUpdate->case_id,
-                        $addDelimiter,
-                        $contact->id
-                    );
+                    $res = $caseUpdate->sendEmail($emails, $email_template, $signature, $caseUpdate->case_id, $addDelimiter, $contact->id, $emailsCC);
                 }
             }
-        } else {
-            $emails = $caseUpdate->getEmailForUser();
-            if ($aop_config['user_email_template_id']) {
-                $email_template = $email_template->retrieve($aop_config['user_email_template_id']);
+        }else{
+            if(!isset($contacts_send[$caseUpdate->contact_id])) {
+                // Отправляем только один раз для контакта
+                // кастыль, защищающий от двойной отправки
+                // где то происходит несколько раз сохранение $case_update
+                // а где - хз
+                $contacts_send[$caseUpdate->contact_id] = true;
+
+                $emails = $caseUpdate->getEmailForUser();
+                if($aop_config['user_email_template_id']){
+                    $email_template = $email_template->retrieve($aop_config['user_email_template_id']);
+                }
+                $addDelimiter = false;
+                if($emails && $email_template){
+                    $GLOBALS['log']->info("AOPCaseUpdates: Calling send email");
+                    $res = $caseUpdate->sendEmail($emails, $email_template, $signature, $caseUpdate->case_id, $addDelimiter,$caseUpdate->contact_id);
+                }
             }
-            $addDelimiter = false;
-            if ($emails && $email_template) {
-                $GLOBALS['log']->info('AOPCaseUpdates: Calling send email');
-                $caseUpdate->sendEmail(
-                    $emails,
-                    $email_template,
-                    $signature,
-                    $caseUpdate->case_id,
-                    $addDelimiter,
-                    $caseUpdate->contact_id
-                );
+        }
+    }
+
+    /**
+     * Функция указания роли присоединяемого к кейсу контакта
+     * @param $bean
+     * @param $event
+     * @param $arguments
+     */
+    public function setRole($bean, $event, $arguments) {
+
+        if($arguments['module'] == 'Cases' AND $arguments['related_module'] == 'Contacts') {
+            // При добавлении связи между Кейсом и Контактом
+
+            if(!isset($GLOBALS['handleCreateCase'])) {
+                // Если происходит добавление контакта вне механизма обработки почты
+
+                // Получаем список Контактов, уже прикрепленных к Кейсу
+                $contacts = $bean->getContacts();
+                if(count($contacts) > 1) {
+                    // Если их уже несколько
+                    // Значит текущий Контакт - это СС
+
+                    $relate_values = array('contact_id'=>$arguments['related_id'],'case_id'=>$bean->id);
+                    $data_values = array('contact_role'=>'Alternate Contact');
+                    $bean->set_relationship($bean->rel_contact_table, $relate_values, true, true,$data_values);
+
+                }
             }
         }
     }

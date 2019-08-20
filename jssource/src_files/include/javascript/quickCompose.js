@@ -102,10 +102,17 @@ SUGAR.quickCompose = function() {
     		if (!SE.composeLayout.composeTemplate)
     			SE.composeLayout.composeTemplate = new YAHOO.SUGAR.Template(SE.templates['compose']);
 
+			var cl_width = document.documentElement.clientWidth;
+			var cl_height = document.documentElement.clientHeight;
+
+			cl_width = Math.round(cl_width * 90 / 100);
+			cl_height = Math.round(cl_height * 80 / 100);
+
     		var panel_modal = dce_mode ? false : true,
-    		    panel_width = '880px',
+    		    panel_width = cl_width + 'px',
 			    panel_constrain = dce_mode ? false : true,
-    		    panel_height = dce_mode ? 'auto' : '400px',
+    		    // panel_height = dce_mode ? 'auto' : cl_height + 'px',
+    		    panel_height = cl_height + 'px',
     		    panel_shadow = dce_mode ? false : true,
     		    panel_draggable = dce_mode ? false : true,
     		    panel_resize = dce_mode ? false : true,

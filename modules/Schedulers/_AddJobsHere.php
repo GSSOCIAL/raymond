@@ -187,7 +187,7 @@ function pollMonitoredInboxes()
                                                 $lastRobin = $users[0];
                                             }
                                         } // else
-                                    } else {
+                                    } elseif ($distributionMethod != 'donotAssign') {
                                         if (sizeof($users) == 1) {
                                             foreach ($users as $k => $value) {
                                                 $userId = $value;
@@ -543,7 +543,7 @@ function pollMonitoredInboxesAOP()
 
     $ie = new AOPInboundEmail();
     $emailUI = new EmailUI();
-    $r = $ie->db->query('SELECT id, name FROM inbound_email WHERE is_personal = 0 AND deleted=0 AND status=\'Active\' AND mailbox_type != \'bounce\'');
+    $r = $ie->db->query('SELECT id, name FROM inbound_email WHERE is_personal = 0 AND deleted=0 AND status=\'Active\' AND mailbox_type != \'bounce\' AND id NOT IN (SELECT c.value FROM config c WHERE c.name=\'inbound_email_address\' AND c.category=\'system\')');
     $GLOBALS['log']->debug('Just got Result from get all Inbounds of Inbound Emails');
 
     while ($a = $ie->db->fetchByAssoc($r)) {

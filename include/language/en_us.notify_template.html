@@ -74,10 +74,10 @@ Description: {ACCOUNT_DESCRIPTION}
 <!-- BEGIN: Case -->
 <p><b>{ASSIGNER}</b> has assigned a Case to <b>{ASSIGNED_USER}</b>.</p>
 <p>
-Subject: {CASE_SUBJECT}<br />
-Priority: {CASE_PRIORITY}<br />
-Status: {CASE_STATUS}<br />
-Description: {CASE_DESCRIPTION}
+Subject: {CASE_SUBJECT}<BR/>
+Priority: {CASE_PRIORITY}<BR/>
+Status: {CASE_STATUS}<BR/>
+Description: {CASE_DESCRIPTION}<BR/><BR/>
 </p>
 <p>You may <a href={URL}>review this Case</a>.</p>
 <!-- END: Case -->
@@ -333,3 +333,22 @@ Description: {KBDOCUMENT_DESCRIPTION}
 <p>Your Contract: {CONTRACT_NAME} will be out of date at {CONTRACT_END_DATE}.</p>
 <p>You may <a href={URL}>review this Contract</a>.</p>
 <!-- END:ContractSpecial-->
+
+<!-- BEGIN: MeetingReminder_Subject -->
+<p>Meeting Reminder - {MEETING_SUBJECT}</p>
+<!-- END: MeetingSpecial_Subject -->
+<!-- BEGIN: MeetingReminder -->
+<p>Title: {MEETING_SUBJECT}</p>
+<p>When: {MEETING_STARTDATE}</p>
+<p>Location: {MEETING_LOCATION}</p>
+<p>Created By: {MEETING_CREATED_BY}</p>
+<!-- END: MeetingReminder -->
+
+<!-- BEGIN: CallReminder_Subject -->
+<p>Call Reminder - {CALL_SUBJECT}</p>
+<!-- END: CallReminder_Subject -->
+<!-- BEGIN: CallReminder -->
+<p>Title: {CALL_SUBJECT}</p>
+<p>When: {CALL_STARTDATE}</p>
+<p>Created By: {CALL_CREATED_BY}</p>
+<!-- END: CallReminder -->

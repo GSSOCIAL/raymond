@@ -36,7 +36,5 @@ class assLicHooks {
                 unlink($file_path);
             }
         }
-        
-        
     }
 }

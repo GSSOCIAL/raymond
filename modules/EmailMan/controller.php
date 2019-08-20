@@ -91,9 +91,10 @@ class EmailManController extends SugarController
             if( !$oe->isAllowUserAccessToSystemDefaultOutbound() )
                 $oe->removeUserOverrideAccounts();
         }
-
+        //https://trello.com/c/ZSsv4opE - Save email addr for monitor inbound emails
+        $focus->saveSetting("system","inbound_email_address",!empty($_POST["inbound_email_address"])?$_POST["inbound_email_address"]:"");
+        
         $focus->saveConfig();
-
         // save User defaults for emails
         $configurator->config['email_default_delete_attachments'] = (isset($_REQUEST['email_default_delete_attachments'])) ? true : false;
 

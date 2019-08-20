@@ -171,6 +171,24 @@
             </td>
         </tr>
 
+        <tr id="support_internal_email_template_row">
+            <td  scope="row" width="200">{$MOD.LBL_AOP_SUPPORT_INTERNAL_EMAIL_TEMPLATE}: </td>
+            <td  >
+                <select id='support_internal_email_template_id_select' name='support_internal_email_template_id' onchange='show_edit_template_link(this);'>{$SUPPORT_INTERNAL_EMAIL_TEMPLATES}</select>
+
+                <a href='javascript:open_email_template_form("support_internal_email_template_id")' >{$MOD.LBL_CREATE_EMAIL_TEMPLATE}</a>
+                <span name='edit_template' id='support_internal_email_template_id_edit_template_link' style='visibility: hidden;'>
+                <a href='javascript:edit_email_template_form("support_internal_email_template_id")' >{$MOD.LBL_EDIT_EMAIL_TEMPLATE}</a></span>
+            </td>
+        </tr>
+
+        <tr id="support_internal_email_role_id">
+            <td  scope="row" width="200">{$MOD.LBL_AOP_SUPPORT_INTERNAL_EMAIL_ROLE_ID}: </td>
+            <td  >
+                <select id='support_internal_email_role_id_select' name='support_internal_email_role_id'>{$SUPPORT_INTERNAL_EMAIL_ROLES}</select>
+            </td>
+        </tr>
+
         <tr id="contact_email_template_row">
             <td  scope="row" width="200">{$MOD.LBL_AOP_CONTACT_EMAIL_TEMPLATE}: </td>
             <td  >

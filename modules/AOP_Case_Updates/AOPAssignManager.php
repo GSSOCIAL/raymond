@@ -251,6 +251,12 @@ class AOPAssignManager
             case 'random':
                 $userId = $this->getRandomUser();
                 break;
+            case 'donotAssign':
+                $userId = '';
+                break;
+            case 'donotAssign':
+                $userId = '';
+                break;
             default:
                 $userId = '';
         }
