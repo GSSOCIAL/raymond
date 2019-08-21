@@ -23,9 +23,8 @@ include('custom/metadata/ass_hardware_casesMetaData.php');
 
  
  //WARNING: The contents of this file are auto-generated
+
 include('custom/metadata/ass_hardware_cases_1MetaData.php');
-
-
 
 include('custom/metadata/ass_hardware_contactsMetaData.php');
 
@@ -58,4 +57,7 @@ include('custom/metadata/ass_lic_documentsMetaData.php');
  
  //WARNING: The contents of this file are auto-generated
 include('custom/metadata/ass_lic_notesMetaData.php');
+
+ //WARNING: The contents of this file are auto-generated
+include('custom/metadata/ass_hardware_cases_1MetaData.php');
 ?>

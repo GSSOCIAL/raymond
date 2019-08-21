@@ -14,5 +14,5 @@ $mod_strings = array (
   'LBL_R_PASS' => 'Root Password',
   'LBL_W_PASS' => 'Web Password',
   'LBL_ASS_HARDWARE_CASES_FROM_CASES_TITLE' => 'Cases',
-  'LBL_NAME' => 'Serial #'
+  'LBL_NAME' => 'Serial #',
 );

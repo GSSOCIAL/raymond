@@ -31,11 +31,13 @@ array (
       ),
       'includes' => 
       array (
-        0 => 
-        array (
-          'file' => 'modules/Cases/js/copyToClipboard.js',
+        0 => array (
+            'file' => 'custom/include/js/bean_export.js',
         ),
-        1 => array (
+        1 => array(
+          'file' => "modules/Cases/js/copyToClipboard.js",
+        ),
+        2 => array (
           'file' => 'include/javascript/tinymce/tinymce.min.js',
         ),
       ),

@@ -14,6 +14,15 @@ array (
           1 => 'DUPLICATE',
           2 => 'DELETE',
           3 => 'FIND_DUPLICATES',
+          4 => array(
+            'customCode' => '<input type="submit" class="button" title="{$MOD.LBL_CONVERT_TO_XML}" onclick="window.bean_server.export(\'xml\');return false;" value="{$MOD.LBL_CONVERT_TO_XML_BUTTON}"/>',
+          ),
+          5 => array(
+            'customCode' => '<input type="submit" class="button" title="{$MOD.LBL_CONVERT_TO_HTML}" onclick="window.bean_server.export(\'html\');return false;" value="{$MOD.LBL_CONVERT_TO_HTML_BUTTON}"/>',
+          ),
+          6 => array(
+            'customCode' => '<input type="submit" class="button" title="{$MOD.LBL_CONVERT_TO_DOCX}" onclick="window.bean_server.export(\'docx\');return false;" value="{$MOD.LBL_CONVERT_TO_DOCX_BUTTON}"/>',
+          ),
         ),
       ),
       'maxColumns' => '2',
@@ -28,6 +37,11 @@ array (
         array (
           'label' => '10',
           'field' => '30',
+        ),
+      ),
+      'includes' => array(
+        0 => array (
+          'file' => 'custom/include/js/bean_export.js',
         ),
       ),
       'useTabs' => true,
