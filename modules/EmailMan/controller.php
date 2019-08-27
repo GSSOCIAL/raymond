@@ -93,6 +93,7 @@ class EmailManController extends SugarController
         }
         //https://trello.com/c/ZSsv4opE - Save email addr for monitor inbound emails
         $focus->saveSetting("system","inbound_email_address",!empty($_POST["inbound_email_address"])?$_POST["inbound_email_address"]:"");
+        $focus->saveSetting("system","email_report_addr",!empty($_POST["email_report_addr"])?$_POST["email_report_addr"]:"");
         
         $focus->saveConfig();
         // save User defaults for emails
