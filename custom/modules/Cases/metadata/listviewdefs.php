@@ -1,6 +1,12 @@
 <?php
 $listViewDefs ['Cases'] = 
 array (
+  'aop_case_updates_delivery_status' => 
+  array (
+    'width' => '5%',
+    'label' => 'LBL_DELIVERY_STATUS',
+    'default' => true,
+  ),
   'CASE_NUMBER' => 
   array (
     'width' => '5%',
