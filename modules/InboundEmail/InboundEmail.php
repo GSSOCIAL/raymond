@@ -4680,30 +4680,34 @@ eoq;
 		 * https://trello.com/c/dfQlIzYy
 		 * Parse case id from subject
 		 */
-		$pattern = $aCase->getEmailSubjectMacro();
+		$macro = explode(",",$aCase->getEmailSubjectMacro());
 		$escape_chars = array('\\',"[","]","(",")",",",".","*","+","|","{","}","?","^","&"); //Array of chars that need escaped for regex.
-		//$emailSubjectMacro
-		foreach($escape_chars as $char){
-			$pattern = str_replace($char,"\\".$char,$pattern);
-		}
-		$pattern = str_replace(array("%1"),array("(\d+)"),$pattern);
-		preg_match_all("/".$pattern."/",$emailName,$matches);
-		if(!empty($matches[1])){ // eliminate everything up to the beginning of the macro and return the rest
-			$match = is_array($matches[1]) && ctype_digit($matches[1][0])?intval($matches[1][0]):(ctype_digit($matches[1])?intval($matches[1]):NULL);
-			if($match){
-                // filter out deleted records in order to create a new case
-                // if email is related to deleted one (bug #49840)
-                $query = 'SELECT id FROM cases WHERE case_number = '
-                    . $this->db->quoted($match)
-                    . ' and deleted = 0';
-                $r = $this->db->query($query, true);
-				$a = $this->db->fetchByAssoc($r);
-                if (!empty($a['id'])) {
-                    return $a['id'];
-                }
-            }
-        }
 		
+		foreach($macro as $pattern){
+			unset($matches);
+			foreach($escape_chars as $char){
+				$pattern = str_replace($char,"\\".$char,$pattern);
+			}
+			$pattern = str_replace(array("%1"),array("(\d+)"),$pattern);
+			$old_pattern = $pattern;
+			preg_match_all("/{$pattern}/",$emailName,$matches);
+			//Case number will store in $matches[1]
+			if(!empty($matches[1])){ // eliminate everything up to the beginning of the macro and return the rest
+				$match = is_array($matches[1]) && ctype_digit($matches[1][0])?intval($matches[1][0]):(ctype_digit($matches[1])?intval($matches[1]):NULL);
+				if($match){
+					// filter out deleted records in order to create a new case
+					// if email is related to deleted one (bug #49840)
+					$query = 'SELECT id FROM cases WHERE case_number = '
+						. $this->db->quoted($match)
+						. ' and deleted = 0';
+					$r = $this->db->query($query, true);
+					$a = $this->db->fetchByAssoc($r);
+					if (!empty($a['id'])){
+						return $a['id'];
+					}
+				}
+			}
+		}
 		// Search for simillar emails
 		$emails = [];
 		if(isset($email->from_addr) AND !empty($email->from_addr) AND $email->from_addr != '') $emails[] = "'" . strtoupper($email->from_addr) . "'";
