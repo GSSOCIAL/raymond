@@ -92,6 +92,7 @@ if(empty($_REQUEST["bean_id"])){
 
     $License->name=implode("_",$name);
     if($id = $License->save()){
+        make_license($License,array());
         $response["status"]=true;
         $License = $License->retrieve($id);
         $response["body"]=array(
