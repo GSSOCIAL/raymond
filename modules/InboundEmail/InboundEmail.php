@@ -4674,41 +4674,37 @@ eoq;
      * @return string|boolean   Case ID or FALSE if not found
      */
 	function getCaseIdFromCaseNumber($email, $aCase) {
-
 		$emailName = $email->name;
 		if(empty($emailName) AND isset($email->Subject)) $emailName = $email->Subject;
-
+		/**
+		 * https://trello.com/c/dfQlIzYy
+		 * Parse case id from subject
+		 */
+		$pattern = $aCase->getEmailSubjectMacro();
+		$escape_chars = array('\\',"[","]","(",")",",",".","*","+","|","{","}","?","^","&"); //Array of chars that need escaped for regex.
 		//$emailSubjectMacro
-		$exMacro = explode('%1', $aCase->getEmailSubjectMacro());
-		$open = $exMacro[0];
-		$close = $exMacro[1];
-
-		if($sub = stristr($emailName, $open)) { // eliminate everything up to the beginning of the macro and return the rest
-			// $sub is [CASE:XX] xxxxxxxxxxxxxxxxxxxxxx
-			$sub2 = str_replace($open, '', $sub);
-			// $sub2 is XX] xxxxxxxxxxxxxx
-			$sub3 = substr($sub2, 0, strpos($sub2, $close));
-
-            // case number is supposed to be numeric
-            if (ctype_digit($sub3)) {
+		foreach($escape_chars as $char){
+			$pattern = str_replace($char,"\\".$char,$pattern);
+		}
+		$pattern = str_replace(array("%1"),array("(\d+)"),$pattern);
+		preg_match_all("/".$pattern."/",$emailName,$matches);
+		if(!empty($matches[1])){ // eliminate everything up to the beginning of the macro and return the rest
+			$match = is_array($matches[1]) && ctype_digit($matches[1][0])?intval($matches[1][0]):(ctype_digit($matches[1])?intval($matches[1]):NULL);
+			if($match){
                 // filter out deleted records in order to create a new case
                 // if email is related to deleted one (bug #49840)
                 $query = 'SELECT id FROM cases WHERE case_number = '
-                    . $this->db->quoted($sub3)
+                    . $this->db->quoted($match)
                     . ' and deleted = 0';
                 $r = $this->db->query($query, true);
-                $a = $this->db->fetchByAssoc($r);
+				$a = $this->db->fetchByAssoc($r);
                 if (!empty($a['id'])) {
                     return $a['id'];
                 }
             }
         }
-
-		// Стандартными средствами не нашли
-		// Далее будем искать все открытые обращения, закрепленные любым емайл в письме
-		// Где название присутствует в теме письма
-
-		// Перечень емайл
+		
+		// Search for simillar emails
 		$emails = [];
 		if(isset($email->from_addr) AND !empty($email->from_addr) AND $email->from_addr != '') $emails[] = "'" . strtoupper($email->from_addr) . "'";
 		if(isset($email->reply_to_email) AND !empty($email->reply_to_email) AND $email->reply_to_email != '') $emails[] = "'" . strtoupper($email->reply_to_email) . "'";
@@ -4748,7 +4744,6 @@ eoq;
 		$result = $this->db->query($sql, true);
 		while ($row = $this->db->fetchByAssoc($result)) {
 			if(mb_strpos($emailName, $row['name']) !== false) {
-				// Кейс найден
 				return $row['id'];
 			}
 		}

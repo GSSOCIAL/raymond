@@ -37,7 +37,7 @@ function make_license($bean,$args){
         
         $cmd = "for i in {$lic_type}; do echo \"------\"; cd /home/genlic; ./genlic -C {$name} -H {$hard_id} -P \$i -D {$interval} ;done > {$file}";
         $bean->lic_key = $cmd;
-
+      
         exec($cmd);
         if(file_exists($file)) {
             $bean->lic_key = file_get_contents($file);
@@ -53,4 +53,19 @@ function replace4byte($string) {
         | [\xF1-\xF3][\x80-\xBF]{3}          # planes 4-15
         | \xF4[\x80-\x8F][\x80-\xBF]{2}      # plane 16
     )%xs', '', $string);
+}
+
+/**
+ * Generate random string
+ * @param number $length code length
+ * @return string 
+ */
+function generateCode($length=6){
+	$chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHI_JKLMNOPRQSTUVWXYZ0123456789";
+	$code = "";
+	$clen = strlen($chars) - 1;  
+	while (strlen($code) < $length) {
+		$code .= $chars[mt_rand(0,$clen)];  
+	}
+	return $code;
 }

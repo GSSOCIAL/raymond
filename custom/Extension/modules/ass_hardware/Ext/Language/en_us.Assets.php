@@ -1,5 +1,4 @@
 <?php
-
 $mod_strings['LBL_ASS_HARDWARE_ACCOUNTS_FROM_ACCOUNTS_TITLE'] = 'Accounts';
 $mod_strings['LBL_ASS_HARDWARE_ASS_HARDWARE_FROM_ASS_HARDWARE_L_TITLE'] = 'Hardware';
 $mod_strings['LBL_ASS_HARDWARE_ASS_HARDWARE_FROM_ASS_HARDWARE_R_TITLE'] = 'Hardware';

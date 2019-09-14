@@ -37,6 +37,26 @@ $GLOBALS['app_list_strings']['os_list']=array (
   'f25' => 'Fedora 25',
   'c7' => 'CentOS 7',
 );
+$GLOBALS["app_list_strings"]["hd_type_list"]=array(
+  'vm0' => 'VMWARE',
+  'vm1' => 'HYPER-V',
+  'vm2' => 'Azure',
+  'small' => 'Small Footprint Server',
+  'u1s' => 'Standart 1U Server',
+  'u1r' => 'Redundant 1U server',
+  'u3a' => 'Research Archive (U3)',
+  'othervm' => 'Other VM',
+  'otherhd' => 'Other Hardware',
+);
+$GLOBALS["app_list_strings"]["status_list"]=array(
+  'new'=> 'New Created',
+  'sent'=> 'Delivered to Customer',
+  'intg'=> 'Integration in progress',
+  'maint'=> 'Maintaining in progress',
+  'prod'=> 'In Production',
+  'test'=> 'Testing/Evaluation',
+  'del'=> 'Replaced',
+);
 $GLOBALS['app_list_strings']['case_type_dom']=array (
   'prob_solv' => 'Problem resolution',
   'bug' => 'Bug issue ',

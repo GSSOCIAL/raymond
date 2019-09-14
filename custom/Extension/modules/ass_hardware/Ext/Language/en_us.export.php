@@ -7,4 +7,3 @@ $mod_strings["LBL_CONVERT_TO_HTML"] = "Export current case updates history as ht
 $mod_strings["LBL_CONVERT_TO_HTML_BUTTON"] = "To HTML";
 $mod_strings["LBL_CONVERT_TO_DOCX"] = "Export current case updates history as Document";
 $mod_strings["LBL_CONVERT_TO_DOCX_BUTTON"] = "As Document";
-$mod_strings['LBL_ASS_HARDWARE_CASES_FROM_ASS_HARDWARE_TITLE'] = 'Hardware';

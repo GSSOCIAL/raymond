@@ -8,6 +8,6 @@
 
 class assLicHooks {
     function genLic (SugarBean &$bean, $event, $arguments) {
-        make_license($bean,array());    
+        make_license($bean,array());  
     }
 }
