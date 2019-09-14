@@ -7,7 +7,7 @@
  */
 function make_license($bean,$args){
     //Setups
-    $dir = "upload/licenses";
+    $dir = "/var/www/html/upload/licenses";
     $__dir="";
     foreach(explode("/",$dir) as $path){
         $__dir .= $path."/";
@@ -30,8 +30,14 @@ function make_license($bean,$args){
         $id = $bean->id;
         $filename = "{$bean->name}_{$diff->days}_{$bean->end_date}";
         $file = $dir."/".$filename.".license";
-        $cmd = "for i in {$lic_type}; do echo \"------\"; cd /home/genlic; ./genlic -C {$bean->name} -H {$bean->hard_id} -P \$i -D {$interval} ;done > ".$file;
+        
+        //Issue with output cmd - in Bean name & hardware id expecting ";" symbol + whitespaces. Remove both
+        $name = trim(str_replace(array(";"),array(""),$bean->name)); 
+        $hard_id = trim(str_replace(array(";"),array(""),$bean->hard_id));
+        
+        $cmd = "for i in {$lic_type}; do echo \"------\"; cd /home/genlic; ./genlic -C {$name} -H {$hard_id} -P \$i -D {$interval} ;done > {$file}";
         $bean->lic_key = $cmd;
+
         exec($cmd);
         if(file_exists($file)) {
             $bean->lic_key = file_get_contents($file);
