@@ -86,7 +86,7 @@ if(empty($_REQUEST["bean_id"])){
     global $app_list_strings;
     $types = "";
     foreach($data->type as $index){
-        $types .= ".{$app_list_strings['lic_type_list'][$index]}";
+        $types .= ".{$index}";
     }
     $name[]=str_replace(" ","",$types);
 

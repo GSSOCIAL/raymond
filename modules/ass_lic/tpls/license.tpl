@@ -69,6 +69,23 @@
     div.license-container-wrapper div.col-value > input{
         width:100%;
     }
+    div.license-container-wrapper fieldset#type_list{
+        width: 100%;
+        outline: 0px;
+        margin: 0px;
+    }
+    div.license-container-wrapper fieldset#type_list > *{
+        padding:5px 0px;
+    }
+    div.license-container-wrapper fieldset#type_list > * input{
+        margin-right:10px;
+    }
+    div.license-container-wrapper fieldset#type_list > *:first-child{
+        padding-top:0px;
+    }
+    div.license-container-wrapper fieldset#type_list > *:last-child{
+        padding-bottom:0px;
+    }
 </style>
 {/literal}
 <div class="license-container-wrapper">
@@ -94,11 +111,13 @@
         <div class="container col-xs-4">
             <div class="col-xs-12" id="license_type_select">
                 <div class="col-xs-12">
-                    <select name="license[type]" multiple="true" size="{$fields.lic_type.list|@count}" tabindex="">
+                    <fieldset id="type_list">
                         {foreach from=$fields.lic_type.list key=key item=label}
-                            <option label="{$label}" value="{$key}">{$label}</option>
+                        <div class="input-wrapper">
+                            <input type="checkbox" name="license[type][]" value="{$key}" label="{$label}"/>{$label}
+                        </div>
                         {/foreach}
-                    </select>
+                    </fieldset>
                 </div>
                 <div class="col-xs-12">
                     <input type="button" id="generate_license" value="Generate"/>
@@ -131,7 +150,15 @@
             "name":$("div[field='name']").text(),
             "id":$("div[field='hard_id']").text(),
             "end_date":$("#generate_license").closest(".license-container-wrapper").find("input[name$='end_date]']").val(),
-            "type":$("#generate_license").closest(".license-container-wrapper").find("select[name$='type]']").val(),
+            "type":(function(inputs){
+                var list = [];
+                inputs.each(function(){
+                    if($(this).is(":checked")){
+                        list.push($(this).attr("value"));
+                    }
+                });
+                return list;
+            }($("input[name='license[type][]']"))),
             "duraction":$("#generate_license").closest(".license-container-wrapper").find("input[name$='expires]']").val(),
             "hardware_id":document.forms.DetailView.record.value
         },function(response){
