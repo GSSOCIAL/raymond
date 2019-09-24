@@ -52,6 +52,10 @@ array (
           'newTab' => true,
           'panelDefault' => 'expanded',
         ),
+        'LBL_PANEL_LICENSES' =>array (
+          'newTab' => false,
+          'panelDefault' => 'expanded',
+        ),
         'LBL_EDITVIEW_PANEL1' => 
         array (
           'newTab' => false,
@@ -124,6 +128,15 @@ array (
             'label' => 'LBL_OS',
           ),
         ),
+      ),
+      'lbl_panel_licenses'=>array(
+        0=>array(
+          0=>array(
+            'name' => 'license_generator',
+            'studio' => 'visible',
+            'hideLabel' => true,
+          ),
+        )
       ),
       'lbl_editview_panel1' => 
       array (
