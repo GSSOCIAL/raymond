@@ -81,16 +81,19 @@ if(empty($_REQUEST["bean_id"])){
     $t2 = new DateTime(date("Y-m-d",strtotime($License->end_date)));
     $diff = $t1->diff($t2);
     
-    $name[]=$License->end_date;
-    $name[]=$diff->days;
-    global $app_list_strings;
     $types = "";
     foreach($data->type as $index){
-        $types .= ".{$index}";
+        $types .= $index;
     }
-    $name[]=str_replace(" ","",$types);
+
+    $name[] = $data->name; //Hardware serial #
+    $name[]=str_replace(" ","",$types); //Add Type
+    $name[]=$diff->days; //Add Duraction
+    $name[]=date("dmY");
+    $name[]=date("dmY",strtotime($License->end_date));
 
     $License->name=implode("_",$name);
+
     if($id = $License->save()){
         make_license($License,array());
         $response["status"]=true;
