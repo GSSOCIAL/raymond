@@ -35,7 +35,8 @@ function display($focus, $field, $value, $view){
         "SELECT l.id,l.name FROM ass_lic l 
         INNER JOIN ass_hardware_ass_lic_c hal ON l.id=hal.ass_hardware_ass_licass_lic_idb AND hal.deleted=0
         WHERE l.deleted=0
-        AND hal.ass_hardware_ass_licass_hardware_ida='{$focus->id}'");
+        AND hal.ass_hardware_ass_licass_hardware_ida='{$focus->id}'
+        ORDER BY l.date_entered DESC");
     if($list){
         while($row = $db->fetchByAssoc($list)){
             $licenses[]=$row;

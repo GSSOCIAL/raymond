@@ -126,7 +126,7 @@
         </div>
         <div class="container col-xs-5">
             <div class="col-xs-12" id="licenses_list">
-                <select id="lic_list" multiple="true" size="{$licenses|@count}" tabindex="">
+                <select id="lic_list" multiple="false" size="{$licenses|@count}" tabindex="">
                     {foreach from=$licenses key=key item=item}
                         <option label="{$item.name}" value="{$item.id}">{$item.name}</option>
                     {/foreach}
@@ -170,7 +170,7 @@
                 option.text(response.body.name);
                 option.attr("label",response.body.name);
                 option.attr("value",response.body.id);
-                $("#lic_list").append(option);
+                $("#lic_list").prepend(option);
             }else{
                 var errors = "";
                 for(var error in response.errors){
@@ -205,8 +205,22 @@
                         node.select();
                         document.execCommand('copy');
                         document.body.removeChild(node);
-                        alert("License keys copyied to clipboard");
+
+                        //Display message 
+                        $(event.target).closest("input").attr('title', 'Copied').tooltip({
+                            content: 'Copied',
+                            position: {my: 'top - 15px', at: 'top center'},
+                            disabled: true,
+                            close: function(E,ui){
+                                $(E.target).tooltip('disable');
+                            },
+                            open:function(E,ui){
+                                setTimeout(function(){
+                                    $(E.target).tooltip('close');
+                                }, 1000);}
+                        }).tooltip('enable').tooltip('open').off('focusout').off('mouseleave');
                     }
+                    
                 });
             break;
             case "download":

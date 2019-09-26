@@ -85,7 +85,9 @@ if(empty($_REQUEST["bean_id"])){
     foreach($data->type as $index){
         $types .= $index;
     }
-
+    global $current_user;
+    
+    $name[] = $current_user->full_name;
     $name[] = $data->name; //Hardware serial #
     $name[]=str_replace(" ","",$types); //Add Type
     $name[]=$diff->days; //Add Duraction
