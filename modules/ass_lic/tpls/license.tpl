@@ -236,13 +236,44 @@
                 }
             break;
             case "delete":
-                License.remove(ids,function(response){
-                    if(response.status){
-                        for(var id in response.request.input.ids){
-                            $("#lic_list").find("option[value='"+response.request.input.ids[id]+"']").remove();
-                        }  
-                    }
-                });
+                window.accLicdialog = new YAHOO.widget.SimpleDialog("deleteLicensesDialog",{
+                    width: "300px",
+                    draggable: false,
+                    close: true,
+                    constraintoviewport: true,
+                    modal: true,
+                    zIndex:15031,
+                    fixedcenter: true,
+                    loadingText: "loading",
+                    buttons:[
+                        {
+                            text:"Delete",
+                            handler: function(){
+                                var self =this;
+                                License.remove(ids,function(response){
+                                    if(response.status){
+                                        for(var id in response.request.input.ids){
+                                            $("#lic_list").find("option[value='"+response.request.input.ids[id]+"']").remove();
+                                        }  
+                                    }
+                                    $("div.mask#deleteLicensesDialog_mask").remove();
+                                    self.destroy();
+                                });
+                            }
+                        },
+                        {
+                            text:"Cancel",
+                            handler:function(){
+                                $("div.mask#deleteLicensesDialog_mask").remove();
+                                this.destroy();
+                            },
+                            isDefault:true
+                        }
+                    ]
+	            });
+                window.accLicdialog.setBody("Are you sure you want to delete license file?");
+                window.accLicdialog.setHeader("Delete license");
+                window.accLicdialog.render(document.body);
             break;
         }
     });
