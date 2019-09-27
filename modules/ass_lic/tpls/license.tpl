@@ -91,6 +91,7 @@
 <div class="license-container-wrapper">
     <div class="col-xs-12 main-container">
         <div class="container col-xs-3">
+            {if $ACL_EDIT}
             <div class="col-xs-12">
                 <div class="label col-1-label">
                     {$fields.end_date.label}:
@@ -107,8 +108,10 @@
                     <input type="number" min="0" max="" step="1" name="license[expires]"/>
                 </div>
             </div>
+            {/if}
         </div>
         <div class="container col-xs-4">
+            {if $ACL_EDIT}
             <div class="col-xs-12" id="license_type_select">
                 <div class="col-xs-12">
                     <fieldset id="type_list">
@@ -123,18 +126,19 @@
                     <input type="button" id="generate_license" value="Generate"/>
                 </div>
             </div>
+            {/if}
         </div>
         <div class="container col-xs-5">
             <div class="col-xs-12" id="licenses_list">
-                <select id="lic_list" multiple="false" size="{$licenses|@count}" tabindex="">
+                <select id="lic_list" size="{$licenses|@count}" tabindex="">
                     {foreach from=$licenses key=key item=item}
-                        <option label="{$item.name}" value="{$item.id}">{$item.name}</option>
+                        <option label="{$item.name}" value="{$item.id}" data-delete="{$item.access.delete}" data-export="{$item.access.export}">{$item.name}</option>
                     {/foreach}
                 </select>
                 <div class="action-buttons-wrapper">
-                    <input type="button" id="" value="Copy"/>
-                    <input type="button" id="" value="Download"/>
-                    <input type="button" id="" value="Delete"/>
+                    <input type="button" id="action_copy" value="Copy" disabled/>
+                    <input type="button" id="action_download" value="Download" disabled/>
+                    <input type="button" id="action_delete" value="Delete" disabled/>
                 </div>
             </div>
         </div>
@@ -170,6 +174,8 @@
                 option.text(response.body.name);
                 option.attr("label",response.body.name);
                 option.attr("value",response.body.id);
+                option.get(0).dataset["delete"] = response.body.access.delete;
+                option.get(0).dataset["export"] = response.body.access.export;
                 $("#lic_list").prepend(option);
             }else{
                 var errors = "";
@@ -277,6 +283,13 @@
                 xhr.send(JSON.stringify(data));
             break;
         }
+    });
+    //
+    $(document).on("change","select#lic_list",function(){
+        var option = $(this).find("option").eq(this.selectedIndex);
+        $(this).closest("#licenses_list").find("#action_delete").prop("disabled",!(option.data("delete") && option.data("delete")=="1"));
+        $(this).closest("#licenses_list").find("#action_download").prop("disabled",!(option.data("export") && option.data("export")=="1"));
+        $(this).closest("#licenses_list").find("#action_copy").prop("disabled",!(option.data("export") && option.data("export")=="1"));
     });
 </script>
 {/literal}
