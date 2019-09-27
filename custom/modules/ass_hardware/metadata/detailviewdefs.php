@@ -55,6 +55,7 @@ array (
         'LBL_PANEL_LICENSES' =>array (
           'newTab' => false,
           'panelDefault' => 'expanded',
+          "displayFunction" => "custom/modules/ass_hardware/metadata/panel_licenses.php",
         ),
         'LBL_EDITVIEW_PANEL1' => 
         array (

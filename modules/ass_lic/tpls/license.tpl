@@ -91,6 +91,7 @@
 <div class="license-container-wrapper">
     <div class="col-xs-12 main-container">
         <div class="container col-xs-3">
+            {if $ACL_EDIT}
             <div class="col-xs-12">
                 <div class="label col-1-label">
                     {$fields.end_date.label}:
@@ -107,8 +108,10 @@
                     <input type="number" min="0" max="" step="1" name="license[expires]"/>
                 </div>
             </div>
+            {/if}
         </div>
         <div class="container col-xs-4">
+            {if $ACL_EDIT}
             <div class="col-xs-12" id="license_type_select">
                 <div class="col-xs-12">
                     <fieldset id="type_list">
@@ -123,18 +126,19 @@
                     <input type="button" id="generate_license" value="Generate"/>
                 </div>
             </div>
+            {/if}
         </div>
         <div class="container col-xs-5">
             <div class="col-xs-12" id="licenses_list">
-                <select id="lic_list" multiple="true" size="{$licenses|@count}" tabindex="">
+                <select id="lic_list" size="{$licenses|@count}" tabindex="">
                     {foreach from=$licenses key=key item=item}
-                        <option label="{$item.name}" value="{$item.id}">{$item.name}</option>
+                        <option label="{$item.name}" value="{$item.id}" data-delete="{$item.access.delete}" data-export="{$item.access.export}">{$item.name}</option>
                     {/foreach}
                 </select>
                 <div class="action-buttons-wrapper">
-                    <input type="button" id="" value="Copy"/>
-                    <input type="button" id="" value="Download"/>
-                    <input type="button" id="" value="Delete"/>
+                    <input type="button" id="action_copy" value="Copy" disabled/>
+                    <input type="button" id="action_download" value="Download" disabled/>
+                    <input type="button" id="action_delete" value="Delete" disabled/>
                 </div>
             </div>
         </div>
@@ -170,7 +174,9 @@
                 option.text(response.body.name);
                 option.attr("label",response.body.name);
                 option.attr("value",response.body.id);
-                $("#lic_list").append(option);
+                option.get(0).dataset["delete"] = response.body.access.delete;
+                option.get(0).dataset["export"] = response.body.access.export;
+                $("#lic_list").prepend(option);
             }else{
                 var errors = "";
                 for(var error in response.errors){
@@ -205,8 +211,22 @@
                         node.select();
                         document.execCommand('copy');
                         document.body.removeChild(node);
-                        alert("License keys copyied to clipboard");
+
+                        //Display message 
+                        $(event.target).closest("input").attr('title', 'Copied').tooltip({
+                            content: 'Copied',
+                            position: {my: 'top - 15px', at: 'top center'},
+                            disabled: true,
+                            close: function(E,ui){
+                                $(E.target).tooltip('disable');
+                            },
+                            open:function(E,ui){
+                                setTimeout(function(){
+                                    $(E.target).tooltip('close');
+                                }, 1000);}
+                        }).tooltip('enable').tooltip('open').off('focusout').off('mouseleave');
                     }
+                    
                 });
             break;
             case "download":
@@ -216,13 +236,44 @@
                 }
             break;
             case "delete":
-                License.remove(ids,function(response){
-                    if(response.status){
-                        for(var id in response.request.input.ids){
-                            $("#lic_list").find("option[value='"+response.request.input.ids[id]+"']").remove();
-                        }  
-                    }
-                });
+                window.accLicdialog = new YAHOO.widget.SimpleDialog("deleteLicensesDialog",{
+                    width: "300px",
+                    draggable: false,
+                    close: true,
+                    constraintoviewport: true,
+                    modal: true,
+                    zIndex:15031,
+                    fixedcenter: true,
+                    loadingText: "loading",
+                    buttons:[
+                        {
+                            text:"Delete",
+                            handler: function(){
+                                var self =this;
+                                License.remove(ids,function(response){
+                                    if(response.status){
+                                        for(var id in response.request.input.ids){
+                                            $("#lic_list").find("option[value='"+response.request.input.ids[id]+"']").remove();
+                                        }  
+                                    }
+                                    $("div.mask#deleteLicensesDialog_mask").remove();
+                                    self.destroy();
+                                });
+                            }
+                        },
+                        {
+                            text:"Cancel",
+                            handler:function(){
+                                $("div.mask#deleteLicensesDialog_mask").remove();
+                                this.destroy();
+                            },
+                            isDefault:true
+                        }
+                    ]
+	            });
+                window.accLicdialog.setBody("Are you sure you want to delete license file?");
+                window.accLicdialog.setHeader("Delete license");
+                window.accLicdialog.render(document.body);
             break;
         }
     });
@@ -263,6 +314,13 @@
                 xhr.send(JSON.stringify(data));
             break;
         }
+    });
+    //
+    $(document).on("change","select#lic_list",function(){
+        var option = $(this).find("option").eq(this.selectedIndex);
+        $(this).closest("#licenses_list").find("#action_delete").prop("disabled",!(option.data("delete") && option.data("delete")=="1"));
+        $(this).closest("#licenses_list").find("#action_download").prop("disabled",!(option.data("export") && option.data("export")=="1"));
+        $(this).closest("#licenses_list").find("#action_copy").prop("disabled",!(option.data("export") && option.data("export")=="1"));
     });
 </script>
 {/literal}

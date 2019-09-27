@@ -290,7 +290,22 @@ class EditView
         foreach ($this->defs['panels'] as $key=>$p)
         {
             $panel = array();
-
+            //Get tab defs
+            $def = !empty($this->defs["templateMeta"]["tabDefs"][strtoupper($key)])?$this->defs["templateMeta"]["tabDefs"][strtoupper($key)]:NULL;
+            if($def && $def["displayFunction"] && file_exists($def["displayFunction"])){
+                //Get file
+                require $def["displayFunction"];
+                /*
+                File must have function called $display_tab. Structure is next:
+                    function display_tab($Bean){
+                        return array(
+                            "EditView"=>false, //Tab wont shown in EditView page
+                            "DetailView"=>true //Tab will show on DetailView
+                        );
+                    }
+                */
+                if(display_tab($this->focus)[$this->view]===false) continue;
+            }
             if (!is_array($this->defs['panels'][$key])) {
                $this->sectionPanels[strtoupper($key)] = $p;
             }
