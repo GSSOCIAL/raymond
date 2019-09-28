@@ -127,3 +127,4 @@ tests/acceptance.suite.yml
 tests/functional.suite.yml
 tests/unit.suite.yml
 tests/bootstrap.php
+.env
