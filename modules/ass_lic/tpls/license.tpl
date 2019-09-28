@@ -56,6 +56,8 @@
     }
     div.license-container-wrapper #licenses_list div.action-buttons-wrapper input{
         width:100%;
+        margin-bottom: 4px !important;
+        margin-right: 4px !important;
     }
     div.license-container-wrapper div.col-1-label{
         float:left;
@@ -139,6 +141,8 @@
                     <input type="button" id="action_copy" value="Copy" disabled/>
                     <input type="button" id="action_download" value="Download" disabled/>
                     <input type="button" id="action_delete" value="Delete" disabled/>
+
+                    <input type="button" id="action_log" value="Log"/>
                 </div>
             </div>
         </div>
@@ -194,9 +198,9 @@
             ids = data;
         }
         var License = new LicenseServer();
-        if(!data || data.length==0) return;
-        switch($(event.target).closest("input").val().toLowerCase()){
-            case "copy":
+        switch($(event.target).closest("input").attr("id").toLowerCase()){
+            case "action_copy":
+                if(!data || data.length==0) return;
                 License.get(ids,function(response){
                     if(response.status){
                         var summary = "";
@@ -229,13 +233,15 @@
                     
                 });
             break;
-            case "download":
+            case "action_download":
+                if(!data || data.length==0) return;
                 for(var id in ids){
                     License.id = ids[id];
                     License.download();
                 }
             break;
-            case "delete":
+            case "action_delete":
+                if(!data || data.length==0) return;
                 window.accLicdialog = new YAHOO.widget.SimpleDialog("deleteLicensesDialog",{
                     width: "300px",
                     draggable: false,
@@ -274,6 +280,15 @@
                 window.accLicdialog.setBody("Are you sure you want to delete license file?");
                 window.accLicdialog.setHeader("Delete license");
                 window.accLicdialog.render(document.body);
+            break;
+            case "action_log":
+                var frame = document.createElement("iframe");
+                frame.style.display = "none";
+                document.body.appendChild(frame);
+                console.log("Frame");
+                console.log(frame);
+                frame.src = "index.php?module=ass_lic&action=api&to_pdf=true&method=download_log";
+                return true;
             break;
         }
     });

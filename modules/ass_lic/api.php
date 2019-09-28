@@ -33,7 +33,7 @@ if(empty($_REQUEST["method"])){
                 if(!is_array($ids)){
                     $ids = array($ids);
                 }
-                global $db;
+                global $db,$current_user;
                 //Delete records
                 $string_ids = "'".implode("','",$ids)."'";
                 $query = $db->query("DELETE FROM `ass_lic` WHERE `id` IN ({$string_ids})");
@@ -44,6 +44,15 @@ if(empty($_REQUEST["method"])){
                         unlink("{$dir}/{$id}.license");
                     }
                 }
+
+                //Write log
+                print_log(array(
+                    "action"=>"delete",
+                    "id"=>$ids,
+                    "user"=>"{$current_user->full_name} ({$current_user->id})",
+                    "date"=>date("d.m.Y")
+                ),"licenses");
+
                 $response["status"] = true;
                 $response["request"]["input"]["ids"] = $ids;
             }
@@ -115,6 +124,12 @@ if(empty($_REQUEST["method"])){
                     }
                 break;
             }
+        break;
+        case "download_log":
+            header("Content-type: text/plain");
+            header("Content-Disposition: attachment; filename=licenses.log");
+            print htmlspecialchars_decode(file_get_contents("cache/licenses.log"));
+            exit();
         break;
     }
 }

@@ -87,3 +87,32 @@ function getEmailNotifyAddr(){
 	global $db;
 	return $db->getOne("SELECT c.value FROM config c WHERE c.name='email_report_addr' AND c.category='system'");
 }
+
+/**
+ * Write content to specifed file
+ * @param $content Content 
+ * @param $file filename 
+ */
+function print_log($content,$file=null){
+    if($file){
+        ob_start();
+    }else{
+        echo '<pre class="print_data">';
+    }
+    print_r($content);
+    if($file){
+        $content = ob_get_contents(); 
+    }else{
+        echo '</pre>' . "\n";
+    }
+    if($file){
+        $file = fopen("cache/{$file}.log","a+");
+        fwrite($file, "\n\n******************************\n");
+        fwrite($file, date("Y-m-d H:i:s") . "\n");
+        fwrite($file, $content);
+        fclose($file);
+        empty($file);
+        ob_end_clean();
+    }
+    return true;
+}
