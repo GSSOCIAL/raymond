@@ -57,10 +57,10 @@ function display_updates($focus)
         $sugar_smarty->assign("HARDWARE_ID",$hw->id);
         //Check for buttons
         if(!empty($hw->pass_w)){
-            $sugar_smarty->assign('COPY_WEB_PASSWORD_BUTTON',"<button class=\"copy_button button\" data-clipboard-text=\"'{$hw->pass_w}'\">Web</button>");
+            $sugar_smarty->assign('COPY_WEB_PASSWORD_BUTTON',"<button class=\"copy_button button\" data-clipboard-text=\"{$hw->pass_w}\">Web</button>");
         }
         if(!empty($hw->pass_r)){
-            $sugar_smarty->assign('COPY_ROOT_PASSWORD_BUTTON',"<button class=\"copy_button button\" data-clipboard-text=\"'{$hw->pass_r}'\">ROOT</button>");
+            $sugar_smarty->assign('COPY_ROOT_PASSWORD_BUTTON',"<button class=\"copy_button button\" data-clipboard-text=\"{$hw->pass_r}\">ROOT</button>");
         }
     }
     $html = $sugar_smarty->fetch('modules/AOP_Case_Updates/tpl/caseUpdateFormBefore.tpl');
