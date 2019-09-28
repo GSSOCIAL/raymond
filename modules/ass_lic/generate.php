@@ -105,6 +105,20 @@ if(empty($_REQUEST["bean_id"])){
 
     if($id = $License->save()){
         make_license($License,array());
+
+        //Write log
+        print_log(array(
+            "action"=>"generate",
+            "id"=>$id,
+            "user"=>"{$current_user->full_name} ({$current_user->id})",
+            "serial"=>$data->name,
+            "hardware_id"=>trim($data->id),
+            "date"=>date("d.m.Y"),
+            "to"=>date("d.m.Y",strtotime($License->end_date)),
+            "types"=>$data->type,
+            "duraction"=>$diff->days
+        ),"licenses");
+
         $response["status"]=true;
         $License = $License->retrieve($id);
         $response["body"]=array(

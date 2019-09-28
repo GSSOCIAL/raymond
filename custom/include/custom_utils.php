@@ -54,9 +54,8 @@ function replace4byte($string) {
         | \xF4[\x80-\x8F][\x80-\xBF]{2}      # plane 16
     )%xs', '', $string);
 }
-
 /**
- * Generate random string
+ * Generate random string eg key
  * @param number $length code length
  * @return string 
  */
@@ -68,4 +67,52 @@ function generateCode($length=6){
 		$code .= $chars[mt_rand(0,$clen)];  
 	}
 	return $code;
+}
+
+/**
+ * Get email addr which set as "Monitor Inbound Email address" verifier.
+ * @param Boolean $with_id If true - return array with keys "id" and "addr". IF False - will return only addr
+ */
+function getEmailVerifierAddr($with_id=false){
+	global $db;
+	$InboundSystemAddressPrefs = $db->query("SELECT e.email_user AS `addr`,c.value AS `id` FROM config c INNER JOIN inbound_email e ON e.id=c.value WHERE c.name='inbound_email_address' AND c.category='system'");
+	$InboundSystemAddressPrefs = (Object)$db->fetchByAssoc($InboundSystemAddressPrefs);
+	return !empty($InboundSystemAddressPrefs->addr)?($with_id===false?$InboundSystemAddressPrefs->addr:(Object)array("id"=>$InboundSystemAddressPrefs->id,"addr"=>$InboundSystemAddressPrefs->addr)):NULL;
+}
+
+/**
+ * Get email addr which set as "Report email adress". Important errors will send to this email
+*/
+function getEmailNotifyAddr(){
+	global $db;
+	return $db->getOne("SELECT c.value FROM config c WHERE c.name='email_report_addr' AND c.category='system'");
+}
+
+/**
+ * Write content to specifed file
+ * @param $content Content 
+ * @param $file filename 
+ */
+function print_log($content,$file=null){
+    if($file){
+        ob_start();
+    }else{
+        echo '<pre class="print_data">';
+    }
+    print_r($content);
+    if($file){
+        $content = ob_get_contents(); 
+    }else{
+        echo '</pre>' . "\n";
+    }
+    if($file){
+        $file = fopen("cache/{$file}.log","a+");
+        fwrite($file, "\n\n******************************\n");
+        fwrite($file, date("Y-m-d H:i:s") . "\n");
+        fwrite($file, $content);
+        fclose($file);
+        empty($file);
+        ob_end_clean();
+    }
+    return true;
 }
