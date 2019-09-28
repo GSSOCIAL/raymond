@@ -29,8 +29,8 @@ body .quickcreatetop .dropdown-toggle{
 body .desktop-bar>.toolbar>li{
     vertical-align: top;
 }
-body .bootstrap-container.col-sm-offset-3{
-    margin-top:80px;
+body .bootstrap-container, body.bootstrap-container.col-sm-offset-3{
+    margin-top:80px !important;
 }
 body .sidebar{
     top:60px;
@@ -40,7 +40,6 @@ body #buttontoggle{
 }
 body .nav>li>a{
     padding: 4px 15px;
-    font-size: 12px !important;
 }
 body .content #tab-actions>a{
     background-position-y:15px;
@@ -121,4 +120,14 @@ body .subpanel-table .SugarActionMenu .sugar_action_button{
         padding:10px 0px;
         height:60px;
     }
+}
+
+.detail-view-field{
+    padding: 8px 12px;
+    min-height: auto;
+}
+input[type=text]{
+    padding: 10px 12px;
+    min-height: auto;
+    line-height: normal;
 }
