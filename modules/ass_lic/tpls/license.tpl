@@ -132,7 +132,7 @@
         </div>
         <div class="container col-xs-5">
             <div class="col-xs-12" id="licenses_list">
-                <select id="lic_list" size="{$licenses|@count}" tabindex="">
+                <select id="lic_list" size="{if $licenses|@count lt 3}2{else}{$licenses|@count}{/if}" tabindex="">
                     {foreach from=$licenses key=key item=item}
                         <option label="{$item.name}" value="{$item.id}" data-delete="{$item.access.delete}" data-export="{$item.access.export}">{$item.name}</option>
                     {/foreach}
