@@ -30,7 +30,7 @@ body .desktop-bar>.toolbar>li{
     vertical-align: top;
 }
 body .bootstrap-container, body.bootstrap-container.col-sm-offset-3{
-    margin-top:80px !important;
+    margin-top:70px !important;
 }
 body .sidebar{
     top:60px;
@@ -130,4 +130,11 @@ input[type=text]{
     padding: 10px 12px;
     min-height: auto;
     line-height: normal;
+}
+.detail-view-field[type="bool"]{
+    padding: 6px;
+    line-height: 0px;
+}
+.moduleTitle .module-title-text{
+    margin-bottom:0px;
 }

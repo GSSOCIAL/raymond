@@ -11,6 +11,7 @@ custom/blowfish/*
 custom/modulebuilder/*
 custom/working/*
 custom/modules/*/Ext/
+custom/application/Ext/
 custom/modules/unified_search_modules_display.php
 # Ignore AOD indexes
 modules/AOD_Index/Index/*
@@ -72,7 +73,8 @@ SuiteCRM.kdev4
 #Ignore composer vendor folder
 vendor/
 public/
-
+composer.phar
+composer.lock
 
 #Ignore Sass Generated files in SuiteP
 themes/SuiteP/studio.css
@@ -107,3 +109,22 @@ themes/SuiteP/calendar.css
 themes/SuiteP/calendar.css.map
 themes/SuiteP/admin.css
 themes/SuiteP/admin.css.map
+
+# Ignore test_ files
+/test_*.php
+
+appsactivity-php-quickstart.json
+client_secret.json
+
+# Ignore DocumentDatas Fields
+custom/Extension/modules/DocumentDatas/Ext/Vardefs/dynamic.*.php
+custom/Extension/modules/DocumentDatas/Ext/Language/ru_RU.dynamic.*.php
+codeception.yml
+tests/_data/*
+tests/_output/*
+tests/_support/*
+tests/acceptance.suite.yml
+tests/functional.suite.yml
+tests/unit.suite.yml
+tests/bootstrap.php
+.env
