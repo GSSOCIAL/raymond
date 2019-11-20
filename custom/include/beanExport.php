@@ -18,7 +18,7 @@ class BeanExport{
      * @param string $record Record id
      */
     public function retrieve($module,$record){
-        global $sugar_config;
+        global $sugar_config,$app_list_strings;
         /**Requested Module name e.g Accounts,Cases*/
         $this->module_name = $module;
         /**Single object name e.g Account,Document (simillar with classname) */
@@ -31,6 +31,9 @@ class BeanExport{
         $this->table_context = array();
         /**Single bean object */
         $this->bean = BeanFactory::getBean($this->module_name,$this->record_id);
+
+        //Construct a filename
+        $this->filename = !empty($this->bean->name)?$this->bean->name:"{$this->bean->object_name}_{$this->bean->record_id}";
         if(!$this->bean){
             $this->content["message"] = "Couldnt retrieve \"{$this->module_name}\" record {$this->record_id}";
             return $this;
@@ -43,12 +46,24 @@ class BeanExport{
         );
         switch($this->module_name){
             case "Cases":
-                $this->context["properties"]["case_number"]=$this->bean->case_number;
-                $this->context["properties"]["subject"]=$this->bean->name;
-                $this->context["properties"]["description"]=$this->bean->description;
-                $this->context["properties"]["created"]=$this->bean->date_entered;
-                $this->context["properties"]["modified"]=$this->bean->date_modified;
-                $this->context["properties"]["account_id"]=$this->bean->account_id;
+                $this->context["properties"]["Case_number"]=$this->bean->case_number;
+                $this->context["properties"]["Subject"]=$this->bean->name;
+                $this->context["properties"]["Description"]=$this->bean->description;
+                $this->context["properties"]["Created"]=$this->bean->date_entered;
+                $this->context["properties"]["Modified"]=$this->bean->date_modified;
+                $this->context["properties"]["Account_id"]=$this->bean->account_id;
+                
+                $this->context["properties"]["Priority"]= $this->val($this->bean->priority);
+                $this->context["properties"]["State"]= $this->val($this->bean->state);
+                $this->context["properties"]["Status"]= $this->val($this->bean->status);
+                $this->context["properties"]["Type"]= $this->val($this->bean->type);
+
+                $this->context["properties"]["Assigned To"]=$this->val("assigned_user_name");
+                $this->context["properties"]["Hardware"]=$this->val("ass_hardware_cases_name");
+                $this->context["properties"]["Resolution"]=$this->val("resolution");
+                $this->context["properties"]["IP eth0"]=$this->val("ip_eth0");
+                $this->context["properties"]["Installation Site Name"]=$this->val("instal_name");
+                
                 //Get Case Updates records
                 $this->context["case_updates"] = array();
                 global $db,$app_list_strings;
@@ -65,6 +80,7 @@ class BeanExport{
                         $this->context["case_updates"][]=$item;
                     }
                 }
+
             break;
             case "ass_hardware":
                 $this->context["properties"]["Serial #"]=$this->val("name",$this->bean->name);
@@ -82,11 +98,26 @@ class BeanExport{
                     "Password for root"=>$this->val("pass_r"),
                     "Customer Shell Account"=>$this->val("ssh_user"),
                     "Customer Shell Password"=>$this->val("ssh_pass"),
+
+                    "IP eth0"=>$this->val("ip_eth0"),
+                    "IP eth1"=>$this->val("ip_eth1"),
+                    "IP IPMI"=>$this->val("ip_ipmi"),
+                    "IPMI Login and Pass"=>$this->val("ipmi_pass"),
+
                     "Hostname"=>$this->val("hostname"),
                     "Hardware id"=>$this->val("hard_id"),
                 );
+                
+                //Cluster config
+                $this->context["ClusterConfig"]=array(
+                    "Cluster"=>$this->val("cluster"),
+                    "Hardware"=>$this->val("ass_hardware_ass_hardware_name"),
+                    "Heartbeat IP"=>$this->val("ip_oth"),
+                    "Virtual IP"=>$this->val("vip"),
+                );
             break;
         }
+        $this->filename = str_replace(array(" ","-"),array("_","_"),trim($this->filename));
         return $this;
     }
     /**
@@ -96,7 +127,7 @@ class BeanExport{
     public function to_json(){
         if(empty($this->context)) return NULL;
         if($this->force_download===true){
-            header("Content-disposition: attachment; filename={$this->object_name}_{$this->record_id}.json");
+            header("Content-disposition: attachment; filename={$this->filename}.json");
             header("Content-type: application/json");
             exit($this->context);
         }
@@ -118,7 +149,7 @@ class BeanExport{
             $ctx = $this->xmlAsChild($ctx,$name,$property);
         }
         if($this->force_download===true){
-            header("Content-disposition: attachment; filename={$this->object_name}_{$this->record_id}.xml");
+            header("Content-disposition: attachment; filename={$this->filename}.xml");
             header("Content-type: text/xml");
             exit($ctx->asXML());
         }
@@ -139,7 +170,7 @@ class BeanExport{
         header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
         header("Cache-Control: max-age=0, no-cache, must-revalidate, proxy-revalidate");
         header("Last-Modified: {$now} GMT");
-        header("Content-Disposition: attachment;filename={$this->object_name}_{$this->record_id}.csv");
+        header("Content-Disposition: attachment;filename={$this->filename}.csv");
         header("Content-Transfer-Encoding: binary");
         //Convert data to read-e .csv format
         $col_delimiter = ';';
@@ -176,7 +207,7 @@ class BeanExport{
      */
     public function to_html(){
         if(empty($this->context)) return NULL;
-        $title = "{$this->record_id} - {$this->module_name}";
+        $title = "{$this->filename} - {$this->module_name}";
         if($this->bean && !empty($this->bean->name)){
             $title = "{$this->bean->name} - {$this->module_name}";
         }
@@ -189,7 +220,7 @@ class BeanExport{
         }
         $ctx .= "</body></html>";
         if($this->force_download===true){
-            header("Content-disposition: attachment; filename={$this->object_name}_{$this->record_id}.html");
+            header("Content-disposition: attachment; filename={$this->filename}.html");
             header("Content-type: text/html");
             exit($ctx);
         }
@@ -325,6 +356,9 @@ class BeanExport{
                     $value = trim($value);
                 break;
             }
+        }
+        if(is_array(($value))){
+            return "";
         }
         return $value;
     }
