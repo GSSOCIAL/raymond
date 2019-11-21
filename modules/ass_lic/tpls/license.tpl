@@ -88,6 +88,9 @@
     div.license-container-wrapper fieldset#type_list > *:last-child{
         padding-bottom:0px;
     }
+    div.license-container-wrapper #licenses_list select{
+        background: none;
+    }
     div.license-container-wrapper #licenses_list select::-ms-expand {
         display: none;
         background: none;
