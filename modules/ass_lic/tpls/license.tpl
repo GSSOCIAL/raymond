@@ -88,8 +88,13 @@
     div.license-container-wrapper fieldset#type_list > *:last-child{
         padding-bottom:0px;
     }
+    div.license-container-wrapper #licenses_list select::-ms-expand {
+        display: none;
+        background: none;
+    }
 </style>
 {/literal}
+{if $display}
 <div class="license-container-wrapper">
     <div class="col-xs-12 main-container">
         <div class="container col-xs-3">
@@ -148,6 +153,14 @@
         </div>
     </div>
 </div>
+{else}
+No access
+{literal}
+<script type="text/javascript">
+    $("#license_generator_span").closest(".panel").remove();
+</script>
+{/literal}
+{/if}
 {literal}
 <script type="text/javascript">
     //Send generate request.
@@ -235,10 +248,8 @@
             break;
             case "action_download":
                 if(!data || data.length==0) return;
-                for(var id in ids){
-                    License.id = ids[id];
-                    License.download();
-                }
+                License.id = ids;
+                License.download();
             break;
             case "action_delete":
                 if(!data || data.length==0) return;
@@ -285,9 +296,7 @@
                 var frame = document.createElement("iframe");
                 frame.style.display = "none";
                 document.body.appendChild(frame);
-                console.log("Frame");
-                console.log(frame);
-                frame.src = "index.php?module=ass_lic&action=api&to_pdf=true&method=download_log";
+                frame.src = "index.php?module=ass_lic&action=api&to_pdf=true&method=download_log&license="+ids;
                 return true;
             break;
         }
@@ -336,6 +345,7 @@
         $(this).closest("#licenses_list").find("#action_delete").prop("disabled",!(option.data("delete") && option.data("delete")=="1"));
         $(this).closest("#licenses_list").find("#action_download").prop("disabled",!(option.data("export") && option.data("export")=="1"));
         $(this).closest("#licenses_list").find("#action_copy").prop("disabled",!(option.data("export") && option.data("export")=="1"));
+        $(this).closest("#licenses_list").find("#action_log").prop("disabled",!(option.data("export") && option.data("export")=="1"));
     });
 </script>
 {/literal}

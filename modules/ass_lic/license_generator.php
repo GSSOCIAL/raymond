@@ -6,6 +6,7 @@ function display($focus, $field, $value, $view){
     
     $smarty = new Sugar_Smarty();
     $Ass_Lic = new ass_lic();
+    $should_display = true; //Define if panel should display
     $fields = array(
         "end_date",
         "license_expires"=>array(
@@ -40,7 +41,7 @@ function display($focus, $field, $value, $view){
         INNER JOIN ass_hardware_ass_lic_c hal ON l.id=hal.ass_hardware_ass_licass_lic_idb AND hal.deleted=0
         WHERE l.deleted=0
         AND hal.ass_hardware_ass_licass_hardware_ida='{$focus->id}'
-        ORDER BY l.date_entered DESC");
+        ORDER BY l.date_entered DESC",true);
     if($list){
         while($row = $db->fetchByAssoc($list)){
             if(!ACLController::checkAccess("ass_lic","view",$row["is_owner"]=="1")) continue;
@@ -52,6 +53,12 @@ function display($focus, $field, $value, $view){
             $licenses[]=$row;
         }
     }
+    //Get hardware
+    if(empty(trim($focus->hard_id)) || empty($focus->name)){
+        $should_display = false;
+    }
+    
+    $smarty->assign("display",$should_display);
     $smarty->assign("licenses",$licenses);
     //Setup access
     $smarty->assign("ACL_EDIT",ACLController::checkAccess("ass_lic","edit",true,"module",true));

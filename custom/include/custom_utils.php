@@ -6,6 +6,9 @@
  * @return Boolean Result
  */
 function make_license($bean,$args){
+    //Check if flag exists. If T - skip
+    if($bean->file_generated) return $bean;
+    
     //Setups
     $dir = "/var/www/html/upload/licenses";
     $__dir="";
@@ -31,13 +34,19 @@ function make_license($bean,$args){
         $filename = "{$bean->name}_{$diff->days}_{$bean->end_date}";
         $file = $dir."/".$filename.".license";
         
+        $bean->filename = $filename;
+        $bean->file_generated = true; //Recursion - Add flag that file created to skip.
+        $bean->save();
+        $bean->skip_log = true;
         //Issue with output cmd - in Bean name & hardware id expecting ";" symbol + whitespaces. Remove both
         $name = trim(str_replace(array(";"),array(""),$bean->name)); 
         $hard_id = trim(str_replace(array(";"),array(""),$bean->hard_id));
         
+        
+
         $cmd = "for i in {$lic_type}; do echo \"------\"; cd /home/genlic; ./genlic -C {$name} -H {$hard_id} -P \$i -D {$interval} ;done > {$file}";
         $bean->lic_key = $cmd;
-      
+        
         exec($cmd);
         if(file_exists($file)) {
             $bean->lic_key = file_get_contents($file);

@@ -34,9 +34,14 @@ if(empty($_REQUEST["method"])){
                     $ids = array($ids);
                 }
                 global $db,$current_user;
-                //Delete records
-                $string_ids = "'".implode("','",$ids)."'";
-                $query = $db->query("DELETE FROM `ass_lic` WHERE `id` IN ({$string_ids})");
+
+                //Delete
+                foreach($ids as $id){
+                    $License = BeanFactory::newBean("ass_lic",$id);
+                    $License->mark_deleted($id);
+                    $License->save();
+                }
+                
                 //Delete license files
                 $dir = "upload/licenses";
                 foreach($ids as $id){
@@ -44,14 +49,6 @@ if(empty($_REQUEST["method"])){
                         unlink("{$dir}/{$id}.license");
                     }
                 }
-
-                //Write log
-                print_log(array(
-                    "action"=>"delete",
-                    "id"=>$ids,
-                    "user"=>"{$current_user->full_name} ({$current_user->id})",
-                    "date"=>date("d.m.Y")
-                ),"licenses");
 
                 $response["status"] = true;
                 $response["request"]["input"]["ids"] = $ids;
@@ -71,7 +68,7 @@ if(empty($_REQUEST["method"])){
                 }
                 global $db;
                 $string_ids = "'".implode("','",$ids)."'";
-                $query = $db->query("SELECT l.lic_key,l.id,l.name FROM ass_lic l WHERE l.id IN ({$string_ids}) AND l.deleted=0");
+                $query = $db->query("SELECT l.lic_key,l.id,l.name FROM ass_lic l WHERE l.id IN ({$string_ids}) AND l.deleted=0",true);
                 if($query){
                     $response["body"] = array();
                     while($row = $db->fetchByAssoc($query)){
@@ -126,10 +123,38 @@ if(empty($_REQUEST["method"])){
             }
         break;
         case "download_log":
-            header("Content-type: text/plain");
-            header("Content-Disposition: attachment; filename=licenses.log");
-            print htmlspecialchars_decode(file_get_contents("cache/licenses.log"));
-            exit();
+            require_once "custom/include/CSV.php";
+
+            global $db;
+            $CSV_Table = new CSV_Manager();
+
+            $id = !empty($_REQUEST["license"])?$_REQUEST["license"]:1;
+
+            //Add table head
+            $CSV_Table->addHeader(array(
+                "Date","Action","Hardware id","Serial","End date","Types","Filename","User id"
+            ));
+            if($rows_q = $db->query("SELECT t.registred,t.action,t.hard_id,t.serial,t.valid_to,t.types,t.filename,t.user_id FROM licenses_log t WHERE t.license_id='{$id}'",true)){
+                while($row = $db->fetchByAssoc($rows_q)){
+                    $CSV_Table->addRow($row);
+                }
+            }
+
+            //Print as file
+            ob_clean();
+            ob_start();
+            $now = gmdate("D, d M Y H:i:s");
+            header('Content-Type: text/xml, charset=UTF-8; encoding=UTF-8');
+            header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
+            header("Cache-Control: max-age=0, no-cache, must-revalidate, proxy-revalidate");
+            header("Last-Modified: {$now} GMT");
+            header("Content-Disposition: attachment;filename={$id}.csv");
+            header("Content-Transfer-Encoding: binary");
+
+            echo(iconv("UTF-8","cp1251",$CSV_Table->get()));
+
+            exit(ob_get_clean());
+            return ob_get_clean();
         break;
     }
 }
