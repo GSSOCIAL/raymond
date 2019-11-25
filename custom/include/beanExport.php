@@ -41,7 +41,7 @@ class BeanExport{
         //Get context
         $this->context["properties"] = array(
             "id"=>$this->record_id,
-            "module"=>$this->module_name,
+            "module"=>!empty($app_list_strings["moduleList"][$this->module_name])?$app_list_strings["moduleList"][$this->module_name]:$this->module_name,
             "url"=>"{$sugar_config['site_url']}/index.php?module={$this->module_name}&action=DetailView&record={$this->record_id}"
         );
         switch($this->module_name){
@@ -54,10 +54,11 @@ class BeanExport{
                 $this->context["properties"]["Account_id"]=$this->bean->account_id;
                 
                 $this->context["properties"]["Priority"]= $this->val($this->bean->priority);
+                
                 $this->context["properties"]["State"]= $this->val($this->bean->state);
                 $this->context["properties"]["Status"]= $this->val($this->bean->status);
                 $this->context["properties"]["Type"]= $this->val($this->bean->type);
-
+                
                 $this->context["properties"]["Assigned To"]=$this->val("assigned_user_name");
                 $this->context["properties"]["Hardware"]=$this->val("ass_hardware_cases_name");
                 $this->context["properties"]["Resolution"]=$this->val("resolution");
@@ -67,7 +68,12 @@ class BeanExport{
                 //Get Case Updates records
                 $this->context["case_updates"] = array();
                 global $db,$app_list_strings;
-                $query = $db->query("SELECT t.id,t.description AS `message`,t.assigned_user_id,t.internal,t.date_entered AS `created`,t.date_modified AS `modified`,t.contact_id FROM aop_case_updates t WHERE t.deleted=0 AND t.case_id='{$this->record_id}'");
+                $query = $db->query("SELECT t.id,t.description AS `message`,t.assigned_user_id,t.internal,t.date_entered AS `created`,t.date_modified AS `modified`,CONCAT_WS(' ',c.first_name,c.last_name) AS `contact`,CONCAT_WS(' ',u.first_name,u.last_name) AS `author`
+                FROM aop_case_updates t
+                LEFT JOIN contacts c ON c.id=t.contact_id 
+                LEFT JOIN users u ON u.id=t.created_by 
+                WHERE t.deleted=0 AND t.case_id='{$this->record_id}'");
+                
                 if($query && $query->num_rows>0){
                     $this->table_context[] = array("id","message","assigned_user_id","internal update");
                     while($item = $db->fetchByAssoc($query)){
@@ -80,14 +86,16 @@ class BeanExport{
                         $this->context["case_updates"][]=$item;
                     }
                 }
-
+                
             break;
             case "ass_hardware":
+                $this->context["properties"]["module"] = "Hardware";
                 $this->context["properties"]["Serial #"]=$this->val("name",$this->bean->name);
                 $this->context["properties"]["Installation Site Name"]=$this->val("instal_name",$this->bean->instal_name);
                 $this->context["properties"]["Status"]=$this->val("status",$this->bean->status);
                 $this->context["properties"]["Account"]=$this->val("ass_hardware_accountsaccounts_ida",$this->bean->ass_hardware_accountsaccounts_ida);
                 //Info about hardware
+                $this->context["properties"]["Rapid"]=$this->val("rapid");
                 $this->context["properties"]["Hardware Type"]=!empty($this->bean->hd_type)?$this->val("hd_type",$this->bean->hd_type):"undefined";
                 $this->context["properties"]["Product Version"]=$this->val("dcmsys_ver",$this->bean->dcmsys_ver);
                 $this->context["properties"]["OS Version"]=$this->val("os",$this->bean->os);
@@ -343,7 +351,7 @@ class BeanExport{
     }
     private function val($field_name,$value=NULL){
         global $app_list_strings;
-        $value = empty($value)?$this->bean->{$field_name}:$value;
+        $value = empty($value)?(isset($this->bean->{$field_name})?$this->bean->{$field_name}:""):$value;
         if(!empty($this->bean) && !empty($this->bean->field_name_map) && !empty($this->bean->field_name_map[$field_name])){
             switch($this->bean->field_name_map[$field_name]["type"]){
                 case "enum":
