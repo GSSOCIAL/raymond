@@ -14,7 +14,7 @@ class PushToLog_LogicHooks{
             $db->query("CREATE TABLE `licenses_log` (
                 `id` INT(16) NOT NULL AUTO_INCREMENT,
                 `license_id` VARCHAR(36) NOT NULL COMMENT 'License id',
-                `registred` DATETIME ON UPDATE CURRENT_TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                `registred` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 `action` ENUM('create','edit','delete','generate','copy') DEFAULT 'create',
                 `hard_id` VARCHAR(36),
                 `serial` VARCHAR(128) COMMENT 'Serial number from hardware',
