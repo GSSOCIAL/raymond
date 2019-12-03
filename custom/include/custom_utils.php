@@ -125,3 +125,31 @@ function print_log($content,$file=null){
     }
     return true;
 }
+
+/**
+ * Convert to valid date format
+ * @param String $value Date
+ * @return String Timestamp if success. Null if couldnt parse date
+ */
+function dateval($value){
+    $d = null;
+    //Possible formats
+    $formatting = array(
+        "d/m/Y",
+        "d.m.Y",
+        "Y-m-d",
+        "Y/m/d",
+        "Y-m-d",
+    );
+    //Trying to parse from diff format
+    foreach($formatting as $format){
+        if($d = DateTime::createFromFormat($format,$value)){
+            break;
+        }
+    }
+
+    if($d){
+        return $d->getTimestamp();
+    }
+    return $value;
+}

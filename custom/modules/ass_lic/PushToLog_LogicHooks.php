@@ -5,7 +5,7 @@ class PushToLog_LogicHooks{
      * Write log
      */
     function add(SugarBean &$bean, $event, $arguments){
-        global $current_user,$db,$timestamp;
+        global $current_user,$db,$timedate;
 
         //Check if log table exists
         if(!$db->query("DESCRIBE `licenses_log`",false)){ //No need to exit. If table doesnt exists - mysql drops error.
@@ -45,7 +45,8 @@ class PushToLog_LogicHooks{
         }
         $lic_type = str_replace(array("^"),array(""),$bean->lic_type);
         //Insert to log
-        $db->query("INSERT INTO `licenses_log` (`license_id`,`action`,`user_id`,`hard_id`,`serial`,`valid_to`,`types`,`filename`) VALUES ('{$bean->id}','{$Event_name}','{$current_user->id}','{$bean->hard_id}','{$bean->name}','{$bean->end_date}','{$lic_type}','{$bean->filename}')",true);
+        $valid_to = date($timedate->get_db_date_time_format(),dateval($bean->end_date));
+        $db->query("INSERT INTO `licenses_log` (`license_id`,`action`,`user_id`,`hard_id`,`serial`,`valid_to`,`types`,`filename`) VALUES ('{$bean->id}','{$Event_name}','{$current_user->id}','{$bean->hard_id}','{$bean->name}','{$valid_to}','{$lic_type}','{$bean->filename}')",true);
         
         return $bean;
     }
