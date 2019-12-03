@@ -17,10 +17,10 @@ class PushToLog_LogicHooks{
                 `registred` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 `action` ENUM('create','edit','delete','generate','copy') DEFAULT 'create',
                 `hard_id` VARCHAR(36),
-                `serial` VARCHAR(128) COMMENT 'Serial number from hardware',
+                `serial` VARCHAR(256) COMMENT 'Serial number from hardware',
                 `valid_to` DATETIME COMMENT 'End license date',
-                `types` VARCHAR(10) COMMENT 'License types array. Each seperated by comma',
-                `filename` VARCHAR(36),
+                `types` VARCHAR(16) COMMENT 'License types array. Each seperated by comma',
+                `filename` VARCHAR(256),
                 `user_id` VARCHAR(36), PRIMARY KEY (`id`))",true);
         }
 
