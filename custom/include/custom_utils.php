@@ -32,7 +32,7 @@ function make_license($bean,$args){
         $lic_type = str_replace(',', ' ', $lic_type);
         $id = $bean->id;
         $filename = "{$bean->name}_{$diff->days}_{$bean->end_date}";
-        $filename = trim(str_replace(array(";","/"," "),array("_","_","_"),$filename)); 
+        $filename = trim(str_replace(array(";","/"," ","\\"),array("_","_","_","_"),$filename)); 
 
         $file = $dir."/".$filename.".license";
         

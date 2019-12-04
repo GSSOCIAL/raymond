@@ -94,8 +94,8 @@ if(empty($_REQUEST["bean_id"])){
         $types .= $index;
     }
     
-    $name[] = str_replace(array(" ","(",")"),array("\\ ","\\(","\\)"),$current_user->full_name);
-    $name[] = str_replace(array(" ","(",")"),array("\\ ","\\(","\\)"),$data->name); //Hardware serial #
+    $name[] = $current_user->full_name;
+    $name[] = $data->name; //Hardware serial #
     $name[]=str_replace(" ","",$types); //Add Type
     $name[]=$diff->days; //Add Duraction
     $name[]=date("dmY");
