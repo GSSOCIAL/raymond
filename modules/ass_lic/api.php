@@ -68,16 +68,20 @@ if(empty($_REQUEST["method"])){
                 }
                 global $db;
                 $string_ids = "'".implode("','",$ids)."'";
-                $query = $db->query("SELECT l.lic_key,l.id,l.name FROM ass_lic l WHERE l.id IN ({$string_ids}) AND l.deleted=0",true);
+                $query = $db->query("SELECT l.filename,l.id,l.name FROM ass_lic l WHERE l.id IN ({$string_ids}) AND l.deleted=0",true);
                 if($query){
                     $response["body"] = array();
                     while($row = $db->fetchByAssoc($query)){
-                        $response["body"][$row["id"]] = array(
-                            "name"=>$row["name"],
-                            "key"=>htmlspecialchars_decode($row["lic_key"])
-                        );
+                        if(file_exists("/var/www/html/upload/licenses/{$row['filename']}.license")){
+                            $response["body"][$row["id"]] = array(
+                                "name"=>$row["name"],
+                                "key"=>htmlspecialchars_decode(file_get_contents("/var/www/html/upload/licenses/{$row['filename']}.license"))
+                            );
+                        }
                     }
-                    $response["status"] = true;
+                    if(!empty($response["body"])){
+                        $response["status"] = true;
+                    }
                     $response["request"]["input"]["ids"] = $ids;
                 }
             }

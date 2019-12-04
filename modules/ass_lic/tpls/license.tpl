@@ -107,7 +107,7 @@
                     {$fields.end_date.label}:
                 </div>
                 <div class="col-value">
-                    <input type="date" name="license[end_date]"/>
+                    <input type="date" name="license[end_date]" data-defaultenddate="{$end_date_default}" value="{$end_date_default}"/>
                 </div>
             </div>
             <div class="col-xs-12">
@@ -115,7 +115,7 @@
                     {$fields.license_expires.label}:
                 </div>
                 <div class="col-value">
-                    <input type="number" min="0" max="" step="1" name="license[expires]"/>
+                    <input type="number" min="0" max="" step="1" name="license[expires]" value="400"/>
                 </div>
             </div>
             {/if}

@@ -62,5 +62,10 @@ function display($focus, $field, $value, $view){
     $smarty->assign("licenses",$licenses);
     //Setup access
     $smarty->assign("ACL_EDIT",ACLController::checkAccess("ass_lic","edit",true,"module",true));
+    //Default
+    $end_date_default = strtotime("+ 400 days");
+    $end_date_default = date("Y-m-d",$end_date_default);
+    $smarty->assign("end_date_default",$end_date_default);
+    
     return $smarty->fetch("modules/ass_lic/tpls/license.tpl");
 }

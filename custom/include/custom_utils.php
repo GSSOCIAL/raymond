@@ -42,8 +42,6 @@ function make_license($bean,$args){
         $name = trim(str_replace(array(";"),array(""),$bean->name)); 
         $hard_id = trim(str_replace(array(";"),array(""),$bean->hard_id));
         
-        
-
         $cmd = "for i in {$lic_type}; do echo \"------\"; cd /home/genlic; ./genlic -C {$name} -H {$hard_id} -P \$i -D {$interval} ;done > {$file}";
         $bean->lic_key = $cmd;
         
