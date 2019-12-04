@@ -32,13 +32,15 @@ function make_license($bean,$args){
         $lic_type = str_replace(',', ' ', $lic_type);
         $id = $bean->id;
         $filename = "{$bean->name}_{$diff->days}_{$bean->end_date}";
+        $filename = trim(str_replace(array(";","/"," "),array("_","_","_"),$filename)); 
+
         $file = $dir."/".$filename.".license";
         
         $bean->filename = $filename;
         $bean->file_generated = true; //Recursion - Add flag that file created to skip.
         $bean->save();
         $bean->skip_log = true;
-        
+
         //Issue with output cmd - in Bean name & hardware id expecting ";" symbol + whitespaces. Remove both
         $name = trim(str_replace(array(";","/"," "),array("_","_","_"),$bean->name)); 
         $hard_id = trim(str_replace(array(";","/"," "),array("_","_","_"),$bean->hard_id));
