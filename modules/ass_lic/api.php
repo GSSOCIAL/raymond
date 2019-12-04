@@ -75,6 +75,7 @@ if(empty($_REQUEST["method"])){
                         if(file_exists("/var/www/html/upload/licenses/{$row['filename']}.license")){
                             $response["body"][$row["id"]] = array(
                                 "name"=>$row["name"],
+                                "filename"=>$row["filename"],
                                 "key"=>htmlspecialchars_decode(file_get_contents("/var/www/html/upload/licenses/{$row['filename']}.license"))
                             );
                         }
