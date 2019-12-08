@@ -6,7 +6,6 @@ class PushToLog_LogicHooks{
      */
     function add(SugarBean &$bean, $event, $arguments){
         global $current_user,$db,$timedate;
-
         //Check if log table exists
         if(!$db->query("DESCRIBE `licenses_log`",false)){ //No need to exit. If table doesnt exists - mysql drops error.
             
@@ -27,6 +26,15 @@ class PushToLog_LogicHooks{
         //Check if log need skipped
         if($bean->skip_log) return $bean;
 
+        $data = array(
+            "id"=>$bean->id,
+            "hard_id"=>$bean->hard_id,
+            "name"=>$bean->name,
+            "filename"=>$bean->filename,
+            "lic_type"=>$bean->lic_type,
+            "end_date"=>$bean->end_date
+        );
+
         //Add to log
         $Event_name = "generate";
         switch($event){
@@ -41,12 +49,18 @@ class PushToLog_LogicHooks{
             case "before_delete":
             case "after_delete":
                 $Event_name = "delete";
+                $BeanData = $db->query("SELECT * FROM ass_lic t WHERE t.id='{$arguments['id']}'",true);
+                $BeanData = $db->fetchByAssoc($BeanData);
+                foreach($BeanData as $k=>$v){
+                    $data[$k]=$v;
+                }
             break;
         }
-        $lic_type = str_replace(array("^"),array(""),$bean->lic_type);
+
+        $lic_type = str_replace(array("^"),array(""),$data['lic_type']);
         //Insert to log
-        $valid_to = date($timedate->get_db_date_time_format(),dateval($bean->end_date));
-        $db->query("INSERT INTO `licenses_log` (`license_id`,`action`,`user_id`,`hard_id`,`serial`,`valid_to`,`types`,`filename`) VALUES ('{$bean->id}','{$Event_name}','{$current_user->id}','{$bean->hard_id}','{$bean->name}','{$valid_to}','{$lic_type}','{$bean->filename}')",true);
+        $valid_to = date($timedate->get_db_date_time_format(),dateval($data['end_date']));
+        $db->query("INSERT INTO `licenses_log` (`license_id`,`action`,`user_id`,`hard_id`,`serial`,`valid_to`,`types`,`filename`) VALUES ('{$data['id']}','{$Event_name}','{$current_user->id}','{$data['hard_id']}','{$data['name']}','{$valid_to}','{$lic_type}','{$data['filename']}')",true);
         
         return $bean;
     }

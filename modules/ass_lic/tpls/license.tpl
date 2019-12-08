@@ -299,7 +299,7 @@ No access
                 var frame = document.createElement("iframe");
                 frame.style.display = "none";
                 document.body.appendChild(frame);
-                frame.src = "index.php?module=ass_lic&action=api&to_pdf=true&method=download_log&license="+ids;
+                frame.src = "index.php?module=ass_lic&action=api&to_pdf=true&method=download_log&license="+ids+"&hardware_id="+window.get_record_id();
                 return true;
             break;
         }

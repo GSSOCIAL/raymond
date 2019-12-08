@@ -103,9 +103,7 @@ if(empty($_REQUEST["bean_id"])){
     
     $License->name=implode("_",$name);
 
-    //Add flag that license will be generated
-    $License->is_generated = true;
-
+    $License->skip_log = true;
     if($id = $License->save()){
         make_license($License,array());
 

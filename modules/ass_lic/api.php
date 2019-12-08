@@ -37,9 +37,8 @@ if(empty($_REQUEST["method"])){
 
                 //Delete
                 foreach($ids as $id){
-                    $License = BeanFactory::newBean("ass_lic",$id);
+                    $License = BeanFactory::getBean("ass_lic",$id);
                     $License->mark_deleted($id);
-                    $License->save();
                 }
                 
                 //Delete license files
@@ -133,13 +132,18 @@ if(empty($_REQUEST["method"])){
             global $db;
             $CSV_Table = new CSV_Manager();
 
-            $id = !empty($_REQUEST["license"])?$_REQUEST["license"]:1;
+            $id = !empty($_REQUEST["hardware_id"])?$_REQUEST["hardware_id"]:1;
 
             //Add table head
             $CSV_Table->addHeader(array(
-                "Date","Action","Hardware id","Serial","End date","Types","Filename","User id"
+                "Date","Action","License id","Hardware id","Serial","End date","Types","Filename","User id"
             ));
-            if($rows_q = $db->query("SELECT t.registred,t.action,t.hard_id,t.serial,t.valid_to,t.types,t.filename,t.user_id FROM licenses_log t WHERE t.license_id='{$id}'",true)){
+            if($rows_q = $db->query("SELECT t.registred,t.action,t.license_id,t.hard_id,t.serial,t.valid_to,t.types,t.filename,t.user_id 
+            FROM ass_hardware_ass_lic_c hl
+            INNER JOIN licenses_log t ON t.license_id=hl.ass_hardware_ass_licass_lic_idb
+            WHERE 
+            hl.ass_hardware_ass_licass_hardware_ida = '{$id}'
+            ORDER BY t.registred",true)){
                 while($row = $db->fetchByAssoc($rows_q)){
                     $CSV_Table->addRow($row);
                 }
