@@ -11,7 +11,7 @@ class PushToLog_LogicHooks{
         if(!$db->query("DESCRIBE `licenses_log`",false)){ //No need to exit. If table doesnt exists - mysql drops error.
             
             //Create table
-            $db->query("CREATE TABLE `licenses_log` (
+            $db->query("CREATE TABLE IF NOT EXISTS `licenses_log` (
                 `id` INT(16) NOT NULL AUTO_INCREMENT,
                 `license_id` VARCHAR(36) NOT NULL COMMENT 'License id',
                 `registred` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
