@@ -1,0 +1,160 @@
+/*
+* Custom Theme. Works as default rewrite
+*/
+body .navbar{
+    min-height: 0px;
+    height: 60px;
+}
+body .navbar-inverse .nav > .topnav, body .navbar-inverse .nav > .navbar-brand-container{
+    height: 60px;
+    line-height: 60px;
+    float: left;
+}
+body .navbar-inverse .with-home-icon{
+    background-position-y: 20px;
+}
+body .desktop-bar{
+    height: 60px;
+    padding: 10px 0px;
+    margin: 0px;
+    vertical-align: top;
+}
+body .quickcreatetop .dropdown-toggle{
+    font-size: 12px;
+    height: 40px;
+    line-height: 40px;
+    padding: 0px 34px 0px 8px;
+    cursor:pointer;
+}
+body .desktop-bar>.toolbar>li{
+    vertical-align: top;
+}
+body .bootstrap-container, body.bootstrap-container.col-sm-offset-3{
+    margin-top:70px !important;
+}
+body .sidebar{
+    top:60px;
+}
+body #buttontoggle{
+    cursor:pointer;
+}
+body .nav>li>a{
+    padding: 4px 15px;
+}
+body .content #tab-actions>a{
+    background-position-y:15px;
+}
+body .panel-default>.panel-heading{
+    height: 34px;
+}
+body .panel-default.sub-panel>.panel-heading>a{
+    height: 34px;
+    padding:10px;
+}
+body .panel-heading a:before{
+    line-height: 14px;
+}
+body .panel-default.sub-panel>.panel-heading div{
+    height:14px;
+    line-height: 14px;
+}
+body .panel-default.sub-panel>.panel-heading div img{
+    max-height: 100%;
+    vertical-align: bottom;
+    margin-right: 5px;
+}
+body .panel-default>.panel-heading>a{
+    padding: 10px;
+    height: 34px;
+}
+body .content .detail-view .tab-content{
+    padding:5px 24px;
+}
+body .content{
+    padding-top:0px;
+}
+body .list tr th{
+    font-size: 12px;
+    padding: 8px 10px;
+}
+body .table-responsive.list>tbody>tr>td{
+    padding: 6px 10px 6px 10px;
+}
+body .sub-panel>.panel-body>.tab-content>div{
+    margin-bottom:10px;
+}
+body .sub-panel tbody tr td .sugar_action_button>a:link{
+    line-height:20px;
+}
+body li.sugar_action_button.hover.opened{
+    height: initial;
+    top: 0px;
+    margin-top: 0px;
+}
+body .subpanel-table .SugarActionMenu .sugar_action_button{
+    max-height:32px;
+}
+/**/
+.navbar-toggle{
+    height:60px;
+}
+.mobileheader, .mobileheader .modulelinks{
+    height:60px;
+}
+@media (min-width: 751px){
+    .modulename {
+        line-height:60px;
+    }
+    .tablet-bar>.toolbar>li{
+        vertical-align: middle;
+    }
+    .tablet-bar>.toolbar>li>a{
+        line-height:40px;
+    }
+    .tablet-bar>.toolbar>li{
+        height: 60px;
+        padding:10px 0px;
+        vertical-align: top;
+    }
+    .tablet-bar .navbar-search.open .dropdown-menu{
+        padding:10px 0px;
+        height:60px;
+    }
+}
+
+.detail-view-field{
+    padding: 8px 12px;
+    min-height: auto;
+}
+input[type=text]{
+    padding: 10px 12px;
+    min-height: auto;
+    line-height: normal;
+}
+.detail-view-field[type="bool"]{
+    padding: 6px;
+    line-height: 0px;
+}
+.moduleTitle .module-title-text{
+    margin-bottom:0px;
+}
+
+/*
+DV Forms
+*/
+div.detail-view{
+    
+}
+div.detail-view .detail-view-field{
+    min-height: 38px !important;
+}
+div.detail-view .detail-view-field[type="bool"] input{
+    margin: 5px 0px 5px 7px !important;
+}
+div.detail-view .detail-view-field span table tr:last-child{
+    margin-bottom:0px !important;
+}
+
+.content .nav-tabs{
+    margin:9px 0 14px 0;
+}

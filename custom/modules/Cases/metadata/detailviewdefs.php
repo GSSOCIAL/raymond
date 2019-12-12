@@ -29,6 +29,16 @@ array (
           'field' => '30',
         ),
       ),
+      'includes' => 
+      array (
+        0 => 
+        array (
+          'file' => 'modules/Cases/js/copyToClipboard.js',
+        ),
+        1 => array (
+          'file' => 'include/javascript/tinymce/tinymce.min.js',
+        ),
+      ),
       'useTabs' => true,
       'tabDefs' => 
       array (
@@ -76,32 +86,15 @@ array (
         array (
           0 => 
           array (
-            'name' => 'name',
-            'label' => 'LBL_SUBJECT',
-          ),
-        ),
-        4 => 
-        array (
-          0 =>
-          array (
-            'name' => 'description',
-            'label' => 'LBL_DESCRIPTION',
-            'customCode' => '{$fields.description.value|from_html}',
-          ),
-        ),
-        5 => 
-        array (
-          0 => 'resolution',
-        ),
-        6 => 
-        array (
-          0 => 
-          array (
             'name' => 'assigned_user_name',
             'label' => 'LBL_ASSIGNED_TO',
           ),
+          1 => 
+          array (
+            'name' => 'ass_hardware_cases_name',
+          ),
         ),
-        7 => 
+        4 => 
         array (
           0 => 
           array (
@@ -115,11 +108,42 @@ array (
             'customCode' => '{$fields.date_modified.value} {$APP.LBL_BY} {$fields.modified_by_name.value}',
           ),
         ),
-        8 => 
+        5 => 
+        array (
+          0 => 'resolution',
+          1 => 
+          array (
+            'name' => 'last_action_c',
+            'studio' => 'visible',
+            'label' => 'LBL_LAST_ACTION',
+          ),
+        ),
+          6 =>
+              array (
+                  0 =>
+                      array (
+                          'name' => 'ip_eth0',
+                          'studio' => 'visible',
+                          'label' => 'LBL_IP_ETH0',
+                      ),
+                  1 =>
+                      array (
+                          'name' => 'instal_name',
+                          'studio' => 'visible',
+                          'label' => 'LBL_INSTAL_NAME',
+                      ),
+              ),
+        7 =>
         array (
           0 => 
           array (
-            'name' => 'ass_hardware_cases_name',
+            'name' => 'copyWebPassword',
+            'customCode' => '{$COPY_WEB_PASSWORD_BUTTON}',
+          ),
+          1 => 
+          array (
+            'name' => 'copyRootPassword',
+            'customCode' => '{$COPY_ROOT_PASSWORD_BUTTON}',
           ),
         ),
       ),

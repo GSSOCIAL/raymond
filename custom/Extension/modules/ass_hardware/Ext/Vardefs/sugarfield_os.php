@@ -1,6 +1,6 @@
 <?php
- // created: 2017-01-25 10:08:14
-$dictionary['ass_hardware']['fields']['os']['default']='c7';
+ // created: 2017-09-24 02:50:03
+$dictionary['ass_hardware']['fields']['os']['default']='f25';
 $dictionary['ass_hardware']['fields']['os']['massupdate']='1';
 
  ?>

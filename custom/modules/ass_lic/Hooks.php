@@ -7,8 +7,7 @@
  */
 
 class assLicHooks {
-    function genLic (SugarBean $bean, $event, $arguments) {
-
+    function genLic (SugarBean &$bean, $event, $arguments) {
         if (empty($bean->lic_key) && !empty($bean->name) && !empty($bean->hard_id) && !empty($bean->end_date) && !empty($bean->lic_type) ) {
             //если с полями всё норма
 
@@ -31,7 +30,6 @@ class assLicHooks {
             $cmd = "for i in {$lic_type}; do echo \"------\"; cd /home/genlic; ./genlic -C {$bean->name} -H {$bean->hard_id} -P \$i -D {$interval} ;done > ".$file_path;
             $bean->lic_key = $cmd;
             exec($cmd);
-
             //Если сгенерился файл с ключами, то сохраняем его содержимое в поле и удаляем файл.
             if(file_exists($file_path)) {
                 $bean->lic_key = file_get_contents($file_path);
