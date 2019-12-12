@@ -304,6 +304,20 @@ $(document).ready(function() {
         #width: 7rem;
         border-radius: 4px;
     }
+    div.read-mark{
+        display: inline-block;
+        margin: 1px 3px;
+        border-radius: 100%;
+        width: 7px;
+        height: 7px;
+        background-color: #534d64;
+    }
+    #caseStyleInternal div.read-mark{
+        display:none;
+    }
+    div.update-activated div.read-mark{
+        display:none !important;
+    }
 </style>
 A;
 
@@ -448,9 +462,9 @@ function getUpdateDisplayHead(SugarBean $update)
     $html .= "<img  id='caseUpdate".$update->id."Image' class='caseUpdateImage' src='".SugarThemeRegistry::current()->getImageURL('basic_search.gif')."'>";
     $html .= "</a>";
     if(isset($update->internal)) {
-        $html .= "<span>" . ($update->internal ? "<strong>" . $mod_strings['LBL_INTERNAL'] . "</strong> " : '') . $name . " " . $update->date_entered . "</span><br>";
+        $html .= "<a href=\"#\" title=\"Probably undelivered\"><div class=\"read-mark\"><span></span></div></a><span>" . ($update->internal ? "<strong>" . $mod_strings['LBL_INTERNAL'] . "</strong> " : '') . $name . " " . $update->date_entered . "</span><br>";
     } else {
-        $html .= "<span>" . $name . " " . $update->date_entered . "</span><br>";
+        $html .= "<a href=\"#\" title=\"Probably undelivered\"><div class=\"read-mark\"><span></span></div></a><span>" . $name . " " . $update->date_entered . "</span><br>";
     }
 
     $notes = $update->get_linked_beans('notes','Notes');
@@ -497,12 +511,15 @@ function displayAttachedImages($update){
  */
 function display_single_update(AOP_Case_Updates $update)
 {
-
+    global $db;
+    $update->delivered = $db->getOne("SELECT k.activated FROM verification_keys k WHERE k.bean='{$update->id}'");
+    $classNames = array();
+    if($update->delivered != false) $classNames[] = "update-activated";
     /*if assigned user*/
     if ($update->assigned_user_id) {
         /*if internal update*/
         if ($update->internal) {
-            $html = "<div id='caseStyleInternal'>" . getUpdateDisplayHead($update);
+            $html = sprintf("<div id='caseStyleInternal' class=\"%s\">" . getUpdateDisplayHead($update),implode(" ",$classNames));
             $html .= "<div id='caseUpdate" . $update->id . "' class='caseUpdate'>";
             $html .= (html_entity_decode($update->description));
             $html .= displayAttachedImages($update);
@@ -510,7 +527,7 @@ function display_single_update(AOP_Case_Updates $update)
 
             return $html;
         } /*if standard update*/ else {
-            $html = "<div id='lessmargin'><div id='caseStyleUser'>" . getUpdateDisplayHead($update);
+            $html = sprintf("<div id='lessmargin' class=\"%s\"><div id='caseStyleUser'>" . getUpdateDisplayHead($update),implode(" ",$classNames));
             $html .= "<div id='caseUpdate" . $update->id . "' class='caseUpdate'>";
             $html .= (html_entity_decode($update->description));
             $html .= displayAttachedImages($update);
@@ -522,7 +539,7 @@ function display_single_update(AOP_Case_Updates $update)
 
     /*if contact user*/
     if($update->contact_id){
-        $html = "<div id='extramargin'><div id='caseStyleContact'>".getUpdateDisplayHead($update);
+        $html = sprintf("<div id='extramargin' class=\"%s\"><div id='caseStyleContact'>".getUpdateDisplayHead($update),implode(" ",$classNames));
         $html .= "<div id='caseUpdate".$update->id."' class='caseUpdate'>";
         $html .= (html_entity_decode($update->description));
         $html .= displayAttachedImages($update);
