@@ -6,6 +6,9 @@
  * @return Boolean Result
  */
 function make_license($bean,$args){
+    //Check if flag exists. If T - skip
+    if($bean->file_generated) return $bean;
+    
     //Setups
     $dir = "/var/www/html/upload/licenses";
     $__dir="";
@@ -28,16 +31,23 @@ function make_license($bean,$args){
         $lic_type = str_replace('^', '', $bean->lic_type);
         $lic_type = str_replace(',', ' ', $lic_type);
         $id = $bean->id;
-        $filename = "{$bean->name}_{$diff->days}_{$bean->end_date}";
-        $file = $dir."/".$filename.".license";
         
         //Issue with output cmd - in Bean name & hardware id expecting ";" symbol + whitespaces. Remove both
-        $name = trim(str_replace(array(";"),array(""),$bean->name)); 
-        $hard_id = trim(str_replace(array(";"),array(""),$bean->hard_id));
+        $name = trim(preg_replace('/[\W\s]/',"_",$bean->name)); 
+        $hard_id = trim(preg_replace('/[\W\s]/',"_",$bean->hard_id));
+
+        $filename = "{$name}_{$diff->days}_{$bean->end_date}";
+        $filename = trim(str_replace(array(";","/"," ","\\"),array("_","_","_","_"),$filename)); 
+
+        $file = $dir."/".$filename.".license";
         
+        $bean->filename = $filename;
+        $bean->file_generated = true; //Recursion - Add flag that file created to skip.
+        $bean->save();
+        $bean->skip_log = true;
+
         $cmd = "for i in {$lic_type}; do echo \"------\"; cd /home/genlic; ./genlic -C {$name} -H {$hard_id} -P \$i -D {$interval} ;done > {$file}";
         $bean->lic_key = $cmd;
-      
         exec($cmd);
         if(file_exists($file)) {
             $bean->lic_key = file_get_contents($file);
@@ -115,4 +125,32 @@ function print_log($content,$file=null){
         ob_end_clean();
     }
     return true;
+}
+
+/**
+ * Convert to valid date format
+ * @param String $value Date
+ * @return String Timestamp if success. Null if couldnt parse date
+ */
+function dateval($value){
+    $d = null;
+    //Possible formats
+    $formatting = array(
+        "d/m/Y",
+        "d.m.Y",
+        "Y-m-d",
+        "Y/m/d",
+        "Y-m-d",
+    );
+    //Trying to parse from diff format
+    foreach($formatting as $format){
+        if($d = DateTime::createFromFormat($format,$value)){
+            break;
+        }
+    }
+
+    if($d){
+        return $d->getTimestamp();
+    }
+    return $value;
 }

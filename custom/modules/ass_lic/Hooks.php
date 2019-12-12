@@ -7,7 +7,8 @@
  */
 
 class assLicHooks {
-    function genLic (SugarBean &$bean, $event, $arguments) {
+    function genLic (SugarBean &$bean, $event, $arguments){
+        $bean->skip_log = false;
         make_license($bean,array());  
     }
 }

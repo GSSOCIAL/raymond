@@ -94,30 +94,18 @@ if(empty($_REQUEST["bean_id"])){
         $types .= $index;
     }
     
-    $name[] = $current_user->full_name;
+    $name[] = $current_user->user_name;
     $name[] = $data->name; //Hardware serial #
     $name[]=str_replace(" ","",$types); //Add Type
     $name[]=$diff->days; //Add Duraction
     $name[]=date("dmY");
     $name[]=date("dmY",strtotime($License->end_date));
-
+    
     $License->name=implode("_",$name);
 
+    $License->skip_log = true;
     if($id = $License->save()){
         make_license($License,array());
-
-        //Write log
-        print_log(array(
-            "action"=>"generate",
-            "id"=>$id,
-            "user"=>"{$current_user->full_name} ({$current_user->id})",
-            "serial"=>$data->name,
-            "hardware_id"=>trim($data->id),
-            "date"=>date("d.m.Y"),
-            "to"=>date("d.m.Y",strtotime($License->end_date)),
-            "types"=>$data->type,
-            "duraction"=>$diff->days
-        ),"licenses");
 
         $response["status"]=true;
         $License = $License->retrieve($id);
