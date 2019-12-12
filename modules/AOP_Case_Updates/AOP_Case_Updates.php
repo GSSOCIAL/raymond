@@ -309,7 +309,7 @@ SQL;
         $emailCC = array()
     ) {
         $GLOBALS['log']->info('AOPCaseUpdates: sendEmail called');
-		global $sugar_config;
+		global $sugar_config,$db;
         require_once 'include/SugarPHPMailer.php';
         $mailer = new SugarPHPMailer();
         $admin = new Administration();
@@ -330,6 +330,22 @@ SQL;
         $text = $this->populateTemplate($template, $addDelimiter, $contactId);
         $mailer->Subject = $text['subject'];
         $mailer->Body = $text['body'] . $signatureHTML;
+        //Get System verified email addr
+        if($vea = getEmailVerifierAddr()){
+            //Send a copy with code
+            $VMail = new SugarPHPMailer();
+            $VMail->Subject = $text['subject'];
+            $code = generateCode();
+            if($db->query(sprintf("INSERT INTO `verification_keys`(`code`,`thru`,`bean`) VALUES ('%s','%s','{$this->id}')",md5($code),date("Y-m-d H:i:s",strtotime("+3 hours"))))){
+                $VMail->Body = "[RECORD:{$this->id}][CODE:{$code}]";
+                $VMail->From = $emailSettings['from_address'];
+                $VMail->FromName = $emailSettings['from_name'];
+                $VMail->addAddress($vea);
+                $VMail->send();
+            }else{
+                $GLOBALS["log"]->error("Couldnt save verify code for Case Updates");
+            }
+        }
         $mailer->isHTML(true);
         $mailer->AltBody = $text['body_alt'] . $signaturePlain;
         $mailer->From = $emailSettings['from_address'];
