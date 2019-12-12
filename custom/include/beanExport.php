@@ -6,16 +6,20 @@ class BeanExport{
     public $force_download=false;
     /**Which sections need to export*/
     public $sections = "*";
+
     /**
      * @param string $module Module name (e.g Accounts,Cases,CaseHistory)
      * @param string $record Record id
+     * @return BeanExport
      */
     function __construct($module,$record){
         return $this->retrieve($module,$record);
     }
+
     /**
      * @param string $module Module name (e.g Accounts,Cases,CaseHistory)
      * @param string $record Record id
+     * @return BeanExport
      */
     public function retrieve($module,$record){
         global $sugar_config,$app_list_strings;
@@ -165,6 +169,7 @@ class BeanExport{
     }
     /**
      * Convert Bean Data to CSV
+     * @return CSV table data
      */
     public function to_csv(){
         if(empty($this->table_context)) return NULL;
@@ -211,7 +216,8 @@ class BeanExport{
         return ob_get_clean();
     }
     /**
-     * Convert Bean Data to CSV
+     * Convert Bean Data to html content
+     * @return HTML Content
      */
     public function to_html(){
         if(empty($this->context)) return NULL;
@@ -233,14 +239,19 @@ class BeanExport{
             exit($ctx);
         }
         return $ctx;
-    }/**
+    }
+    /**
      * Convert Bean Data to Document
+     * @return .docx data
      */
     public function to_docx(){
         if(empty($this->context)) return NULL;
         require_once "vendor/autoload.php";
+
         // Creating the new document...
+        PhpOffice\PhpWord\Settings::setOutputEscapingEnabled(true);
         $phpWord = new \PhpOffice\PhpWord\PhpWord();
+        
         //Define fonts
         $phpWord->addFontStyle(
             "userDefinedText",
@@ -250,10 +261,19 @@ class BeanExport{
             "userDefinedTitle",
             array('name' => 'Tahoma','size' => 16,'color'=>'black','bold' => true)
         );
-        //Create root 
-        $section = $phpWord->addSection();
-        //And push content
-        $section = $this->buildDocumentContent("doc",$section,null,$this->context);
+
+        //Create root and add content
+        $root = $phpWord->addSection();
+
+        $ctx = "";
+        if(!empty($this->context)){
+            foreach($this->context as $a=>$b){
+                $ctx .= sprintf("<h1 style=\"font-size:18px\">Bean %s</h1>",ucfirst($a));
+                $ctx .= $this->buildHtmlTable($a,$b);
+            }
+        }
+        \PhpOffice\PhpWord\Shared\Html::addHtml($root,$ctx,false,false);
+
         //Export document
         if($this->force_download===true){
             header("Content-Description: File Transfer");
@@ -266,11 +286,13 @@ class BeanExport{
             $xmlWriter->save("php://output");
             exit();
         }
+
         $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
         $objWriter->save("{$this->filename}.docx");
         $ctx="";
         return $ctx;
     }
+
     /**
      * Parse and Import data to xml node. Use in loop
      * @param SimpleXmlObject $node SimpleXML DOM node
@@ -297,6 +319,7 @@ class BeanExport{
         }
         return $node;
     }
+
     /**
      * Parse and Import data to html table node. Use in loop
      * @param SimpleXmlObject $node SimpleXML DOM node
@@ -312,9 +335,13 @@ class BeanExport{
             case "array":
             case "object":
                 $node .= "<table>";
+                
                 foreach($content as $a=>$b){
+                    if(is_array($b) || is_object($b)) $node .= "<tr><td>";
                     $node .= $this->buildHtmlTable($a,$b);
+                    if(is_array($b) || is_object($b)) $node .= "</td></tr>";
                 }
+
                 $node .= "</table>";
             break;
             case "string":
@@ -323,51 +350,13 @@ class BeanExport{
         }
         return $node;
     }
-    private function buildDocumentContent($type="doc",$node=NULL,$node_name="",$body=""){
-        $name = !empty($node_name)?strval($node_name):$node_name;
-        $type = strtolower($type);
-        if(strpos($name,"__external__")!==false) return $node;//skip system nodes
-        switch(gettype($body)){
-            case "array":
-            case "object":
-                $_name = empty(((array)$body)['__external__classname'])?(is_array($body)?$name:get_class($body)):((array)$body)['__external__classname'];
-                foreach($body as $a=>$b){
-                    //Add section title
-                    if(empty($_name) && !empty($a)){
-                        $node->addText(ucfirst(str_replace("_"," ",$a)),
-                        array("color"=>"black","bold"=>true,"size"=>18));
-                    }
-                    $node = $this->buildDocumentContent($type,$node,$a,$b);
-                }
-            break;
-            case "string":
-                $body = htmlspecialchars_decode($body);
 
-                $table = $node->addTable();
-                $table->addRow();
-                $table->addCell()->addText($name,array("bold"=>true));
-
-                /*
-                This code will remove tags
-                $body = preg_replace("/<br\s\/>/","\n",$body);
-                $body = strip_tags($body,"<a>");
-                $body = preg_replace_callback('/<a.+?href=[\'"](.+)[\'"](.+)?>(.+)<\/a>/',function($m){
-                    return $m[1];
-                },$body);
-                $body = strip_tags($body);*/
-                
-                $body = htmlentities($body);
-
-                $xml = array('&#34;','&#38;','&#38;','&#60;','&#62;','&#160;','&#161;','&#162;','&#163;','&#164;','&#165;','&#166;','&#167;','&#168;','&#169;','&#170;','&#171;','&#172;','&#173;','&#174;','&#175;','&#176;','&#177;','&#178;','&#179;','&#180;','&#181;','&#182;','&#183;','&#184;','&#185;','&#186;','&#187;','&#188;','&#189;','&#190;','&#191;','&#192;','&#193;','&#194;','&#195;','&#196;','&#197;','&#198;','&#199;','&#200;','&#201;','&#202;','&#203;','&#204;','&#205;','&#206;','&#207;','&#208;','&#209;','&#210;','&#211;','&#212;','&#213;','&#214;','&#215;','&#216;','&#217;','&#218;','&#219;','&#220;','&#221;','&#222;','&#223;','&#224;','&#225;','&#226;','&#227;','&#228;','&#229;','&#230;','&#231;','&#232;','&#233;','&#234;','&#235;','&#236;','&#237;','&#238;','&#239;','&#240;','&#241;','&#242;','&#243;','&#244;','&#245;','&#246;','&#247;','&#248;','&#249;','&#250;','&#251;','&#252;','&#253;','&#254;','&#255;');
-                $html = array('&quot;','&amp;','&amp;','&lt;','&gt;','&nbsp;','&iexcl;','&cent;','&pound;','&curren;','&yen;','&brvbar;','&sect;','&uml;','&copy;','&ordf;','&laquo;','&not;','&shy;','&reg;','&macr;','&deg;','&plusmn;','&sup2;','&sup3;','&acute;','&micro;','&para;','&middot;','&cedil;','&sup1;','&ordm;','&raquo;','&frac14;','&frac12;','&frac34;','&iquest;','&Agrave;','&Aacute;','&Acirc;','&Atilde;','&Auml;','&Aring;','&AElig;','&Ccedil;','&Egrave;','&Eacute;','&Ecirc;','&Euml;','&Igrave;','&Iacute;','&Icirc;','&Iuml;','&ETH;','&Ntilde;','&Ograve;','&Oacute;','&Ocirc;','&Otilde;','&Ouml;','&times;','&Oslash;','&Ugrave;','&Uacute;','&Ucirc;','&Uuml;','&Yacute;','&THORN;','&szlig;','&agrave;','&aacute;','&acirc;','&atilde;','&auml;','&aring;','&aelig;','&ccedil;','&egrave;','&eacute;','&ecirc;','&euml;','&igrave;','&iacute;','&icirc;','&iuml;','&eth;','&ntilde;','&ograve;','&oacute;','&ocirc;','&otilde;','&ouml;','&divide;','&oslash;','&ugrave;','&uacute;','&ucirc;','&uuml;','&yacute;','&thorn;','&yuml;');
-                $body = str_replace($html,$xml,$body);
-                $body = str_ireplace($html,$xml,$body);
-
-                $table->addCell()->addText($body);
-            break;
-        }
-        return $node;
-    }
+    /**
+     * Converts bean value to read format
+     * @param $field_name Field name
+     * @param $value Field value
+     * @return mixed Converted Value
+     */
     private function val($field_name,$value=NULL){
         global $app_list_strings;
         $value = empty($value)?(isset($this->bean->{$field_name})?$this->bean->{$field_name}:""):$value;
@@ -378,6 +367,10 @@ class BeanExport{
                     if(!empty($options) && !empty($options[$value])){
                         $value = $options[$value];
                     }
+                break;
+                case "boolean":
+                case "bool":
+                    $value = $value==true?"Enabled":"Disabled";
                 break;
                 default:
                     $value = trim($value);
