@@ -370,7 +370,7 @@ class BeanExport{
                 break;
                 case "boolean":
                 case "bool":
-                    $value = $value==true?"Enabled":"Disabled";
+                    $value = $value==true?"Yes":"No";
                 break;
                 default:
                     $value = trim($value);
