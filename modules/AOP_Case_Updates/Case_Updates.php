@@ -48,9 +48,24 @@ function display_updates($focus)
 
     $hideImage = SugarThemeRegistry::current()->getImageURL('basic_search.gif');
     $showImage = SugarThemeRegistry::current()->getImageURL('advanced_search.gif');
-
+    //Add Before form template
+    $sugar_smarty = new Sugar_Smarty();
+    $sugar_smarty->assign('MOD', $mod_strings);
+    //Get hardware linked with case
+    $hw = BeanFactory::getBean('ass_hardware',$focus->ass_hardware_casesass_hardware_ida);
+    if($hw && $hw->id){
+        $sugar_smarty->assign("HARDWARE_ID",$hw->id);
+        //Check for buttons
+        if(!empty($hw->pass_w)){
+            $sugar_smarty->assign('COPY_WEB_PASSWORD_BUTTON',"<button class=\"copy_button button\" data-clipboard-text=\"{$hw->pass_w}\">Web</button>");
+        }
+        if(!empty($hw->pass_r)){
+            $sugar_smarty->assign('COPY_ROOT_PASSWORD_BUTTON',"<button class=\"copy_button button\" data-clipboard-text=\"{$hw->pass_r}\">ROOT</button>");
+        }
+    }
+    $html = $sugar_smarty->fetch('modules/AOP_Case_Updates/tpl/caseUpdateFormBefore.tpl');
     //Javascript for Asynchronous update
-    $html = <<<A
+    $html .= <<<A
 <script>
 var hideUpdateImage = '$hideImage';
 var showUpdateImage = '$showImage';

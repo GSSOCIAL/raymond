@@ -84,17 +84,17 @@ class CasesViewDetail extends ViewDetail {
             if ( !empty($hw->pass_r) ) {
                 $this->ss->assign('COPY_ROOT_PASSWORD_BUTTON', '<button class="copy_button button" data-clipboard-text="'.$hw->pass_r.'">Copy ROOT Password</button>');
             }
-            parent::display();
-            echo "<script>$(document).ready(function() { var clipboard = new Clipboard('.copy_button'); 
-                clipboard.off('success').on('success', function(e) { $(e.trigger).attr('title', 'Copied').tooltip({
-                    content: 'Copied',
-                    position: {my: 'top - 15px', at: 'top center'},
-                    disabled: true,
-                    close: function(event, ui) { $(event.target).tooltip('disable'); },
-                    open: function(event, ui) { setTimeout(function() { $(event.target).tooltip('close');}, 1000); }
-                }).tooltip('enable').tooltip('open').off('focusout').off('mouseleave');});
-            });</script>";
         }
+        parent::display();
+        echo "<script>$(document).ready(function() { var clipboard = new Clipboard('.copy_button'); 
+            clipboard.off('success').on('success', function(e) { $(e.trigger).attr('title', 'Copied').tooltip({
+                content: 'Copied',
+                position: {my: 'top - 15px', at: 'top center'},
+                disabled: true,
+                close: function(event, ui) { $(event.target).tooltip('disable'); },
+                open: function(event, ui) { setTimeout(function() { $(event.target).tooltip('close');}, 1000); }
+            }).tooltip('enable').tooltip('open').off('focusout').off('mouseleave');});
+        });</script>";
     }
 }
 ?>
