@@ -14,6 +14,12 @@ array (
           1 => 'DUPLICATE',
           2 => 'DELETE',
           3 => 'FIND_DUPLICATES',
+          4 => array (
+            'customCode' => '<input type="submit" class="button" title="{$MOD.LBL_DOWNLOAD_LIC_BUTTON}" onclick="license.download();return false;" value="{$MOD.LBL_DOWNLOAD_LIC_BUTTON}"/>',
+          ),
+          5 => array (
+            'customCode' => '<input type="submit" class="button" title="{$MOD.LBL_TOCLIPBOARD_LIC_BUTTON}" onclick="license.to_clipboard();return false;" value="{$MOD.LBL_TOCLIPBOARD_LIC_BUTTON}"/>',
+          )
         ),
       ),
       'maxColumns' => '2',
@@ -28,6 +34,11 @@ array (
         array (
           'label' => '10',
           'field' => '30',
+        ),
+      ),
+      'includes' => array(
+        0 => array (
+          'file' => 'custom/modules/ass_lic/license.js',
         ),
       ),
       'useTabs' => false,
