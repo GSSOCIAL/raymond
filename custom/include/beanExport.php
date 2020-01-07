@@ -72,22 +72,25 @@ class BeanExport{
                 //Get Case Updates records
                 $this->context["case_updates"] = array();
                 global $db,$app_list_strings;
-                $query = $db->query("SELECT t.id,t.description AS `message`,t.assigned_user_id,t.internal,t.date_entered AS `created`,t.date_modified AS `modified`,CONCAT_WS(' ',c.first_name,c.last_name) AS `contact`,CONCAT_WS(' ',u.first_name,u.last_name) AS `author`
+                $query = $db->query("SELECT t.id,t.description AS `message`,CONCAT_WS(' ',au.first_name,au.last_name) AS `assigned_user`,t.internal,t.date_entered AS `created`,t.date_modified AS `modified`,CONCAT_WS(' ',c.first_name,c.last_name) AS `contact`,CONCAT_WS(' ',u.first_name,u.last_name) AS `author`
                 FROM aop_case_updates t
                 LEFT JOIN contacts c ON c.id=t.contact_id 
                 LEFT JOIN users u ON u.id=t.created_by 
+                LEFT JOIN users au ON au.id=t.assigned_user_id 
                 WHERE t.deleted=0 AND t.case_id='{$this->record_id}'");
                 
                 if($query && $query->num_rows>0){
-                    $this->table_context[] = array("id","message","assigned_user_id","internal update");
+                    $this->table_context[] = array("id","message","assigned_user","internal update");
                     while($item = $db->fetchByAssoc($query)){
                         $item["message"] = str_replace(array("<br/>","<br />","<br>"),array("\n","\n","\n"),strip_tags(htmlspecialchars_decode($item["message"]),"<br>"));
                         //Add table data
                         $this->table_context[]=$item;
+                        $this->table_context[]="divider";
                         //Specify object name
                         $item["__external__classname"] = "update";
                         $item = (Object)$item;
                         $this->context["case_updates"][]=$item;
+                        $this->context["case_updates"][]="divider";
                     }
                 }
                 
@@ -313,8 +316,14 @@ class BeanExport{
                 }
             break;
             case "string":
-                $name = str_replace(array(" ","#","\n","<br/>"),array("","","",""),htmlspecialchars($name));
-                $node->addChild(trim($name),htmlspecialchars($content));
+                switch($content){
+                    case "divider":
+                    break;
+                    default:
+                        $name = str_replace(array(" ","#","\n","<br/>"),array("","","",""),htmlspecialchars($name));
+                        $node->addChild(trim($name),htmlspecialchars($content));
+                    break;
+                }
             break;
         }
         return $node;
@@ -345,7 +354,14 @@ class BeanExport{
                 $node .= "</table>";
             break;
             case "string":
-                $node .= "<tr><td><b>{$name}</b></td><td>{$content}</td></tr>";
+                switch($content){
+                    case "divider":
+                        $node .= "<tr class=\"divider\"><td><hr/></td><td><hr/></td></tr>";
+                    break;
+                    default:
+                        $node .= "<tr><td><b>{$name}</b></td><td>{$content}</td></tr>";
+                    break;
+                }
             break;
         }
         return $node;
@@ -358,7 +374,7 @@ class BeanExport{
      * @return mixed Converted Value
      */
     private function val($field_name,$value=NULL){
-        global $app_list_strings;
+        global $app_list_strings,$db;
         $value = empty($value)?(isset($this->bean->{$field_name})?$this->bean->{$field_name}:""):$value;
         if(!empty($this->bean) && !empty($this->bean->field_name_map) && !empty($this->bean->field_name_map[$field_name])){
             switch($this->bean->field_name_map[$field_name]["type"]){
@@ -371,6 +387,25 @@ class BeanExport{
                 case "boolean":
                 case "bool":
                     $value = $value==true?"Yes":"No";
+                break;
+                case "link":
+                    //Get link field
+                    $link = array(
+                        "relate"=>null
+                    );
+                    foreach($this->bean->field_name_map as $fmname=>$fmoptions){
+                        if(!empty($fmoptions) && !empty($fmoptions["id_name"]) && $fmoptions["type"]=="relate" && $fmoptions["id_name"]==$field_name){
+                            if(!empty($fmoptions["table"]) && in_array($fmoptions["table"],array("accounts","users"))){
+                                $link["relate"] = $fmname;
+                                break;
+                            }
+                        }
+                    }
+                    if(!empty($link["relate"])){
+                        $value = $this->bean->{$link["relate"]};
+                    }else{
+                        $value = trim($value);
+                    }
                 break;
                 default:
                     $value = trim($value);
