@@ -6,19 +6,23 @@ class BeanExport{
     public $force_download=false;
     /**Which sections need to export*/
     public $sections = "*";
+
     /**
      * @param string $module Module name (e.g Accounts,Cases,CaseHistory)
      * @param string $record Record id
+     * @return BeanExport
      */
     function __construct($module,$record){
         return $this->retrieve($module,$record);
     }
+
     /**
      * @param string $module Module name (e.g Accounts,Cases,CaseHistory)
      * @param string $record Record id
+     * @return BeanExport
      */
     public function retrieve($module,$record){
-        global $sugar_config;
+        global $sugar_config,$app_list_strings;
         /**Requested Module name e.g Accounts,Cases*/
         $this->module_name = $module;
         /**Single object name e.g Account,Document (simillar with classname) */
@@ -31,6 +35,9 @@ class BeanExport{
         $this->table_context = array();
         /**Single bean object */
         $this->bean = BeanFactory::getBean($this->module_name,$this->record_id);
+
+        //Construct a filename
+        $this->filename = !empty($this->bean->name)?$this->bean->name:"{$this->bean->object_name}_{$this->bean->record_id}";
         if(!$this->bean){
             $this->content["message"] = "Couldnt retrieve \"{$this->module_name}\" record {$this->record_id}";
             return $this;
@@ -38,40 +45,64 @@ class BeanExport{
         //Get context
         $this->context["properties"] = array(
             "id"=>$this->record_id,
-            "module"=>$this->module_name,
+            "module"=>!empty($app_list_strings["moduleList"][$this->module_name])?$app_list_strings["moduleList"][$this->module_name]:$this->module_name,
             "url"=>"{$sugar_config['site_url']}/index.php?module={$this->module_name}&action=DetailView&record={$this->record_id}"
         );
         switch($this->module_name){
             case "Cases":
-                $this->context["properties"]["case_number"]=$this->bean->case_number;
-                $this->context["properties"]["subject"]=$this->bean->name;
-                $this->context["properties"]["description"]=$this->bean->description;
-                $this->context["properties"]["created"]=$this->bean->date_entered;
-                $this->context["properties"]["modified"]=$this->bean->date_modified;
-                $this->context["properties"]["account_id"]=$this->bean->account_id;
+                $this->context["properties"]["Case_number"]=$this->bean->case_number;
+                $this->context["properties"]["Subject"]=$this->bean->name;
+                $this->context["properties"]["Description"]=$this->bean->description;
+                $this->context["properties"]["Created"]=$this->bean->date_entered;
+                $this->context["properties"]["Modified"]=$this->bean->date_modified;
+                $this->context["properties"]["Account_id"]=$this->bean->account_id;
+                
+                $this->context["properties"]["Priority"]= $this->val($this->bean->priority);
+                
+                $this->context["properties"]["State"]= $this->val($this->bean->state);
+                $this->context["properties"]["Status"]= $this->val($this->bean->status);
+                $this->context["properties"]["Type"]= $this->val($this->bean->type);
+                
+                $this->context["properties"]["Assigned To"]=$this->val("assigned_user_name");
+                $this->context["properties"]["Hardware"]=$this->val("ass_hardware_cases_name");
+                $this->context["properties"]["Resolution"]=$this->val("resolution");
+                $this->context["properties"]["IP eth0"]=$this->val("ip_eth0");
+                $this->context["properties"]["Installation Site Name"]=$this->val("instal_name");
+                
                 //Get Case Updates records
                 $this->context["case_updates"] = array();
                 global $db,$app_list_strings;
-                $query = $db->query("SELECT t.id,t.description AS `message`,t.assigned_user_id,t.internal,t.date_entered AS `created`,t.date_modified AS `modified`,t.contact_id FROM aop_case_updates t WHERE t.deleted=0 AND t.case_id='{$this->record_id}'");
+                $query = $db->query("SELECT t.id,t.description AS `message`,CONCAT_WS(' ',au.first_name,au.last_name) AS `assigned_user`,t.internal,t.date_entered AS `created`,t.date_modified AS `modified`,CONCAT_WS(' ',c.first_name,c.last_name) AS `contact`,CONCAT_WS(' ',u.first_name,u.last_name) AS `author`
+                FROM aop_case_updates t
+                LEFT JOIN contacts c ON c.id=t.contact_id 
+                LEFT JOIN users u ON u.id=t.created_by 
+                LEFT JOIN users au ON au.id=t.assigned_user_id 
+                WHERE t.deleted=0 AND t.case_id='{$this->record_id}'");
+                
                 if($query && $query->num_rows>0){
-                    $this->table_context[] = array("id","message","assigned_user_id","internal update");
+                    $this->table_context[] = array("id","message","assigned_user","internal update");
                     while($item = $db->fetchByAssoc($query)){
                         $item["message"] = str_replace(array("<br/>","<br />","<br>"),array("\n","\n","\n"),strip_tags(htmlspecialchars_decode($item["message"]),"<br>"));
                         //Add table data
                         $this->table_context[]=$item;
+                        $this->table_context[]="divider";
                         //Specify object name
                         $item["__external__classname"] = "update";
                         $item = (Object)$item;
                         $this->context["case_updates"][]=$item;
+                        $this->context["case_updates"][]="divider";
                     }
                 }
+                
             break;
             case "ass_hardware":
+                $this->context["properties"]["module"] = "Hardware";
                 $this->context["properties"]["Serial #"]=$this->val("name",$this->bean->name);
                 $this->context["properties"]["Installation Site Name"]=$this->val("instal_name",$this->bean->instal_name);
                 $this->context["properties"]["Status"]=$this->val("status",$this->bean->status);
                 $this->context["properties"]["Account"]=$this->val("ass_hardware_accountsaccounts_ida",$this->bean->ass_hardware_accountsaccounts_ida);
                 //Info about hardware
+                $this->context["properties"]["Rapid"]=$this->val("rapid");
                 $this->context["properties"]["Hardware Type"]=!empty($this->bean->hd_type)?$this->val("hd_type",$this->bean->hd_type):"undefined";
                 $this->context["properties"]["Product Version"]=$this->val("dcmsys_ver",$this->bean->dcmsys_ver);
                 $this->context["properties"]["OS Version"]=$this->val("os",$this->bean->os);
@@ -82,11 +113,26 @@ class BeanExport{
                     "Password for root"=>$this->val("pass_r"),
                     "Customer Shell Account"=>$this->val("ssh_user"),
                     "Customer Shell Password"=>$this->val("ssh_pass"),
+
+                    "IP eth0"=>$this->val("ip_eth0"),
+                    "IP eth1"=>$this->val("ip_eth1"),
+                    "IP IPMI"=>$this->val("ip_ipmi"),
+                    "IPMI Login and Pass"=>$this->val("ipmi_pass"),
+
                     "Hostname"=>$this->val("hostname"),
                     "Hardware id"=>$this->val("hard_id"),
                 );
+                
+                //Cluster config
+                $this->context["ClusterConfig"]=array(
+                    "Cluster"=>$this->val("cluster"),
+                    "Hardware"=>$this->val("ass_hardware_ass_hardware_name"),
+                    "Heartbeat IP"=>$this->val("ip_oth"),
+                    "Virtual IP"=>$this->val("vip"),
+                );
             break;
         }
+        $this->filename = str_replace(array(" ","-"),array("_","_"),trim($this->filename));
         return $this;
     }
     /**
@@ -96,7 +142,7 @@ class BeanExport{
     public function to_json(){
         if(empty($this->context)) return NULL;
         if($this->force_download===true){
-            header("Content-disposition: attachment; filename={$this->object_name}_{$this->record_id}.json");
+            header("Content-disposition: attachment; filename={$this->filename}.json");
             header("Content-type: application/json");
             exit($this->context);
         }
@@ -118,7 +164,7 @@ class BeanExport{
             $ctx = $this->xmlAsChild($ctx,$name,$property);
         }
         if($this->force_download===true){
-            header("Content-disposition: attachment; filename={$this->object_name}_{$this->record_id}.xml");
+            header("Content-disposition: attachment; filename={$this->filename}.xml");
             header("Content-type: text/xml");
             exit($ctx->asXML());
         }
@@ -126,6 +172,7 @@ class BeanExport{
     }
     /**
      * Convert Bean Data to CSV
+     * @return CSV table data
      */
     public function to_csv(){
         if(empty($this->table_context)) return NULL;
@@ -139,7 +186,7 @@ class BeanExport{
         header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
         header("Cache-Control: max-age=0, no-cache, must-revalidate, proxy-revalidate");
         header("Last-Modified: {$now} GMT");
-        header("Content-Disposition: attachment;filename={$this->object_name}_{$this->record_id}.csv");
+        header("Content-Disposition: attachment;filename={$this->filename}.csv");
         header("Content-Transfer-Encoding: binary");
         //Convert data to read-e .csv format
         $col_delimiter = ';';
@@ -172,11 +219,12 @@ class BeanExport{
         return ob_get_clean();
     }
     /**
-     * Convert Bean Data to CSV
+     * Convert Bean Data to html content
+     * @return HTML Content
      */
     public function to_html(){
         if(empty($this->context)) return NULL;
-        $title = "{$this->record_id} - {$this->module_name}";
+        $title = "{$this->filename} - {$this->module_name}";
         if($this->bean && !empty($this->bean->name)){
             $title = "{$this->bean->name} - {$this->module_name}";
         }
@@ -189,19 +237,24 @@ class BeanExport{
         }
         $ctx .= "</body></html>";
         if($this->force_download===true){
-            header("Content-disposition: attachment; filename={$this->object_name}_{$this->record_id}.html");
+            header("Content-disposition: attachment; filename={$this->filename}.html");
             header("Content-type: text/html");
             exit($ctx);
         }
         return $ctx;
-    }/**
+    }
+    /**
      * Convert Bean Data to Document
+     * @return .docx data
      */
     public function to_docx(){
         if(empty($this->context)) return NULL;
         require_once "vendor/autoload.php";
+
         // Creating the new document...
+        PhpOffice\PhpWord\Settings::setOutputEscapingEnabled(true);
         $phpWord = new \PhpOffice\PhpWord\PhpWord();
+        
         //Define fonts
         $phpWord->addFontStyle(
             "userDefinedText",
@@ -211,14 +264,23 @@ class BeanExport{
             "userDefinedTitle",
             array('name' => 'Tahoma','size' => 16,'color'=>'black','bold' => true)
         );
-        //Create root 
-        $section = $phpWord->addSection();
-        //And push content
-        $section = $this->buildDocumentContent("doc",$section,null,$this->context);
+
+        //Create root and add content
+        $root = $phpWord->addSection();
+
+        $ctx = "";
+        if(!empty($this->context)){
+            foreach($this->context as $a=>$b){
+                $ctx .= sprintf("<h1 style=\"font-size:18px\">Bean %s</h1>",ucfirst($a));
+                $ctx .= $this->buildHtmlTable($a,$b);
+            }
+        }
+        \PhpOffice\PhpWord\Shared\Html::addHtml($root,$ctx,false,false);
+
         //Export document
         if($this->force_download===true){
             header("Content-Description: File Transfer");
-            header("Content-Disposition: attachment; filename={$this->object_name}_{$this->record_id}.docx");
+            header("Content-Disposition: attachment; filename={$this->filename}.docx");
             header("Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document");
             header("Content-Transfer-Encoding: binary");
             header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
@@ -227,11 +289,13 @@ class BeanExport{
             $xmlWriter->save("php://output");
             exit();
         }
+
         $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
-        $objWriter->save('helloWorld.docx');
+        $objWriter->save("{$this->filename}.docx");
         $ctx="";
         return $ctx;
     }
+
     /**
      * Parse and Import data to xml node. Use in loop
      * @param SimpleXmlObject $node SimpleXML DOM node
@@ -252,12 +316,19 @@ class BeanExport{
                 }
             break;
             case "string":
-                $name = str_replace(array(" ","#","\n","<br/>"),array("","","",""),htmlspecialchars($name));
-                $node->addChild(trim($name),htmlspecialchars($content));
+                switch($content){
+                    case "divider":
+                    break;
+                    default:
+                        $name = str_replace(array(" ","#","\n","<br/>"),array("","","",""),htmlspecialchars($name));
+                        $node->addChild(trim($name),htmlspecialchars($content));
+                    break;
+                }
             break;
         }
         return $node;
     }
+
     /**
      * Parse and Import data to html table node. Use in loop
      * @param SimpleXmlObject $node SimpleXML DOM node
@@ -273,46 +344,38 @@ class BeanExport{
             case "array":
             case "object":
                 $node .= "<table>";
+                
                 foreach($content as $a=>$b){
+                    if(is_array($b) || is_object($b)) $node .= "<tr><td>";
                     $node .= $this->buildHtmlTable($a,$b);
+                    if(is_array($b) || is_object($b)) $node .= "</td></tr>";
                 }
+
                 $node .= "</table>";
             break;
             case "string":
-                $node .= "<tr><td><b>{$name}</b></td><td>{$content}</td></tr>";
-            break;
-        }
-        return $node;
-    }
-    private function buildDocumentContent($type="doc",$node=NULL,$node_name="",$body=""){
-        $name = !empty($node_name)?strval($node_name):$node_name;
-        $type = strtolower($type);
-        if(strpos($name,"__external__")!==false) return $node;//skip system nodes
-        switch(gettype($body)){
-            case "array":
-            case "object":
-                $_name = empty(((array)$body)['__external__classname'])?(is_array($body)?$name:get_class($body)):((array)$body)['__external__classname'];
-                foreach($body as $a=>$b){
-                    //Add section title
-                    if(empty($_name) && !empty($a)){
-                        $node->addText(ucfirst(str_replace("_"," ",$a)),
-                        array("color"=>"black","bold"=>true,"size"=>18));
-                    }
-                    $node = $this->buildDocumentContent($type,$node,$a,$b);
+                switch($content){
+                    case "divider":
+                        $node .= "<tr class=\"divider\"><td><hr/></td><td><hr/></td></tr>";
+                    break;
+                    default:
+                        $node .= "<tr><td><b>{$name}</b></td><td>{$content}</td></tr>";
+                    break;
                 }
             break;
-            case "string":
-                $table = $node->addTable();
-                $table->addRow();
-                $table->addCell()->addText($name,array("bold"=>true));
-                $table->addCell()->addText(htmlspecialchars($body));
-            break;
         }
         return $node;
     }
+
+    /**
+     * Converts bean value to read format
+     * @param $field_name Field name
+     * @param $value Field value
+     * @return mixed Converted Value
+     */
     private function val($field_name,$value=NULL){
-        global $app_list_strings;
-        $value = empty($value)?$this->bean->{$field_name}:$value;
+        global $app_list_strings,$db;
+        $value = empty($value)?(isset($this->bean->{$field_name})?$this->bean->{$field_name}:""):$value;
         if(!empty($this->bean) && !empty($this->bean->field_name_map) && !empty($this->bean->field_name_map[$field_name])){
             switch($this->bean->field_name_map[$field_name]["type"]){
                 case "enum":
@@ -321,10 +384,36 @@ class BeanExport{
                         $value = $options[$value];
                     }
                 break;
+                case "boolean":
+                case "bool":
+                    $value = $value==true?"Yes":"No";
+                break;
+                case "link":
+                    //Get link field
+                    $link = array(
+                        "relate"=>null
+                    );
+                    foreach($this->bean->field_name_map as $fmname=>$fmoptions){
+                        if(!empty($fmoptions) && !empty($fmoptions["id_name"]) && $fmoptions["type"]=="relate" && $fmoptions["id_name"]==$field_name){
+                            if(!empty($fmoptions["table"]) && in_array($fmoptions["table"],array("accounts","users"))){
+                                $link["relate"] = $fmname;
+                                break;
+                            }
+                        }
+                    }
+                    if(!empty($link["relate"])){
+                        $value = $this->bean->{$link["relate"]};
+                    }else{
+                        $value = trim($value);
+                    }
+                break;
                 default:
                     $value = trim($value);
                 break;
             }
+        }
+        if(is_array(($value))){
+            return "";
         }
         return $value;
     }
