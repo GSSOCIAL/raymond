@@ -272,7 +272,7 @@ class BeanExport{
         if(!empty($this->context)){
             foreach($this->context as $a=>$b){
                 $ctx .= sprintf("<h1 style=\"font-size:18px\">Bean %s</h1>",ucfirst($a));
-                $ctx .= $this->buildHtmlTable($a,$b);
+                $ctx .= $this->buildHtmlTable($a,$b,true);
             }
         }
         \PhpOffice\PhpWord\Shared\Html::addHtml($root,$ctx,false,false);
@@ -331,12 +331,12 @@ class BeanExport{
 
     /**
      * Parse and Import data to html table node. Use in loop
-     * @param SimpleXmlObject $node SimpleXML DOM node
      * @param string $name Node name
      * $param mixed $content Node content
+     * @param boolean $cleanTags Clean HTML tags?
      * @return SimpleXmlObject Return updated $node content
      */
-    private function buildHtmlTable($name=NULL,$content){
+    private function buildHtmlTable($name=NULL,$content,$cleanTags=false){
         $name = !empty($name)?strval($name):$name;
         $node = "";
         if(strpos($name,"__external__")!==false) return $node;
@@ -347,7 +347,7 @@ class BeanExport{
                 
                 foreach($content as $a=>$b){
                     if(is_array($b) || is_object($b)) $node .= "<tr><td>";
-                    $node .= $this->buildHtmlTable($a,$b);
+                    $node .= $this->buildHtmlTable($a,$b,$cleanTags);
                     if(is_array($b) || is_object($b)) $node .= "</td></tr>";
                 }
 
@@ -359,6 +359,10 @@ class BeanExport{
                         $node .= "<tr class=\"divider\"><td><hr/></td><td><hr/></td></tr>";
                     break;
                     default:
+                        if($cleanTags){
+                            $content = str_replace(array("<br>","<br/>"),array("\n","\n"),$content);
+                            $content = strip_tags(htmlspecialchars_decode($content));
+                        }
                         $node .= "<tr><td><b>{$name}</b></td><td>{$content}</td></tr>";
                     break;
                 }
