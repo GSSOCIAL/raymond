@@ -1,5 +1,5 @@
 <?php
- // created: 2017-02-21 03:34:04
+ // created: 2017-05-25 05:53:08
 $layout_defs["ass_hardware"]["subpanel_setup"]['ass_hardware_cases_1'] = array (
   'order' => 100,
   'module' => 'Cases',

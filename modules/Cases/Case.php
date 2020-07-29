@@ -321,7 +321,7 @@ class aCase extends Basic
             '</a>';
 		if(!empty($this->account_id)) {
 			// Если Контрагент присутствует
-			if(isset($_REQUEST['module']) AND $_REQUEST['module'] == 'Home' AND isset($_REQUEST['action']) AND $_REQUEST['action'] == 'index') {
+            if(isset($_REQUEST['module']) AND $_REQUEST['module'] == 'Home' AND ((isset($_REQUEST['action']) AND $_REQUEST['action'] == 'index') OR (isset($_REQUEST['DynamicAction']) AND $_REQUEST['DynamicAction'] == 'displayDashlet')))  {
 				// Если получение данных для дашлета
 				$seedAccount = new Account();
 				$seedAccount->retrieve($this->account_id);

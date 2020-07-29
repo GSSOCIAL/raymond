@@ -122,6 +122,7 @@ class Email extends SugarBean {
     public $link_action;
     public $emailAddress;
     public $attachments = array();
+    public $header_message_id;
 
     /* to support Email 2.0 */
     public $isDuplicate;
@@ -263,9 +264,9 @@ class Email extends SugarBean {
 	 * @return array
 	 */
 	function email2ParseAddresses($addresses) {
+        require_once('modules/Emails/EmailUI.php');
 		$addresses = from_html($addresses);
-        $addresses = $this->et->unifyEmailString($addresses);
-
+        $addresses = EmailUI::unifyEmailString($addresses);
 		$pattern = '/@.*,/U';
 		preg_match_all($pattern, $addresses, $matchs);
 		if (!empty($matchs[0])){
@@ -928,7 +929,7 @@ class Email extends SugarBean {
 					}
 					else{
 						$c = new aCase();
-						if($caseId = InboundEmail::getCaseIdFromCaseNumber($mail->Subject, $c)) {
+						if($caseId = InboundEmail::getCaseIdFromCaseNumber($mail, $c)) {
 							$c->retrieve($caseId);
 							$c->load_relationship('emails');
 							$c->emails->add($this->id);
@@ -1075,7 +1076,6 @@ class Email extends SugarBean {
             $this->raw_source = SugarCleaner::cleanHtml($this->raw_source, true);
 			$this->saveEmailText();
 			$this->saveEmailAddresses();
-
 			$GLOBALS['log']->debug('-------------------------------> Email called save()');
 
 			// handle legacy concatenation of date and time fields
@@ -1087,9 +1087,7 @@ class Email extends SugarBean {
  				    $this->date_sent = $date_sent_obj->asDb();
                  }
 			}
-
 			parent::save($check_notify);
-
 			if(!empty($this->parent_type) && !empty($this->parent_id)) {
                 if(!empty($this->fetched_row) && !empty($this->fetched_row['parent_id']) && !empty($this->fetched_row['parent_type'])) {
                     if($this->fetched_row['parent_id'] != $this->parent_id || $this->fetched_row['parent_type'] != $this->parent_type) {
@@ -1218,10 +1216,13 @@ class Email extends SugarBean {
 	function cleanEmails($emails)
 	{
 	    if(empty($emails)) return '';
-		$emails = str_replace(array(",",";"), "::", from_html($emails));
-		$addrs = explode("::", $emails);
+        $addrs = $this->email2ParseAddresses($emails);
+        array_walk($addrs, function(&$element) {
+            $element = $element['display'] . ' <' . $element['email'] . '>';
+        });
 		$res = array();
 		foreach($addrs as $addr) {
+            //$addrTemp = $addr['display'] . ' <' . $addr['email'] . '>';
             $parts = $this->emailAddress->splitEmailAddress($addr);
             if(empty($parts["email"])) {
                 continue;

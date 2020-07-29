@@ -52,7 +52,6 @@ function make_license($bean,$args){
         $bean->lic_key = $cmd;
 	$logfile=fopen("/var/www/html/genlic.log","a+");
 	fwrite($logfile,$cmd);
-	fwrite($logfile,"\n");
         exec($cmd);
         if(file_exists($file)) {
             $bean->lic_key = file_get_contents($file);
