@@ -34,7 +34,9 @@ function make_license($bean,$args){
         
         //Issue with output cmd - in Bean name & hardware id expecting ";" symbol + whitespaces. Remove both
         $name = trim(preg_replace('/[\W\s]/',"_",$bean->name)); 
+
         $hard_id = trim(preg_replace('/[\W\s]/',"_",$bean->hard_id));
+        $hard_id2 = trim($bean->hard_id);
 
         $filename = "{$name}_{$diff->days}_{$bean->end_date}";
         $filename = trim(str_replace(array(";","/"," ","\\"),array("_","_","_","_"),$filename)); 
@@ -46,8 +48,10 @@ function make_license($bean,$args){
         $bean->save();
         $bean->skip_log = true;
 
-        $cmd = "for i in {$lic_type}; do echo \"------\"; cd /home/genlic; ./genlic -C {$name} -H {$hard_id} -P \$i -D {$interval} ;done > {$file}";
+        $cmd = "for i in {$lic_type}; do echo \"------\"; cd /home/genlic; ./genlic -C {$name} -H {$hard_id2} -P \$i -D {$interval} ;done > {$file}";
         $bean->lic_key = $cmd;
+	$logfile=fopen("/var/www/html/genlic.log","a+");
+	fwrite($logfile,$cmd);
         exec($cmd);
         if(file_exists($file)) {
             $bean->lic_key = file_get_contents($file);
