@@ -77,6 +77,17 @@ if(empty($_REQUEST["method"])){
                                 "filename"=>$row["filename"],
                                 "key"=>htmlspecialchars_decode(file_get_contents("/var/www/html/upload/licenses/{$row['filename']}.license"))
                             );
+                        }else{
+                            foreach($ids as $id){
+                                $Bean = BeanFactory::getBean("ass_lic",$id);
+                                if($Bean && !empty($Bean->lic_key)){
+                                    $response["body"][$id] = array(
+                                        "name"=>$Bean->name,
+                                        "filename"=>NULL,
+                                        "key"=>htmlspecialchars_decode($Bean->lic_key)
+                                    );
+                                }
+                            }
                         }
                     }
                     if(!empty($response["body"])){
