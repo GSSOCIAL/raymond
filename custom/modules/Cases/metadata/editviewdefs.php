@@ -108,6 +108,7 @@ array (
             'studio' => 'visible',
             'label' => 'LBL_INTERNAL',
           ),
+          "spent_time"
         ),
         6 => 
         array (

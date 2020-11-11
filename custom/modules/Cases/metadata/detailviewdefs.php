@@ -121,6 +121,7 @@ array (
           array (
             'name' => 'ass_hardware_cases_name',
           ),
+          "spent_time"
         ),
       ),
       'LBL_AOP_CASE_UPDATES' => 
