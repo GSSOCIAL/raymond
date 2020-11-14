@@ -8,7 +8,9 @@
   "config": {
     "vendor-dir": "vendor"
   },
-  "require": {},
+  "require": {
+    "phpoffice/phpword": "v0.17.*"
+  },
   "require-dev": {
     "leafo/scssphp": "dev-master",
     "phpunit/phpunit": "^3.7",

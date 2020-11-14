@@ -351,13 +351,24 @@ class SugarView
                     $themeObject->getCSSURL('print.css') .
                     '" media="all" />';
         }
+        if(file_exists("custom/include/css/components.css")){
+            $css .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"custom/include/css/components.css\" />";
+        }
         $ss->assign("SUGAR_CSS", $css);
 
         // get javascript
         ob_start();
         $this->renderJavascript();
+        $JAVASCRIPT = $themeObject->getJS();
 
-        $ss->assign("SUGAR_JS", ob_get_contents() . $themeObject->getJS());
+        if(file_exists("custom/include/js/vue/vue.min.js")){
+            $JAVASCRIPT .= "<script type=\"text/javascript\" src=\"custom/include/js/vue/vue.min.js\"></script>";
+        }
+        if(file_exists("custom/include/js/vue/components.js")){
+            $JAVASCRIPT .= "<script type=\"text/javascript\" src=\"custom/include/js/vue/components.js\"></script>";
+        }
+
+        $ss->assign("SUGAR_JS",ob_get_contents().$JAVASCRIPT);
         ob_end_clean();
 
         // get favicon

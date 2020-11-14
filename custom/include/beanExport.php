@@ -6,13 +6,21 @@ class BeanExport{
     public $force_download=false;
     /**Which sections need to export*/
     public $sections = "*";
+    /**
+     * Export record options
+     */
+    public $properties = array();
 
     /**
      * @param string $module Module name (e.g Accounts,Cases,CaseHistory)
      * @param string $record Record id
+     * @param Array $properties Array of export options
      * @return BeanExport
      */
-    function __construct($module,$record){
+    function __construct($module,$record,Array $properties=array()){
+        foreach($properties as $k=>$v){
+            $this->properties[$k]=$v;
+        }
         return $this->retrieve($module,$record);
     }
 
@@ -51,8 +59,8 @@ class BeanExport{
         switch($this->module_name){
             case "Cases":
                 $this->context["properties"]["Case_number"]=$this->bean->case_number;
-                $this->context["properties"]["Subject"]=$this->bean->name;
-                $this->context["properties"]["Description"]=$this->bean->description;
+                $this->context["properties"]["Subject"]=str_replace(array("<br/>","<br />","<br>"),array("\n","\n","\n"),strip_tags(htmlspecialchars_decode($this->bean->name),"<br>"));
+                $this->context["properties"]["Description"]=str_replace(array("<br/>","<br />","<br>"),array("\n","\n","\n"),strip_tags(htmlspecialchars_decode($this->bean->description),"<br>"));
                 $this->context["properties"]["Created"]=$this->bean->date_entered;
                 $this->context["properties"]["Modified"]=$this->bean->date_modified;
                 $this->context["properties"]["Account_id"]=$this->bean->account_id;
@@ -80,18 +88,29 @@ class BeanExport{
                 WHERE t.deleted=0 AND t.case_id='{$this->record_id}'");
                 
                 if($query && $query->num_rows>0){
-                    $this->table_context[] = array("id","message","assigned_user","internal update");
+                    $this->table_context[-1] = array("id","message","assigned_user","internal update");
                     while($item = $db->fetchByAssoc($query)){
                         $item["message"] = str_replace(array("<br/>","<br />","<br>"),array("\n","\n","\n"),strip_tags(htmlspecialchars_decode($item["message"]),"<br>"));
+                        
+                        //If skip internal updates
+                        if($item["internal"]=="1"&&array_key_exists("internal",$this->properties)&&$this->properties["internal"]==false){
+                            continue;
+                        }
+                        $key=strtotime($item["created"]);
+                        while(array_key_exists($key,$this->table_context)){
+                            $key+=1;
+                        }
                         //Add table data
-                        $this->table_context[]=$item;
-                        $this->table_context[]="divider";
+                        $this->table_context[strval($key)]=$item;
+                        $this->table_context[strval(intval($key)+0.1)]="divider";
                         //Specify object name
                         $item["__external__classname"] = "update";
                         $item = (Object)$item;
-                        $this->context["case_updates"][]=$item;
-                        $this->context["case_updates"][]="divider";
+                        $this->context["case_updates"][strval($key)]=$item;
+                        $this->context["case_updates"][strval(intval($key)+0.1)]="divider";
                     }
+                    ksort($this->table_context);
+                    ksort($this->context["case_updates"]);
                 }
                 
             break;
@@ -133,6 +152,8 @@ class BeanExport{
             break;
         }
         $this->filename = str_replace(array(" ","-"),array("_","_"),trim($this->filename));
+        $this->filename = preg_replace('/[^\w0-9_]/u',"",html_entity_decode(urldecode($this->filename),ENT_QUOTES));
+        $this->filename = preg_replace('/_{2,}/u',"_",$this->filename);
         return $this;
     }
     /**
@@ -231,7 +252,7 @@ class BeanExport{
         $ctx = "<html><head><title>{$title}</title></head><body>";
         if(!empty($this->context)){
             foreach($this->context as $a=>$b){
-                $ctx .= sprintf("<h1>Bean %s</h1>",ucfirst($a));
+                $ctx .= sprintf("<h1>%s</h1>",ucfirst($a));
                 $ctx .= $this->buildHtmlTable($a,$b);
             }
         }
@@ -271,7 +292,7 @@ class BeanExport{
         $ctx = "";
         if(!empty($this->context)){
             foreach($this->context as $a=>$b){
-                $ctx .= sprintf("<h1 style=\"font-size:18px\">Bean %s</h1>",ucfirst($a));
+                $ctx .= sprintf("<h1 style=\"font-size:18px\">%s</h1>",ucfirst($a));
                 $ctx .= $this->buildHtmlTable($a,$b);
             }
         }

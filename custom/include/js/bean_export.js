@@ -12,12 +12,13 @@ class BeanServer{
     /**
      * Performs export request
      * @param {string} to_type Type export format [JSON/XML/DOCX]
+     * @param {boolean} with_internals Export document with internal updates?
      */
-    export(to_type="JSON"){
+    export(to_type="JSON",with_internals=false){
         var frame = document.createElement("iframe");
         frame.style.display = "none";
         document.body.appendChild(frame);
-        frame.src = "index.php?module=Home&action=beanServer&method=export&to_pdf=true&mod="+this.module_name+"&record="+this.id+"&to_format="+to_type+"&download=true";
+        frame.src = "index.php?module=Home&action=beanServer&method=export&to_pdf=true&mod="+this.module_name+"&record="+this.id+"&to_format="+to_type+"&download=true&internals="+with_internals;
         frame.onload = function(e){
             var ctx = JSON.parse($(frame).contents().eq(0).text());
             if(ctx){
