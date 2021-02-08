@@ -40,6 +40,10 @@ array (
           'newTab' => true,
           'panelDefault' => 'expanded',
         ),
+        'LBL_PANEL_ADVANCED_LICENSES' =>array (
+          'newTab' => false,
+          'panelDefault' => 'expanded',
+        ),
         'LBL_PANEL_LICENSES' =>array (
           'newTab' => false,
           'panelDefault' => 'expanded',
@@ -117,6 +121,15 @@ array (
             'label' => 'LBL_OS',
           ),
         ),
+      ),
+      'lbl_panel_advanced_licenses'=>array(
+        0=>array(
+          0=>array(
+            'name' => 'advanced_license_generator',
+            'studio' => 'visible',
+            'hideLabel' => true,
+          ),
+        )
       ),
       'lbl_panel_licenses'=>array(
         0=>array(
