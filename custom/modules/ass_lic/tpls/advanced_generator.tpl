@@ -1600,7 +1600,7 @@
                             /**Decode manual contents to editor*/
                             parseManual(contents=null){
                                 setTimeout(()=>{
-                                    var decoded = contents?contents.split("\n"):this.$refs.manual_textarea.value.split("\n");
+                                    var decoded = contents!==null&&typeof contents == "string"?contents.split("\n"):this.$refs.manual_textarea.value.split("\n");
                                     for(var i in decoded){
                                         if(decoded[i][0]=="."){
                                             decoded[i] = decoded[i].substring(1);
@@ -1643,7 +1643,6 @@
                                     contents.sort();
                                     return contents.join("\n");
                                 },
-                                set(value){}
                             }
                         },
                         mounted(){
