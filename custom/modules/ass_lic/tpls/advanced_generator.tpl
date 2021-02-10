@@ -2,7 +2,17 @@
 {literal}
 <style type="text/css">
     .generator-form{
-
+        position: relative;
+    }
+    .generator-form .lock-overlay{
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        background: rgba(255,255,255,0.6);
+        cursor: default;
+        z-index: 10;
     }
     .generator-form .fields-row{
         display: inline-block;
@@ -34,7 +44,12 @@
         line-height: normal;
         margin: 10px 0px 10px;
     }
-
+    .generator-form .field-actions{
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        margin: 10px 0px 0px;
+    }
     .generator-form .field-wrapper{
         width:100%;
     }
@@ -449,7 +464,7 @@
 {/literal}
 <div id="license_generator_container">
     <span v-if="false">Generator requires vue.js</span>
-    <div v-if="true" class="generator-form">
+    <div v-if="true" class="generator-form" {literal}:class="{'loading':lock}"{/literal}>
         <div class="fields-row row-columns-5">
             <div class="field-wrapper">
                 <label>Hardware id</label>
@@ -466,7 +481,7 @@
             <div class="field-wrapper">
                 <label>Start date</label>
                 <div class="input-wrapper">
-                    <calendar value="values.start_date" ref="calendar_start_date" @change="calculateIAT($refs.calendar_start_date.str_date);values.start_date = $refs.calendar_start_date.str_date"></calendar>
+                    <calendar :value="values.start_date" ref="calendar_start_date" @change="calculateIAT($refs.calendar_start_date.str_date);values.start_date = $refs.calendar_start_date.str_date"></calendar>
                 </div>
             </div>
             <div class="field-wrapper">
@@ -950,6 +965,11 @@
                 </div>
             </template>
         </tabs>
+        <div class="fields-row field-actions">
+            <div class="button primary" @click="save">Save</div>
+            <div class="button secondary">Generate License</div>
+        </div>
+        <div v-if="lock" class="lock-overlay"></div>
     </div>
 </div>
 {literal}
@@ -1409,6 +1429,8 @@
                         "el":"#license_generator_container",
                         data(){
                             return{
+                                id:"{/literal}{$RECORD_ID}{literal}",
+                                lock:false,
                                 values:{
                                     hid:"{/literal}{$HARDWARE_ID}{literal}",
                                     serial:"{/literal}{$SERIAL}{literal}",
@@ -1576,27 +1598,42 @@
                                 return values;
                             },
                             /**Decode manual contents to editor*/
-                            parseManual(){
+                            parseManual(contents=null){
                                 setTimeout(()=>{
-                                    var decoded = this.$refs.manual_textarea.value.split("\n");
+                                    var decoded = contents?contents.split("\n"):this.$refs.manual_textarea.value.split("\n");
                                     for(var i in decoded){
                                         if(decoded[i][0]=="."){
                                             decoded[i] = decoded[i].substring(1);
                                             var line = decoded[i].split("=");
                                             if(line.length==2){
                                                 var value = "'"+line[1]+"'";
-                                                if(line[1]==false || line[1]==true){
-                                                    value = line[1];
+                                                if(line[1]==false||line[1]==true||line[1]=='false'||line[1]=='true'){
+                                                    value = line[1]==true||line[1]=='true';
                                                 }
-                                                if(value.trim().length==0){
+                                                if(typeof value == 'string' && value.trim().length==0){
                                                     value = "''";
                                                 }
-                                                eval("window.LicensesGeneratorController.values."+line[0]+"="+value);
+                                                var key = line[0].replace("&quot;","");
+                                                eval("window.LicensesGeneratorController.values."+key+"="+value);
                                             }
                                         }
                                     }
                                 },100);
                                 
+                            },
+                            save(){
+                                this.lock = true;
+                                fetch(window.location.origin+"/index.php?module=ass_hardware&action=update_license&record="+this.id,{
+                                    method:"POST",
+                                    body:JSON.stringify(this.manual)
+                                }).then(response=>response.json()).then((response)=>{
+                                    this.lock = false;
+                                    if(response.result == true){
+                                        
+                                    }
+                                }).catch((error)=>{
+                                    this.lock = false;
+                                });
                             }
                         },
                         computed:{
@@ -1606,7 +1643,13 @@
                                     contents.sort();
                                     return contents.join("\n");
                                 },
-                                set(){}
+                                set(value){}
+                            }
+                        },
+                        mounted(){
+                            var license = "{/literal}{$LICENSE}{literal}";
+                            if(license.toString().trim().length>0){
+                                this.parseManual(license);
                             }
                         }
                     });

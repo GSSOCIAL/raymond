@@ -447,4 +447,9 @@ if("Vue" in window){
         </div>
         `
     });
+    Vue.component("modal",{
+        template:`
+        <div class="vue-component modal"></div>
+        `
+    })
 }

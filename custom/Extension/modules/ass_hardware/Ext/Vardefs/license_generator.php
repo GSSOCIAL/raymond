@@ -39,3 +39,16 @@ $dictionary['ass_hardware']['fields']['advanced_license_generator'] = array (
             'include' => 'custom/modules/ass_lic/advanced_license_generator.php'
         ),
 );
+$dictionary['ass_hardware']['fields']['license'] = array (
+    'name' => 'license',
+    'vname' => 'LBL_ADVANCED_LICENSE',
+    'required' => false,
+    'type' => 'text',
+    'massupdate' => 0,
+    'importable' => 'false',
+    'duplicate_merge' => 'disabled',
+    'duplicate_merge_dom_value' => 0,
+    'audited' => true,
+    'reportable' => false,
+    'inline_edit' => false,
+);

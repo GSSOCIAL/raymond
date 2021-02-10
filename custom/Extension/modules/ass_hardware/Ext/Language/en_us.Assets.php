@@ -10,3 +10,4 @@ $mod_strings['LBL_ASS_HARDWARE_ASS_LIC_FROM_ASS_LIC_TITLE'] = 'Licenses';
 $mod_strings["LBL_PANEL_LICENSES"]="License generator";
 $mod_strings["LBL_PANEL_ADVANCED_LICENSES"]="Advanced License generator";
 $mod_strings["LBL_ADVANCED_LICENSE_GENERATOR"]="License generator";
+$mod_strings["LBL_ADVANCED_LICENSE"]="License";
