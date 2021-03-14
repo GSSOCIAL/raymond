@@ -18,6 +18,5 @@ function displayAdvancedLicenseGenerator($bean){
         $s->assign("CURRENT_DATE",date("Y-m-d"));
         return $s->fetch("custom/modules/ass_lic/tpls/advanced_generator.tpl");
     }
-    return "invalid function call";
     return NULL;
 }

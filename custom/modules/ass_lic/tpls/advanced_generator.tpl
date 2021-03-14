@@ -26,10 +26,16 @@
         border: 1px solid #d2e8f9;
         border-radius: 10px;
         background: #fff;
+        display: inline-block;
+        width: 100%;
     }
     .generator-form .generator-layout section{
         border-bottom: 1px solid #d2e8f9;
         padding: 20px 0px 10px;
+        display: inline-block;
+        width:100%; 
+        float: left;
+        clear: both;
     }
     .generator-form .generator-layout section:last-child{
         border-bottom-color:transparent;
@@ -129,6 +135,7 @@
     }
     .generator-form .fields-row.section-fields{
         padding: 10px 10px 0px;
+        float: left;
     }
     .generator-form .fields-row.section-fields > .field-wrapper{
         border-bottom: 1px solid #d2e8f9;
@@ -202,11 +209,11 @@
         right:0;
         bottom:0;
         left:0;
-        background:rgb(210 232 249);
+        background:rgb(236 236 236);
         border-radius: 3px;
     }
     .vue-component.tumbler > .pipe{
-        background: #03a9f4;
+        background: #9e9e9e;
         width: 16px;
         height: 16px;
         z-index: 3;
@@ -218,7 +225,11 @@
     .vue-component.tumbler.checked{
         
     }
+    .vue-component.checked .component-fill{
+        background:rgb(210 232 249);
+    }
     .vue-component.tumbler.checked > .pipe{
+        background: #03a9f4;
         left:18px;
     }
     /*Calendar*/ 
@@ -460,6 +471,16 @@
             transform: scale(1);
         }
     }
+    .input-error{
+        display: block;
+        width: 100%;
+        background: #f44336;
+        color: #fff;
+        font-size: 12px;
+        padding: 4px;
+        border-radius: 4px;
+        margin-top: 2px;
+    }
 </style>
 {/literal}
 <div id="license_generator_container">
@@ -538,7 +559,7 @@
                             <div class="field-wrapper checkbox-field-wrapper">
                                 <label>Granted</label>
                                 <div class="input-wrapper">
-                                    <tumbler v-model="values.rapid.dicom.granted" title="Rapid engine is granted"></tumbler>
+                                    <tumbler v-model="values.router.dicom.granted" title="Rapid engine is granted"></tumbler>
                                 </div>
                             </div>
                         </div>
@@ -546,25 +567,23 @@
                             <div class="field-wrapper">
                                 <label>Iat</label>
                                 <div class="input-wrapper">
-                                    <input type="text" title="Issued at date-time" v-model="values.rapid.dicom.iat"/>
+                                    <input type="text" title="Issued at date-time" v-model="values.router.dicom.iat"/>
                                 </div>
                             </div>
                             <div class="field-wrapper">
                                 <label>Exp</label>
                                 <div class="input-wrapper">
-                                    <input type="text" title="Expiration date-time" v-model="values.rapid.dicom.exp"/>
+                                    <input type="text" title="Expiration date-time" v-model="values.router.dicom.exp"/>
                                 </div>
                             </div>
                         </div>
-                        <div class="fields-row section-fields" v-show="values.rapid.dicom.granted == true">
+                        <div class="fields-row section-fields" v-show="values.router.dicom.granted == true">
                             <div class="field-wrapper">
                                 <div class="field-label">SCP</div>
                                 <div class="fields-wrapper">
                                     <div class="field-wrapper">
                                         <label>Max</label>
-                                        <div class="input-wrapper">
-                                            <input min="1" max="1000" type="number" title="Maximum number of rapid receivers" v-model="values.rapid.dicom.scp.max"/>
-                                        </div>
+                                        <input-field min="1" max="1000" type="number" title="Maximum number of rapid receivers" v-model="values.router.dicom.scp.max"></input-field>
                                     </div>
                                 </div>
                             </div>
@@ -601,9 +620,7 @@
                                 <div class="fields-wrapper">
                                     <div class="field-wrapper">
                                         <label></label>
-                                        <div class="input-wrapper">
-                                            <input min="1" max="100" type="number" title="Maximum number of storages" v-model="values.router.storage.max"/>
-                                        </div>
+                                        <input-field min="1" max="100" type="number" title="Maximum number of storages" v-model="values.router.storage.max"></input-field>
                                     </div>
                                 </div>
                             </div>
@@ -615,7 +632,7 @@
                                         <div class="input-wrapper">
                                             <div class="field-wrapper">
                                                 <label>Max</label>
-                                                <input type="number" min="1" title="Maximum storage capacity" v-model="values.router.storage.quota.size.max"/>
+                                                <input-field min="1" type="number" title="Maximum storage capacity" v-model="values.router.storage.quota.size.max"></input-field>
                                             </div>
                                         </div>
                                     </div>
@@ -624,7 +641,7 @@
                                         <div class="input-wrapper">
                                             <div class="field-wrapper">
                                                 <label>Max</label>
-                                                <input type="number" min="1" title="Maximum number of studies" v-model="values.router.storage.quota.study.max"/>
+                                                <input-field min="1" type="number" title="Maximum number of studies" v-model="values.router.storage.quota.study.max"></input-field>
                                             </div>
                                         </div>
                                     </div>
@@ -633,7 +650,7 @@
                                         <div class="input-wrapper">
                                             <div class="field-wrapper">
                                                 <label>Max</label>
-                                                <input type="number" min="1" title="Maximum number of hl7 messages" v-model="values.router.storage.quota.hl7.max"/>
+                                                <input-field min="1" type="number" title="Maximum number of hl7 messages" v-model="values.router.storage.quota.hl7.max"></input-field>
                                             </div>
                                         </div>
                                     </div>
@@ -642,7 +659,7 @@
                                         <div class="input-wrapper">
                                             <div class="field-wrapper">
                                                 <label>Max</label>
-                                                <input type="number" min="1" title="Maximum number of dicom worklist orders" v-model="values.router.storage.quota.order.max"/>
+                                                <input-field min="1" type="number" title="Maximum number of dicom worklist orders" v-model="values.router.storage.quota.order.max"></input-field>
                                             </div>
                                         </div>
                                     </div>
@@ -667,7 +684,7 @@
                                         <div class="input-wrapper">
                                             <div class="field-wrapper">
                                                 <label>Max</label>
-                                                <input type="number" min="3600" title="Maximum retention period for dicom study" v-model="values.router.storage.retention.study.max"/>
+                                                <input-field min="3600" type="number" title="Maximum retention period for dicom study" v-model="values.router.storage.retention.study.max"></input-field>
                                             </div>
                                         </div>
                                     </div>
@@ -676,7 +693,7 @@
                                         <div class="input-wrapper">
                                             <div class="field-wrapper">
                                                 <label>Max</label>
-                                                <input type="number" min="3600" title="Maximum retention period for hl7 message" v-model="values.router.storage.retention.hl7.max"/>
+                                                <input-field min="3600" type="number" title="Maximum retention period for hl7 message" v-model="values.router.storage.retention.hl7.max"></input-field>
                                             </div>
                                         </div>
                                     </div>
@@ -685,7 +702,7 @@
                                         <div class="input-wrapper">
                                             <div class="field-wrapper">
                                                 <label>Max</label>
-                                                <input type="number" min="3600" title="Maximum retention period for dicom worklist order" v-model="values.router.storage.retention.order.max"/>
+                                                <input-field min="3600" type="number" title="Maximum retention period for dicom worklist order" v-model="values.router.storage.retention.order.max"></input-field>
                                             </div>
                                         </div>
                                     </div>
@@ -725,7 +742,7 @@
                                     <div class="field-wrapper">
                                         <label>Max</label>
                                         <div class="input-wrapper">
-                                            <input min="1" max="1000" type="number" title="Maximum number of dicom receivers" v-model="values.router.dicom.scp.max"/>
+                                            <input-field min="1" max="1000" type="number" title="Maximum number of dicom receivers" v-model="values.router.dicom.scp.max"></input-field>
                                         </div>
                                     </div>
                                 </div>
@@ -736,7 +753,7 @@
                                     <div class="field-wrapper">
                                         <label>Max</label>
                                         <div class="input-wrapper">
-                                            <input min="1" max="10000" type="number" title="Maximum number of registered remote dicom devices" v-model="values.router.dicom.scu.max"/>
+                                            <input-field min="1" max="10000" type="number" title="Maximum number of registered remote dicom devices" v-model="values.router.dicom.scu.max"></input-field>
                                         </div>
                                     </div>
                                 </div>
@@ -753,7 +770,7 @@
                                     <div class="field-wrapper" v-show="values.router.dicom.router.granted">
                                         <label>Max</label>
                                         <div class="input-wrapper">
-                                            <input min="1" max="10000" type="number" title="Maximum number of dicom router rules" v-model="values.router.dicom.router.max"/>
+                                            <input-field min="1" max="10000" type="number" title="Maximum number of dicom router rules" v-model="values.router.dicom.router.max"></input-field>
                                         </div>
                                     </div>
                                 </div>
@@ -770,7 +787,8 @@
                                     <div class="field-wrapper" v-show="values.router.dicom.transform.granted">
                                         <label>Max</label>
                                         <div class="input-wrapper">
-                                            <input min="1" max="10000" type="number" title="Maximum number of dicom transformation rules" v-model="values.router.dicom.transform.max"/>
+                                            <input-field min="3600" type="number" title="Maximum retention period for hl7 message" v-model="values.router.storage.retention.hl7.max"></input-field>
+                                            <input-field min="1" max="10000" type="number" title="Maximum number of dicom transformation rules" v-model="values.router.dicom.transform.max"></input-field>
                                         </div>
                                     </div>
                                 </div>
@@ -787,7 +805,7 @@
                                     <div class="field-wrapper" v-show="values.router.dicom.proxy.granted">
                                         <label>Max</label>
                                         <div class="input-wrapper">
-                                            <input type="number" title="Maximum number of dicom proxy rules" v-model="values.router.dicom.proxy.max"/>
+                                            <input-field min="1" max="10000" type="number" title="Maximum number of dicom proxy rules" v-model="values.router.dicom.proxy.max"></input-field>
                                         </div>
                                     </div>
                                     <div class="field-wrapper" v-show="values.router.dicom.proxy.granted">
@@ -831,7 +849,7 @@
                                     <div class="field-wrapper" v-show="values.router.dicom.priors.granted">
                                         <label>Max</label>
                                         <div class="input-wrapper">
-                                            <input min="1" max="10000" type="number" title="Maximum number of dicom prior rules" v-model="values.router.dicom.priors.max"/>
+                                            <input-field min="1" max="10000" type="number" title="Maximum number of dicom prior rules" v-model="values.router.dicom.priors.max"></input-field>
                                         </div>
                                     </div>
                                 </div>
@@ -870,7 +888,7 @@
                                     <div class="field-wrapper">
                                         <label>Max</label>
                                         <div class="input-wrapper">
-                                            <input type="number" title="Maximum number of hl7 receivers" v-model="values.router.hl7.scp.max"/>
+                                            <input-field min="1" max="1000" type="number" title="Maximum number of hl7 receivers" v-model="values.router.hl7.scp.max"></input-field>
                                         </div>
                                     </div>
                                 </div>
@@ -881,7 +899,7 @@
                                     <div class="field-wrapper">
                                         <label>Max</label>
                                         <div class="input-wrapper">
-                                            <input type="number" title="Maximum number of hl7 remote device records" v-model="values.router.hl7.scu.max"/>
+                                            <input-field min="1" max="10000" type="number" title="Maximum number of hl7 remote device records" v-model="values.router.hl7.scu.max"></input-field>
                                         </div>
                                     </div>
                                 </div>
@@ -914,6 +932,95 @@
                             </div>
                         </div>
                     </section>
+                    <!--FHIR-->
+                    <section>
+                        <div class="section-title">FHIR</div>
+                        <div class="fields-row">
+                            <div class="field-wrapper checkbox-field-wrapper">
+                                <label>Granted</label>
+                                <div class="input-wrapper">
+                                    <tumbler v-model="values.router.fhir.granted" title=""></tumbler>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="fields-row row-columns-2"></div>
+                    </section>
+                    <!--Workflow-->
+                    <section>
+                        <div class="section-title">Workflow</div>
+                        <div class="fields-row section-fields">
+                            <div class="field-wrapper checkbox-field-wrapper">
+                                <label>Granted</label>
+                                <div class="input-wrapper">
+                                    <tumbler v-model="values.router.workflow.granted" title=""></tumbler>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="fields-row section-fields" v-show="values.router.workflow.granted == true">
+                            <div class="field-wrapper">
+                                <div class="field-label">Max</div>
+                                <div class="fields-wrapper">
+                                    <div class="field-wrapper">
+                                        <label></label>
+                                        <input-field min="1" type="number" title="" v-model="values.router.workflow.max"></input-field>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <!--Cluster-->
+                    <section>
+                        <div class="section-title">Cluster</div>
+                        <div class="fields-row">
+                            <div class="field-wrapper checkbox-field-wrapper">
+                                <label>Granted</label>
+                                <div class="input-wrapper">
+                                    <tumbler v-model="values.router.cluster.granted" title=""></tumbler>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="fields-row row-columns-2">
+                            <div class="field-wrapper">
+                                <label>Iat</label>
+                                <div class="input-wrapper">
+                                    <input type="text" title="Issued at date-time" v-model="values.router.cluster.iat"/>
+                                </div>
+                            </div>
+                            <div class="field-wrapper">
+                                <label>Exp</label>
+                                <div class="input-wrapper">
+                                    <input type="text" title="Expiration date-time" v-model="values.router.cluster.exp"/>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <!--Worklist-->
+                    <section>
+                        <div class="section-title">Worklist</div>
+                        <div class="fields-row">
+                            <div class="field-wrapper checkbox-field-wrapper">
+                                <label>Granted</label>
+                                <div class="input-wrapper">
+                                    <tumbler v-model="values.router.worklist.granted" title=""></tumbler>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="fields-row row-columns-2">
+                            <div class="field-wrapper">
+                                <label>Iat</label>
+                                <div class="input-wrapper">
+                                    <input type="text" title="Issued at date-time" v-model="values.router.worklist.iat"/>
+                                </div>
+                            </div>
+                            <div class="field-wrapper">
+                                <label>Exp</label>
+                                <div class="input-wrapper">
+                                    <input type="text" title="Expiration date-time" v-model="values.router.worklist.exp"/>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    
                 </div>
                 <div class="generator-layout" v-if="values.product == 'editor'">
                     <!--PRO-->
@@ -967,7 +1074,7 @@
         </tabs>
         <div class="fields-row field-actions">
             <div class="button primary" @click="save">Save</div>
-            <div class="button secondary">Generate License</div>
+            <div class="button secondary" @click="generate">Generate License</div>
         </div>
         <div v-if="lock" class="lock-overlay"></div>
     </div>
@@ -1425,6 +1532,78 @@
                         </div>
                         `
                     });
+                    Vue.component("input-field",{
+                        data(){
+                            return {
+                                error:false
+                            };
+                        },
+                        model: {
+                            prop: 'value',
+                            event: 'change'
+                        },
+                        props:{
+                            value:"",
+                            min:{
+                                type:"Number",
+                                default:null,
+                                required:false
+                            },
+                            max:{
+                                type:"Number",
+                                default:null,
+                                required:false
+                            },
+                            type:{
+                                type:"String",
+                                default:"number",
+                                required:false
+                            },
+                            title:{
+                                type:"String",
+                                default:"",
+                                required:false
+                            },
+                        },
+                        watch:{
+                            value(){
+                                if(this.value){
+                                    if(this.type == "number"){
+                                        if(this.min && parseInt(this.value) < parseInt(this.min)){
+                                            this.value = this.min;
+                                            this.error = true;
+                                            console.warn({
+                                                min:this.min,
+                                                value:this.value
+                                            });
+                                            setTimeout(()=>{this.error=false;},1000);
+                                        }else if(this.max && parseInt(this.value) > parseInt(this.max)){
+                                            this.value = this.max;
+                                            this.error = true;
+                                            console.warn({
+                                                max:this.max,
+                                                value:this.value
+                                            });
+                                            setTimeout(()=>{this.error=false;},1000);
+                                        }
+                                    }
+                                }
+                                console.log(this.value);
+                            }
+                        },
+                        template:`
+                        <div class="input-wrapper">
+                            <input :type="type" v-model="value" :title="title" @change="$emit('change',$event.target.value)"/>
+                            <transition name="opacity">
+                                <span v-if="error" class="input-error">
+                                    <template v-if="min && max">Value must be between {{min}} and {{max}}</template>
+                                    <template v-if="min && !max">Value must be between greater than {{min}}</template>
+                                    <template v-if="!min && max">Value must be between less than {{max}}</template>
+                                </span>
+                            </transition>
+                        </div>
+                        `
+                    });
                     window.LicensesGeneratorController = new Vue({
                         "el":"#license_generator_container",
                         data(){
@@ -1434,21 +1613,11 @@
                                 values:{
                                     hid:"{/literal}{$HARDWARE_ID}{literal}",
                                     serial:"{/literal}{$SERIAL}{literal}",
-                                    version:"",
+                                    version:"jwt.v2",
                                     start_date:"{/literal}{$CURRENT_DATE}{literal}",
                                     days:365,
                                     product:null,
                                     platform:"standalone",
-                                    rapid:{
-                                        dicom:{
-                                            granted:false,
-                                            iat:"{/literal}{$CURRENT_DATE}{literal}",
-                                            exp:"{/literal}{$OFFSET_DATE}{literal}",
-                                            scp:{
-                                                max:1000
-                                            }
-                                        },
-                                    },
                                     router:{
                                         platform:"standalone",
                                         storage:{
@@ -1536,7 +1705,24 @@
                                             iat:"{/literal}{$CURRENT_DATE}{literal}",
                                             exp:"{/literal}{$OFFSET_DATE}{literal}",
                                             granted:false, 
-                                        }
+                                        },
+                                        fhir:{
+                                            granted:false
+                                        },
+                                        workflow:{
+                                            granted:false,
+                                            max:5
+                                        },
+                                        cluster:{
+                                            iat:"{/literal}{$CURRENT_DATE}{literal}",
+                                            exp:"{/literal}{$OFFSET_DATE}{literal}",
+                                            granted:false,
+                                        },
+                                        worklist:{
+                                            iat:"{/literal}{$CURRENT_DATE}{literal}",
+                                            exp:"{/literal}{$OFFSET_DATE}{literal}",
+                                            granted:false,
+                                        },
                                     },
                                     editor:{
                                         iss:"Dicom Systems",
@@ -1555,11 +1741,11 @@
                         },
                         methods:{
                             calculateIAT(date){
-                                this.values.rapid.dicom.iat = this.values.router.dicom.iat = this.values.router.hl7.iat = this.values.router.vna.iat = this.values.editor.pro.iat = date;
+                                this.values.router.dicom.iat = this.values.router.hl7.iat = this.values.router.vna.iat = this.values.editor.pro.iat = date;
                                 this.diff_from = date;
                             },
                             calculateEXP(date){
-                                this.values.rapid.dicom.exp = this.values.router.dicom.exp = this.values.router.hl7.exp = this.values.router.vna.exp = this.values.editor.pro.exp = date;
+                                this.values.router.dicom.exp = this.values.router.hl7.exp = this.values.router.vna.exp = this.values.editor.pro.exp = date;
                             },
                             generateContent(key,section){
                                 var values = [];
@@ -1576,8 +1762,6 @@
                                             if([
                                                 ".editor.pro.exp",
                                                 ".editor.pro.iat",
-                                                ".rapid.dicom.exp",
-                                                ".rapid.dicom.iat",
                                                 ".router.dicom.exp",
                                                 ".router.dicom.iat",
                                                 ".router.hl7.exp",
@@ -1585,11 +1769,20 @@
                                                 ".router.vna.exp",
                                                 ".router.vna.iat",
                                                 ".start_date",
+                                                ".router.cluster.iat",
+                                                ".router.cluster.iat",
+                                                ".router.worklist.iat",
+                                                ".router.worklist.iat",
                                             ].indexOf(prefix)>-1){
                                                 var d = new Date(value);
                                                 if(d){
                                                     value = d.toISOString();
                                                 }
+                                            }
+                                            switch(prefix){
+                                                case ".product":
+                                                    continue;
+                                                break;
                                             }
                                             values.push(prefix+"="+value);
                                         break;
@@ -1607,14 +1800,16 @@
                                             var line = decoded[i].split("=");
                                             if(line.length==2){
                                                 var value = "'"+line[1]+"'";
-                                                if(line[1]==false||line[1]==true||line[1]=='false'||line[1]=='true'){
+                                                if(line[1]=='false'||line[1]=='true'){
                                                     value = line[1]==true||line[1]=='true';
                                                 }
                                                 if(typeof value == 'string' && value.trim().length==0){
                                                     value = "''";
                                                 }
                                                 var key = line[0].replace("&quot;","");
-                                                eval("window.LicensesGeneratorController.values."+key+"="+value);
+                                                if(typeof eval("window.LicensesGeneratorController.values."+key) != "undefined"){
+                                                    eval("window.LicensesGeneratorController.values."+key+"="+value);
+                                                }
                                             }
                                         }
                                     }
@@ -1624,6 +1819,20 @@
                             save(){
                                 this.lock = true;
                                 fetch(window.location.origin+"/index.php?module=ass_hardware&action=update_license&record="+this.id,{
+                                    method:"POST",
+                                    body:JSON.stringify(this.manual)
+                                }).then(response=>response.json()).then((response)=>{
+                                    this.lock = false;
+                                    if(response.result == true){
+                                        
+                                    }
+                                }).catch((error)=>{
+                                    this.lock = false;
+                                });
+                            },
+                            generate(){
+                                this.lock = true;
+                                fetch(window.location.origin+"/index.php?module=ass_hardware&action=generate_license&record="+this.id+"&days="+this.values.days+"&start_date="+this.values.start_date,{
                                     method:"POST",
                                     body:JSON.stringify(this.manual)
                                 }).then(response=>response.json()).then((response)=>{
@@ -1657,436 +1866,3 @@
         }
    </script> 
 {/literal}
-{*
-
-{
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "http://www.dcmsys.com/license",
-  "title": "license",
-  "description": "Dicom Systems License Schema",
-  "required": [
-    "version",
-    "hid"
-  ],
-  "type": "object",
-  "properties": {
-    "hid": {
-      "type": "string",
-      "minLength": 6,
-      "maxLength": 255,
-      "description": "hardware identifier"
-    },
-    "router": {
-      "type": "object",
-      "description": "Dcmsys Router",
-      "required": [
-        "platform"
-      ],
-      "properties": {
-        "platform": {
-          "type": "string",
-          "enum": [
-            "standalone",
-            "gcp"
-          ],
-          "default": "standalone",
-          "description": "router platform type"
-        },
-        "storage": {
-          "type": "object",
-          "properties": {
-            "max": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 100,
-              "description": "maximum number of storages"
-            },
-            "quota": {
-              "type": "object",
-              "description": "storage quota parameters",
-              "properties": {
-                "size": {
-                  "type": "object",
-                  "properties": {
-                    "max": {
-                      "type": "integer",
-                      "minimum": 1,
-                      "description": "maximum storage capacity"
-                    }
-                  },
-                  "description": "storage capacity"
-                },
-                "study": {
-                  "type": "object",
-                  "properties": {
-                    "max": {
-                      "type": "integer",
-                      "minimum": 1,
-                      "description": "maximum number of studies"
-                    }
-                  },
-                  "description": "dicom studies"
-                },
-                "hl7": {
-                  "type": "object",
-                  "properties": {
-                    "max": {
-                      "type": "integer",
-                      "minimum": 1,
-                      "description": "maximum number of hl7 messages"
-                    }
-                  },
-                  "description": "hl7 messages"
-                },
-                "order": {
-                  "type": "object",
-                  "properties": {
-                    "max": {
-                      "type": "integer",
-                      "minimum": 1,
-                      "description": "maximum number of dicom worklist orders"
-                    }
-                  },
-                  "description": "dicom worklist"
-                },
-                "dynamic": {
-                  "type": "object",
-                  "properties": {
-                    "granted": {
-                      "type": "boolean",
-                      "description": "grant dynamic quota service"
-                    }
-                  },
-                  "description": "dynamic quota having pool zone for unrouted studies"
-                }
-              }
-            },
-            "retention": {
-              "type": "object",
-              "description": "limit storage data retention",
-              "properties": {
-                "study": {
-                  "type": "object",
-                  "properties": {
-                    "max": {
-                      "type": "integer",
-                      "minimum": 3600,
-                      "description": "maximum retention period for dicom study"
-                    }
-                  },
-                  "description": "dicom study retention period"
-                },
-                "hl7": {
-                  "type": "object",
-                  "properties": {
-                    "max": {
-                      "type": "integer",
-                      "minimum": 3600,
-                      "description": "maximum retention period for hl7 message"
-                    }
-                  },
-                  "description": "hl7 message retention period"
-                },
-                "order": {
-                  "type": "object",
-                  "properties": {
-                    "max": {
-                      "type": "integer",
-                      "minimum": 3600,
-                      "description": "maximum retention period for dicom worklist order"
-                    }
-                  },
-                  "description": "dicom worklist order retention period"
-                }
-              }
-            }
-          },
-          "description": "storage parameters"
-        },
-        "dicom": {
-          "type": "object",
-          "required": [
-            "iat",
-            "exp"
-          ],
-          "properties": {
-            "iss": {
-              "type": "string",
-              "default": "Dicom Systems",
-              "description": "issued by"
-            },
-            "iat": {
-              "type": "string",
-              "format": "date-time",
-              "description": "issued at date-time"
-            },
-            "exp": {
-              "type": "string",
-              "format": "date-time",
-              "description": "expiration date-time"
-            },
-            "granted": {
-              "type": "boolean",
-              "description": "dicom engine is granted"
-            },
-            "scp": {
-              "type": "object",
-              "properties": {
-                "max": {
-                  "type": "integer",
-                  "minimum": 1,
-                  "maximum": 1000,
-                  "default": 1000,
-                  "description": "maximum number of dicom receivers"
-                }
-              },
-              "description": "dicom receiver"
-            },
-            "scu": {
-              "type": "object",
-              "properties": {
-                "max": {
-                  "type": "integer",
-                  "minimum": 1,
-                  "maximum": 10000,
-                  "default": 10000,
-                  "description": "maximum number of registered remote dicom devices"
-                }
-              },
-              "description": "dicom remote device"
-            },
-            "router": {
-              "type": "object",
-              "properties": {
-                "granted": {
-                  "type": "boolean",
-                  "description": "dicom router is granted"
-                },
-                "max": {
-                  "type": "integer",
-                  "minimum": 1,
-                  "maximum": 10000,
-                  "default": 10000,
-                  "description": "maximum number of dicom router rules"
-                }
-              },
-              "description": "dicom router"
-            },
-            "transform": {
-              "type": "object",
-              "properties": {
-                "granted": {
-                  "type": "boolean",
-                  "description": "dicom object transformation is granted"
-                },
-                "max": {
-                  "type": "integer",
-                  "minimum": 1,
-                  "maximum": 10000,
-                  "default": 10000,
-                  "description": "maximum number of dicom transformation rules"
-                }
-              },
-              "description": "dicom object transformation"
-            },
-            "proxy": {
-              "type": "object",
-              "properties": {
-                "granted": {
-                  "type": "boolean",
-                  "description": "dicom proxy is granted"
-                },
-                "max": {
-                  "type": "integer",
-                  "minimum": 1,
-                  "maximum": 10000,
-                  "default": 10000,
-                  "description": "maximum number of dicom proxy rules"
-                },
-                "query": {
-                  "type": "object",
-                  "properties": {
-                    "granted": {
-                      "type": "boolean",
-                      "description": "dicom c-find proxy is granted"
-                    }
-                  },
-                  "description": "dicom c-find proxy"
-                },
-                "dmwl": {
-                  "type": "object",
-                  "properties": {
-                    "granted": {
-                      "type": "boolean",
-                      "description": "dicom worklist proxy is granted"
-                    }
-                  },
-                  "description": "dicom worklist proxy"
-                },
-                "retrieve": {
-                  "type": "object",
-                  "properties": {
-                    "granted": {
-                      "type": "boolean",
-                      "description": "dicom c-move/c-get proxy is granted"
-                    }
-                  },
-                  "description": "dicom c-move/c-get proxy"
-                }
-              },
-              "description": "dicom proxy engine"
-            },
-            "priors": {
-              "type": "object",
-              "properties": {
-                "granted": {
-                  "type": "boolean",
-                  "description": "dicom prior engine is granted"
-                },
-                "max": {
-                  "type": "integer",
-                  "minimum": 1,
-                  "maximum": 10000,
-                  "default": 10000,
-                  "description": "maximum number of dicom prior rules"
-                }
-              },
-              "description": "dicom prior engine"
-            }
-          },
-          "description": "dicom engine"
-        },
-        "hl7": {
-          "type": "object",
-          "required": [
-            "iat",
-            "exp"
-          ],
-          "properties": {
-            "iss": {
-              "type": "string",
-              "default": "Dicom Systems",
-              "description": "issued by"
-            },
-            "iat": {
-              "type": "string",
-              "format": "date-time",
-              "description": "issued at date-time"
-            },
-            "exp": {
-              "type": "string",
-              "format": "date-time",
-              "description": "expiration date-time"
-            },
-            "granted": {
-              "type": "boolean",
-              "description": "hl7 engine is granted"
-            },
-            "scp": {
-              "type": "object",
-              "properties": {
-                "max": {
-                  "type": "integer",
-                  "minimum": 1,
-                  "maximum": 1000,
-                  "default": 1000,
-                  "description": "maximum number of hl7 receivers"
-                }
-              },
-              "description": "hl7 receiver"
-            },
-            "scu": {
-              "type": "object",
-              "properties": {
-                "max": {
-                  "type": "integer",
-                  "minimum": 1,
-                  "maximum": 10000,
-                  "default": 10000,
-                  "description": "maximum number of hl7 remote device records"
-                }
-              },
-              "description": "hl7 remote device records"
-            }
-          },
-          "description": "hl7 engine"
-        },
-        "vna": {
-          "type": "object",
-          "required": [
-            "iat",
-            "exp"
-          ],
-          "properties": {
-            "iss": {
-              "type": "string",
-              "default": "Dicom Systems",
-              "description": "issued by"
-            },
-            "iat": {
-              "type": "string",
-              "format": "date-time",
-              "description": "issued at date-time"
-            },
-            "exp": {
-              "type": "string",
-              "format": "date-time",
-              "description": "expiration date-time"
-            },
-            "granted": {
-              "type": "boolean",
-              "description": "vendor neutral archive is granted"
-            }
-          },
-          "description": "vendor neutral archive"
-        }
-      }
-    },
-    "editor": {
-      "type": "object",
-      "description": "Dcmsys DICOM Editor",
-      "properties": {
-        "iss": {
-          "type": "string",
-          "default": "Dicom Systems",
-          "description": "issued by"
-        },
-        "pro": {
-          "type": "object",
-          "required": [
-            "iat",
-            "exp"
-          ],
-          "iat": {
-            "type": "string",
-            "format": "date-time",
-            "description": "issued at date/time"
-          },
-          "exp": {
-            "type": "string",
-            "format": "date-time",
-            "description": "license expiration date/time"
-          },
-          "granted": {
-            "type": "bool",
-            "description": "license for this product is granted"
-          },
-          "wsi": {
-            "type": "object",
-            "properties": {
-              "granted": {
-                "type": "boolean",
-                "description": "wsi handling is granted"
-              }
-            },
-            "description": "WSI features"
-          },
-          "description": "professional version of the dicom editor"
-        }
-      }
-    }
-  }
-}
-
-*}
