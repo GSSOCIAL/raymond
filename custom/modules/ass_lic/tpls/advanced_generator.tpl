@@ -547,7 +547,7 @@
             </div>
         </div>
         <tabs
-        :selected="form"
+        selected="form"
         {literal}:tabs="{'form':'Form','manual':'Manual'}"{/literal}
         >
             <template v-slot:form>
