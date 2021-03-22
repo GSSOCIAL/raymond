@@ -187,6 +187,22 @@
         justify-content: flex-end;
         flex-direction: row;
     }
+    .field-wrapper > .description,.input-wrapper > .description{
+        letter-spacing: 0px;
+        margin-left: 10px;
+        font-size: 14px;
+        color:#9e9e9e;
+    }
+    .input-wrapper.checkbox-field{
+        display: flex;
+        flex-direction: row;
+    }
+    .input-wrapper.simple-field{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
     textarea.manual{
         min-height: 50vh;
     }
@@ -481,6 +497,169 @@
         border-radius: 4px;
         margin-top: 2px;
     }
+    .vue-modal{
+        
+    }
+    .vue-modal *{
+        position:relative;
+    }
+    .vue-modal > .overlay{
+        position: fixed;
+        top:0px;
+        right:0px;
+        bottom:0px;
+        left:0px;
+        z-index:111000;
+        background: rgba(255,255,255,0.6);
+        -webkit-backdrop-filter: saturate(180%) blur(10px);
+        backdrop-filter: saturate(180%) blur(10px);
+    }
+    .vue-modal .modal-window-wrapper{
+        position: fixed;
+        top:0px;
+        right:0px;
+        bottom:0px;
+        left:0px;
+        z-index:111001;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .vue-modal .modal-window-wrapper .modal-window{
+
+    }
+    .vue-modal .modal-window-wrapper .modal-window > .modal-window-actions{
+        display: inline-block;
+        width: 100%;
+    }
+    .vue-modal .modal-window-wrapper .modal-window > .modal-window-actions .action-close{
+        float: right;
+        cursor: pointer;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+    .vue-modal .modal-window-wrapper .action-icon{
+        width:30px;
+        margin-left: 7px;
+    }
+    .vue-modal .modal-window-wrapper .action-icon:before{
+        content:"";
+        display: block;
+        padding-top: 100%;
+    }
+    .vue-modal .modal-window-wrapper .action-icon .icon-wrapper{
+        position: absolute;
+        top:0px;
+        right:0px;
+        bottom:0px;
+        left:0px;
+        background: #fff;
+        border-radius: 100%;
+        box-shadow: 0px 2px 3px rgb(0 0 0 / 10%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .vue-modal .modal-window-wrapper .action-icon .icon-wrapper:before,
+    .vue-modal .modal-window-wrapper .action-icon .icon-wrapper:after{
+        content:"";
+        background: #534d64;
+        position: absolute;
+        border-radius: 6px;
+    }
+    .vue-modal .action-close .action-icon .icon-wrapper:before,
+    .vue-modal .action-close .action-icon .icon-wrapper:after{
+        width: 12px;
+        height: 3px;
+    }
+    .vue-modal .action-close .action-icon .icon-wrapper:before{
+        transform:rotate(45deg);
+    }
+    .vue-modal .action-close .action-icon .icon-wrapper:after{
+        transform:rotate(-45deg);
+    }
+    .vue-modal .action-close > span{
+        opacity:0;
+        left:100%;
+        transition: 0.3s ease-in-out opacity,0.4s cubic-bezier(0.075, 0.82, 0.165, 1) left;
+    }
+    .vue-modal .action-close:hover > span{
+        opacity:1;
+        left:0%;
+    }
+    .vue-modal .modal-window-wrapper .modal-window .modal-window-popup{
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0px 2px 3px rgb(0 0 0 / 10%);    
+        max-width: 600px;
+    }
+    .vue-modal .modal-window-popup .modal-title{
+        padding: 30px 30px 10px;
+        font-size: 24px;    
+        font-weight: 600;
+    }
+    .vue-modal .modal-window-popup .modal-title .title-icon{
+        width:40px;
+        margin-bottom: 7px;
+    }
+    .vue-modal .modal-window-popup .modal-title .title-icon:before{
+        content: "";
+        padding-top:100%;
+        display: block;
+    }
+    .vue-modal .modal-window-popup .modal-title .title-icon .icon-wrapper{
+        position: absolute;
+        top:0px;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 100%;
+    }
+    .vue-modal .modal-window-popup .modal-title .title-icon.success .icon-wrapper{
+        background: #4caf50;
+    }
+    .vue-modal .modal-window-popup .modal-title .title-icon.fault .icon-wrapper{
+        background: #f44336;
+    }
+    .vue-modal .modal-window-popup .modal-title .title-icon .icon-wrapper:before,
+    .vue-modal .modal-window-popup .modal-title .title-icon .icon-wrapper:after{
+        content:"";    
+        background: #fff;
+        height: 4px;
+        border-radius: 4px;
+        position: absolute;
+    }
+    .vue-modal .modal-window-popup .modal-title .title-icon.success .icon-wrapper:before{
+        width: 10px;
+        transform: rotate(45deg);
+        top: 21px;
+        left: 10px;
+    }
+    .vue-modal .modal-window-popup .modal-title .title-icon.success .icon-wrapper:after{
+        width: 18px;
+        transform: rotate(132deg);
+        top: 18px;
+        left: 14px;
+    }
+    .vue-modal .modal-window-popup .modal-title .title-icon.fault .icon-wrapper:before{
+        width: 18px;
+        transform: rotate(45deg);
+    }
+    .vue-modal .modal-window-popup .modal-title .title-icon.fault .icon-wrapper:after{
+        width: 18px;
+        transform: rotate(-45deg);
+    }
+
+    .vue-modal .modal-window-popup .modal-context{
+        padding: 0px 30px 20px;
+        font-size: 15px;
+        word-break: break-word;
+        white-space: pre-wrap;
+    }
 </style>
 {/literal}
 <div id="license_generator_container">
@@ -584,6 +763,7 @@
                                     <div class="field-wrapper">
                                         <label>Max</label>
                                         <input-field min="1" max="1000" type="number" title="Maximum number of rapid receivers" v-model="values.router.dicom.scp.max"></input-field>
+                                        <div class="description">Maximum number of rapid receivers</div>
                                     </div>
                                 </div>
                             </div>
@@ -621,6 +801,7 @@
                                     <div class="field-wrapper">
                                         <label></label>
                                         <input-field min="1" max="100" type="number" title="Maximum number of storages" v-model="values.router.storage.max"></input-field>
+                                        <div class="description">Maximum number of storages</div>
                                     </div>
                                 </div>
                             </div>
@@ -633,6 +814,7 @@
                                             <div class="field-wrapper">
                                                 <label>Max</label>
                                                 <input-field min="1" type="number" title="Maximum storage capacity" v-model="values.router.storage.quota.size.max"></input-field>
+                                                <div class="description">Maximum storage capacity</div>
                                             </div>
                                         </div>
                                     </div>
@@ -642,6 +824,7 @@
                                             <div class="field-wrapper">
                                                 <label>Max</label>
                                                 <input-field min="1" type="number" title="Maximum number of studies" v-model="values.router.storage.quota.study.max"></input-field>
+                                                <div class="description">Maximum number of studies</div>
                                             </div>
                                         </div>
                                     </div>
@@ -651,6 +834,7 @@
                                             <div class="field-wrapper">
                                                 <label>Max</label>
                                                 <input-field min="1" type="number" title="Maximum number of hl7 messages" v-model="values.router.storage.quota.hl7.max"></input-field>
+                                                <div class="description">Maximum number of hl7 messages</div>
                                             </div>
                                         </div>
                                     </div>
@@ -660,6 +844,7 @@
                                             <div class="field-wrapper">
                                                 <label>Max</label>
                                                 <input-field min="1" type="number" title="Maximum number of dicom worklist orders" v-model="values.router.storage.quota.order.max"></input-field>
+                                                <div class="description">Maximum number of dicom worklist orders</div>
                                             </div>
                                         </div>
                                     </div>
@@ -668,8 +853,9 @@
                                         <div class="input-wrapper">
                                             <div class="field-wrapper">
                                                 <label>Granted</label>
-                                                <div class="input-wrapper">
+                                                <div class="input-wrapper checkbox-field">
                                                     <tumbler v-model="values.router.storage.quota.dynamic.granted" title="Grant dynamic quota service"></tumbler>
+                                                    <div class="description">Grant dynamic quota service</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -685,6 +871,7 @@
                                             <div class="field-wrapper">
                                                 <label>Max</label>
                                                 <input-field min="3600" type="number" title="Maximum retention period for dicom study" v-model="values.router.storage.retention.study.max"></input-field>
+                                                <div class="description">Maximum retention period for dicom study</div>
                                             </div>
                                         </div>
                                     </div>
@@ -694,6 +881,7 @@
                                             <div class="field-wrapper">
                                                 <label>Max</label>
                                                 <input-field min="3600" type="number" title="Maximum retention period for hl7 message" v-model="values.router.storage.retention.hl7.max"></input-field>
+                                                <div class="description">Maximum retention period for hl7 message</div>
                                             </div>
                                         </div>
                                     </div>
@@ -703,6 +891,7 @@
                                             <div class="field-wrapper">
                                                 <label>Max</label>
                                                 <input-field min="3600" type="number" title="Maximum retention period for dicom worklist order" v-model="values.router.storage.retention.order.max"></input-field>
+                                                <div class="description">Maximum retention period for dicom worklist order</div>
                                             </div>
                                         </div>
                                     </div>
@@ -716,8 +905,9 @@
                         <div class="fields-row">
                             <div class="field-wrapper checkbox-field-wrapper">
                                 <label>Granted</label>
-                                <div class="input-wrapper">
+                                <div class="input-wrapper checkbox-field">
                                     <tumbler v-model="values.router.dicom.granted" title="Dicom engine is granted"></tumbler>
+                                    <div class="description">Dicom engine is granted</div>
                                 </div>
                             </div>
                         </div>
@@ -741,8 +931,9 @@
                                 <div class="fields-wrapper">
                                     <div class="field-wrapper">
                                         <label>Max</label>
-                                        <div class="input-wrapper">
+                                        <div class="input-wrapper simple-field">
                                             <input-field min="1" max="1000" type="number" title="Maximum number of dicom receivers" v-model="values.router.dicom.scp.max"></input-field>
+                                            <div class="description">Maximum number of dicom receivers</div>
                                         </div>
                                     </div>
                                 </div>
@@ -752,8 +943,9 @@
                                 <div class="fields-wrapper">
                                     <div class="field-wrapper">
                                         <label>Max</label>
-                                        <div class="input-wrapper">
+                                        <div class="input-wrapper simple-field">
                                             <input-field min="1" max="10000" type="number" title="Maximum number of registered remote dicom devices" v-model="values.router.dicom.scu.max"></input-field>
+                                            <div class="description">Maximum number of registered remote dicom devices</div>
                                         </div>
                                     </div>
                                 </div>
@@ -763,14 +955,16 @@
                                 <div class="fields-wrapper">
                                     <div class="field-wrapper">
                                         <label>Granted</label>
-                                        <div class="input-wrapper">
+                                        <div class="input-wrapper checkbox-field">
                                             <tumbler v-model="values.router.dicom.router.granted" title="Dicom router is granted"></tumbler>
+                                            <div class="description">Dicom router is granted</div>
                                         </div>
                                     </div>
                                     <div class="field-wrapper" v-show="values.router.dicom.router.granted">
                                         <label>Max</label>
-                                        <div class="input-wrapper">
+                                        <div class="input-wrapper simple-field">
                                             <input-field min="1" max="10000" type="number" title="Maximum number of dicom router rules" v-model="values.router.dicom.router.max"></input-field>
+                                            <div class="description">Maximum number of dicom router rules</div>
                                         </div>
                                     </div>
                                 </div>
@@ -780,15 +974,16 @@
                                 <div class="fields-wrapper">
                                     <div class="field-wrapper">
                                         <label>Granted</label>
-                                        <div class="input-wrapper">
+                                        <div class="input-wrapper checkbox-field">
                                             <tumbler v-model="values.router.dicom.transform.granted" title="Dicom object transformation is granted"></tumbler>
+                                            <div class="description">Dicom object transformation is granted</div>
                                         </div>
                                     </div>
                                     <div class="field-wrapper" v-show="values.router.dicom.transform.granted">
                                         <label>Max</label>
-                                        <div class="input-wrapper">
-                                            <input-field min="3600" type="number" title="Maximum retention period for hl7 message" v-model="values.router.storage.retention.hl7.max"></input-field>
+                                        <div class="input-wrapper simple-field">
                                             <input-field min="1" max="10000" type="number" title="Maximum number of dicom transformation rules" v-model="values.router.dicom.transform.max"></input-field>
+                                            <div class="description">Maximum number of dicom transformation rules</div>
                                         </div>
                                     </div>
                                 </div>
@@ -798,22 +993,25 @@
                                 <div class="fields-wrapper">
                                     <div class="field-wrapper">
                                         <label>Granted</label>
-                                        <div class="input-wrapper">
+                                        <div class="input-wrapper checkbox-field">
                                             <tumbler v-model="values.router.dicom.proxy.granted" title="Dicom proxy is granted"></tumbler>
+                                            <div class="description">Dicom proxy is granted</div>
                                         </div>
                                     </div>
                                     <div class="field-wrapper" v-show="values.router.dicom.proxy.granted">
                                         <label>Max</label>
-                                        <div class="input-wrapper">
+                                        <div class="input-wrapper simple-field">
                                             <input-field min="1" max="10000" type="number" title="Maximum number of dicom proxy rules" v-model="values.router.dicom.proxy.max"></input-field>
+                                            <div class="description">Maximum number of dicom proxy rules</div>
                                         </div>
                                     </div>
                                     <div class="field-wrapper" v-show="values.router.dicom.proxy.granted">
                                         <label>Query</label>
                                         <div class="field-wrapper">
                                             <label>Granted</label>
-                                            <div class="input-wrapper">
+                                            <div class="input-wrapper checkbox-field">
                                                 <tumbler v-model="values.router.dicom.proxy.query.granted" title="Dicom c-find proxy is granted"></tumbler>
+                                                <div class="description">Dicom c-find proxy is granted</div>
                                             </div>
                                         </div>
                                     </div>
@@ -821,8 +1019,9 @@
                                         <label>Dmwl</label>
                                         <div class="field-wrapper">
                                             <label>Granted</label>
-                                            <div class="input-wrapper">
+                                            <div class="input-wrapper checkbox-field">
                                                 <tumbler v-model="values.router.dicom.proxy.dmwl.granted" title="Dicom worklist proxy is granted"></tumbler>
+                                                <div class="description">Dicom worklist proxy is granted</div>
                                             </div>
                                         </div>
                                     </div>
@@ -830,8 +1029,9 @@
                                         <label>Retrieve</label>
                                         <div class="field-wrapper">
                                             <label>Granted</label>
-                                            <div class="input-wrapper">
+                                            <div class="input-wrapper checkbox-field">
                                                 <tumbler v-model="values.router.dicom.proxy.retrieve.granted" title="Dicom c-move/c-get proxy is granted"></tumbler>
+                                                <div class="description">Dicom c-move/c-get proxy is granted</div>
                                             </div>
                                         </div>
                                     </div>
@@ -842,14 +1042,16 @@
                                 <div class="fields-wrapper">
                                     <div class="field-wrapper">
                                         <label>Granted</label>
-                                        <div class="input-wrapper">
+                                        <div class="input-wrapper checkbox-field">
                                             <tumbler v-model="values.router.dicom.priors.granted" title="Dicom prior engine is granted"></tumbler>
+                                            <div class="description">Dicom prior engine is granted</div>
                                         </div>
                                     </div>
                                     <div class="field-wrapper" v-show="values.router.dicom.priors.granted">
                                         <label>Max</label>
-                                        <div class="input-wrapper">
+                                        <div class="input-wrapper simple-field">
                                             <input-field min="1" max="10000" type="number" title="Maximum number of dicom prior rules" v-model="values.router.dicom.priors.max"></input-field>
+                                            <div class="description">Maximum number of dicom prior rules</div>
                                         </div>
                                     </div>
                                 </div>
@@ -862,8 +1064,9 @@
                         <div class="fields-row">
                             <div class="field-wrapper checkbox-field-wrapper">
                                 <label>Granted</label>
-                                <div class="input-wrapper">
+                                <div class="input-wrapper checkbox-field">
                                     <tumbler v-model="values.router.hl7.granted" title="Hl7 engine is granted"></tumbler>
+                                    <div class="description">Hl7 engine is granted</div>
                                 </div>
                             </div>
                         </div>
@@ -887,8 +1090,9 @@
                                 <div class="fields-wrapper">
                                     <div class="field-wrapper">
                                         <label>Max</label>
-                                        <div class="input-wrapper">
+                                        <div class="input-wrapper simple-field">
                                             <input-field min="1" max="1000" type="number" title="Maximum number of hl7 receivers" v-model="values.router.hl7.scp.max"></input-field>
+                                            <div class="description">Maximum number of hl7 receivers</div>
                                         </div>
                                     </div>
                                 </div>
@@ -898,8 +1102,9 @@
                                 <div class="fields-wrapper">
                                     <div class="field-wrapper">
                                         <label>Max</label>
-                                        <div class="input-wrapper">
+                                        <div class="input-wrapper simple-field">
                                             <input-field min="1" max="10000" type="number" title="Maximum number of hl7 remote device records" v-model="values.router.hl7.scu.max"></input-field>
+                                            <div class="description">Maximum number of hl7 remote device records</div>
                                         </div>
                                     </div>
                                 </div>
@@ -912,8 +1117,9 @@
                         <div class="fields-row">
                             <div class="field-wrapper checkbox-field-wrapper">
                                 <label>Granted</label>
-                                <div class="input-wrapper">
+                                <div class="input-wrapper checkbox-field">
                                     <tumbler v-model="values.router.vna.granted" title="Vendor neutral archive is granted"></tumbler>
+                                    <div class="description">Vendor neutral archive is granted</div>
                                 </div>
                             </div>
                         </div>
@@ -938,8 +1144,9 @@
                         <div class="fields-row">
                             <div class="field-wrapper checkbox-field-wrapper">
                                 <label>Granted</label>
-                                <div class="input-wrapper">
+                                <div class="input-wrapper checkbox-field">
                                     <tumbler v-model="values.router.fhir.granted" title=""></tumbler>
+                                    <div class="description"></div>
                                 </div>
                             </div>
                         </div>
@@ -951,8 +1158,9 @@
                         <div class="fields-row section-fields">
                             <div class="field-wrapper checkbox-field-wrapper">
                                 <label>Granted</label>
-                                <div class="input-wrapper">
+                                <div class="input-wrapper checkbox-field">
                                     <tumbler v-model="values.router.workflow.granted" title=""></tumbler>
+                                    <div class="description"></div>
                                 </div>
                             </div>
                         </div>
@@ -963,6 +1171,7 @@
                                     <div class="field-wrapper">
                                         <label></label>
                                         <input-field min="1" type="number" title="" v-model="values.router.workflow.max"></input-field>
+                                        <div class="description"></div>
                                     </div>
                                 </div>
                             </div>
@@ -974,8 +1183,9 @@
                         <div class="fields-row">
                             <div class="field-wrapper checkbox-field-wrapper">
                                 <label>Granted</label>
-                                <div class="input-wrapper">
+                                <div class="input-wrapper checkbox-field">
                                     <tumbler v-model="values.router.cluster.granted" title=""></tumbler>
+                                    <div class="description"></div>
                                 </div>
                             </div>
                         </div>
@@ -1000,8 +1210,9 @@
                         <div class="fields-row">
                             <div class="field-wrapper checkbox-field-wrapper">
                                 <label>Granted</label>
-                                <div class="input-wrapper">
+                                <div class="input-wrapper checkbox-field">
                                     <tumbler v-model="values.router.worklist.granted" title=""></tumbler>
+                                    <div class="description"></div>
                                 </div>
                             </div>
                         </div>
@@ -1029,8 +1240,9 @@
                         <div class="fields-row">
                             <div class="field-wrapper checkbox-field-wrapper">
                                 <label>Granted</label>
-                                <div class="input-wrapper">
+                                <div class="input-wrapper checkbox-field">
                                     <tumbler v-model="values.editor.pro.granted" title="License for this product is granted"></tumbler>
+                                    <div class="description">License for this product is granted</div>
                                 </div>
                             </div>
                         </div>
@@ -1054,8 +1266,9 @@
                                 <div class="fields-wrapper">
                                     <div class="field-wrapper">
                                         <label>Granted</label>
-                                        <div class="input-wrapper">
+                                        <div class="input-wrapper checkbox-field">
                                             <tumbler v-model="values.editor.pro.wsi.granted" title="Wsi handling is granted"></tumbler>
+                                            <div class="description">Wsi handling is granted</div>
                                         </div>
                                     </div>
                                 </div>
@@ -1078,6 +1291,32 @@
         </div>
         <div v-if="lock" class="lock-overlay"></div>
     </div>
+    <div class="vue-modal">
+        <transition name="opacity">
+        <div class="overlay" v-if="modal"></div>
+        </transition>
+        <transition name="bounce">
+        <div class="modal-window-wrapper" v-if="modal">
+            <div v-show="modal" class="modal-window">
+                <div class="modal-window-actions">
+                    <div class="action-close" @click="modal=false">
+                        <span>Close</span>
+                        <div class="action-icon"><div class="icon-wrapper"></div></div>
+                    </div>
+                </div>
+                <div class="modal-window-popup">
+                    <div class="modal-title">
+                        <div class="title-icon"{literal}:class="{'success':modal_type=='success','fault':modal_type=='error'}"{/literal}>
+                            <div class="icon-wrapper"></div>
+                        </div>
+                        <span v-html="modal_title"></span>
+                    </div>
+                    <div class="modal-context" v-html="modal_description"></div>
+                </div>
+            </div>
+        </div>
+        </transition>
+    </div>
 </div>
 {literal}
    <script type="text/javascript">
@@ -1089,6 +1328,7 @@
                             return {
                                 /**Flag shows that calendar container is displayed*/
                                 state_open:false,
+                                id:null,
                                 /**Calendar current view [month|year]*/
                                 view:"month",
                                 /**Days of week*/
@@ -1315,10 +1555,11 @@
                                         this.$emit("change",this.str_date);
                                     }
                                 }
-                            }
+                            },
                         },
                         mounted(){
                             var d = new Date();
+                            this.id = randomString();
                             if(this.value){
                                 var dd = new Date(this.value);
                                 if(dd){
@@ -1351,9 +1592,17 @@
 
                             this.view_date.year = this.date.year;
                             this.view_date.month = this.date.month;
+
+                            $(window).on("mousedown",(Event)=>{
+                                if(this.state_open){
+                                    if(Event.target && $(Event.target).closest(".vue-component[data-id='"+this.id+"']").length==0){
+                                        this.state_open = false;
+                                    }
+                                }
+                            });
                         },
                         template:`
-                        <div class="vue-component calendar" :class="{'open':state_open}">
+                        <div class="vue-component calendar" :class="{'open':state_open}" :data-id="id">
                             <div class="field-wrapper">
                                 <div class="input-wrapper">
                                     <input v-show="display_field" type="text" v-model="str_date" readonly />
@@ -1736,7 +1985,12 @@
                                         },
                                     }
                                 },
-                                diff_from:""
+                                diff_from:"",
+                                modal:false,
+                                modal_type:"success",
+                                modal_title:"",
+                                modal_description:"",
+                                modal_actions:[]
                             };
                         },
                         methods:{
@@ -1824,10 +2078,22 @@
                                 }).then(response=>response.json()).then((response)=>{
                                     this.lock = false;
                                     if(response.result == true){
-                                        
+                                        this.modal_type = "success";
+                                        this.modal_title = "License saved";
+                                        this.modal_description = "";
+                                        this.modal = true;
+                                    }else{
+                                        this.modal_type = "error";
+                                        this.modal_title = "Failed to save license";
+                                        this.modal_description = "";
+                                        this.modal = true;
                                     }
                                 }).catch((error)=>{
                                     this.lock = false;
+                                    this.modal_type = "error";
+                                    this.modal_title = "Failed to save license";
+                                    this.modal_description = "";
+                                    this.modal = true;
                                 });
                             },
                             generate(){
@@ -1838,10 +2104,22 @@
                                 }).then(response=>response.json()).then((response)=>{
                                     this.lock = false;
                                     if(response.result == true){
-                                        
+                                        this.modal_type = "success";
+                                        this.modal_title = "License generated";
+                                        this.modal_description = "License generated successfully. You can find generated license located at panel 'licences'";
+                                        this.modal = true;
+                                    }else{
+                                        this.modal_type = "error";
+                                        this.modal_title = "Failed to generate license";
+                                        this.modal_description = response.description?response.description:"";
+                                        this.modal = true;
                                     }
                                 }).catch((error)=>{
                                     this.lock = false;
+                                    this.modal_type = "error";
+                                    this.modal_title = "Failed to generate license";
+                                    this.modal_description = "";
+                                    this.modal = true;
                                 });
                             }
                         },
@@ -1863,6 +2141,19 @@
                     });
                 }
             });
+        }
+        /**
+        * генерирует случайную строку
+        * @param {int} length Длина строки
+        */
+        function randomString(length=6){
+            var result           = '';
+            var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            var charactersLength = characters.length;
+            for ( var i = 0; i < length; i++ ) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+            }
+            return result;
         }
    </script> 
 {/literal}

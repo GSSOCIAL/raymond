@@ -31,7 +31,8 @@ class Customass_hardwareController extends SugarController{
     function action_generate_license(){
         if(!is_array($_REQUEST) || !array_key_exists("record",$_REQUEST)){
             echo(json_encode(array(
-                "result"=>false
+                "result"=>false,
+                "description"=>"hardware instance doesnt passed in request"
             )));
             die();
         }
@@ -45,6 +46,14 @@ class Customass_hardwareController extends SugarController{
                 if(!file_exists($__dir)){
                     mkdir($__dir);
                 }
+            }
+
+            if(empty($bean->hard_id)){
+                echo(json_encode(array(
+                    "result"=>false,
+                    "description"=>"'hardware id' field couldn't be empty"
+                )));
+                die();
             }
 
             //Create new license file
@@ -82,11 +91,24 @@ class Customass_hardwareController extends SugarController{
                         "result"=>true
                     )));
                     die();
+                }else{
+                    echo(json_encode(array(
+                        "result"=>false,
+                        "description"=>"could fetch generated file - {$file}"
+                    )));
+                    die();
                 }
+            }else{
+                echo(json_encode(array(
+                    "result"=>false,
+                    "description"=>"invalid license context format"
+                )));
+                die();
             }
         }
         echo(json_encode(array(
-            "result"=>false
+            "result"=>false,
+            "description"=>"could retrieve hardware record - {$_REQUEST['record']}"
         )));
         die();
     }
