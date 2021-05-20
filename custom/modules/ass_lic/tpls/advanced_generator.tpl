@@ -666,13 +666,13 @@
     <span v-if="false">Generator requires vue.js</span>
     <div v-if="true" class="generator-form" {literal}:class="{'loading':lock}"{/literal}>
         <div class="fields-row row-columns-5">
-            <div class="field-wrapper">
+            <div class="field-wrapper" style="display:none;">
                 <label>Hardware id</label>
                 <div class="input-wrapper">
                     <input type="text" maxlength="255" title="hardware identifier" v-model="values.hid"/>
                 </div>
             </div>
-            <div class="field-wrapper">
+            <div class="field-wrapper" style="display:none;">
                 <label>Serial</label>
                 <div class="input-wrapper">
                     <input type="text" v-model="values.serial"/>
@@ -698,7 +698,7 @@
                     </div>
                 </div>
             </div>
-            <div class="field-wrapper">
+            <div class="field-wrapper" style="display:none;">
                 <label>Platform</label>
                 <div class="input-wrapper">
                     <select v-model="values.router.platform" title="router platform type">
@@ -743,13 +743,13 @@
                             </div>
                         </div>
                         <div class="fields-row row-columns-2">
-                            <div class="field-wrapper">
+                            <div class="field-wrapper" style="display:none">
                                 <label>Iat</label>
                                 <div class="input-wrapper">
                                     <input type="text" title="Issued at date-time" v-model="values.router.dicom.iat"/>
                                 </div>
                             </div>
-                            <div class="field-wrapper">
+                            <div class="field-wrapper" style="display:none">
                                 <label>Exp</label>
                                 <div class="input-wrapper">
                                     <input type="text" title="Expiration date-time" v-model="values.router.dicom.exp"/>
@@ -805,7 +805,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="field-wrapper">
+                            <!--<div class="field-wrapper">
                                 <div class="field-label">Quota</div>
                                 <div class="fields-wrapper">
                                     <div class="field-wrapper">
@@ -896,7 +896,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div>-->
                         </div>
                     </section>
                     <!--DICOM-->
@@ -912,13 +912,13 @@
                             </div>
                         </div>
                         <div class="fields-row row-columns-2">
-                            <div class="field-wrapper">
+                            <div class="field-wrapper" style="display:none">
                                 <label>Iat</label>
                                 <div class="input-wrapper">
                                     <input type="text" title="Issued at date-time" v-model="values.router.dicom.iat"/>
                                 </div>
                             </div>
-                            <div class="field-wrapper">
+                            <div class="field-wrapper" style="display:none">
                                 <label>Exp</label>
                                 <div class="input-wrapper">
                                     <input type="text" title="Expiration date-time" v-model="values.router.dicom.exp"/>
@@ -1005,7 +1005,7 @@
                                             <div class="description">Maximum number of dicom proxy rules</div>
                                         </div>
                                     </div>
-                                    <div class="field-wrapper" v-show="values.router.dicom.proxy.granted">
+                                    <div class="field-wrapper" v-show="false && values.router.dicom.proxy.granted" style="display:none">
                                         <label>Query</label>
                                         <div class="field-wrapper">
                                             <label>Granted</label>
@@ -1015,7 +1015,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="field-wrapper" v-show="values.router.dicom.proxy.granted">
+                                    <div class="field-wrapper" v-show="false && values.router.dicom.proxy.granted" style="display:none">
                                         <label>Dmwl</label>
                                         <div class="field-wrapper">
                                             <label>Granted</label>
@@ -1025,7 +1025,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="field-wrapper" v-show="values.router.dicom.proxy.granted">
+                                    <div class="field-wrapper" v-show="false && values.router.dicom.proxy.granted" style="display:none">
                                         <label>Retrieve</label>
                                         <div class="field-wrapper">
                                             <label>Granted</label>
@@ -1071,13 +1071,13 @@
                             </div>
                         </div>
                         <div class="fields-row row-columns-2">
-                            <div class="field-wrapper">
+                            <div class="field-wrapper" style="display:none">
                                 <label>Iat</label>
                                 <div class="input-wrapper">
                                     <input type="text" title="Issued at date-time" v-model="values.router.hl7.iat"/>
                                 </div>
                             </div>
-                            <div class="field-wrapper">
+                            <div class="field-wrapper" style="display:none">
                                 <label>Exp</label>
                                 <div class="input-wrapper">
                                     <input type="text" title="Expiration date-time" v-model="values.router.hl7.exp"/>
@@ -1124,13 +1124,13 @@
                             </div>
                         </div>
                         <div class="fields-row row-columns-2">
-                            <div class="field-wrapper">
+                            <div class="field-wrapper" style="display:none">
                                 <label>Iat</label>
                                 <div class="input-wrapper">
                                     <input type="text" title="Issued at date-time" v-model="values.router.vna.iat"/>
                                 </div>
                             </div>
-                            <div class="field-wrapper">
+                            <div class="field-wrapper" style="display:none">
                                 <label>Exp</label>
                                 <div class="input-wrapper">
                                     <input type="text" title="Expiration date-time" v-model="values.router.vna.exp"/>
@@ -1190,13 +1190,13 @@
                             </div>
                         </div>
                         <div class="fields-row row-columns-2">
-                            <div class="field-wrapper">
+                            <div class="field-wrapper" style="display:none">
                                 <label>Iat</label>
                                 <div class="input-wrapper">
                                     <input type="text" title="Issued at date-time" v-model="values.router.cluster.iat"/>
                                 </div>
                             </div>
-                            <div class="field-wrapper">
+                            <div class="field-wrapper" style="display:none">
                                 <label>Exp</label>
                                 <div class="input-wrapper">
                                     <input type="text" title="Expiration date-time" v-model="values.router.cluster.exp"/>
@@ -1217,13 +1217,13 @@
                             </div>
                         </div>
                         <div class="fields-row row-columns-2">
-                            <div class="field-wrapper">
+                            <div class="field-wrapper" style="display:none">
                                 <label>Iat</label>
                                 <div class="input-wrapper">
                                     <input type="text" title="Issued at date-time" v-model="values.router.worklist.iat"/>
                                 </div>
                             </div>
-                            <div class="field-wrapper">
+                            <div class="field-wrapper" style="display:none">
                                 <label>Exp</label>
                                 <div class="input-wrapper">
                                     <input type="text" title="Expiration date-time" v-model="values.router.worklist.exp"/>
@@ -1247,13 +1247,13 @@
                             </div>
                         </div>
                         <div class="fields-row row-columns-2">
-                            <div class="field-wrapper">
+                            <div class="field-wrapper" style="display:none">
                                 <label>Iat</label>
                                 <div class="input-wrapper">
                                     <input type="text" title="Issued at date-time" v-model="values.editor.pro.iat"/>
                                 </div>
                             </div>
-                            <div class="field-wrapper">
+                            <div class="field-wrapper" style="display:none">
                                 <label>Exp</label>
                                 <div class="input-wrapper">
                                     <input type="text" title="License expiration date/time" v-model="values.editor.pro.exp"/>
@@ -1286,7 +1286,7 @@
             </template>
         </tabs>
         <div class="fields-row field-actions">
-            <div class="button primary" @click="save">Save</div>
+            <!--<div class="button primary" @click="save">Save</div>-->
             <div class="button secondary" @click="generate">Generate License</div>
         </div>
         <div v-if="lock" class="lock-overlay"></div>
@@ -1871,6 +1871,7 @@
                                         platform:"standalone",
                                         storage:{
                                             max:100,
+                                            /*
                                             quota:{
                                                 size:{
                                                     max:1,
@@ -1898,7 +1899,7 @@
                                                 order:{
                                                     max:3600,
                                                 },
-                                            }
+                                            }*/
                                         },
                                         dicom:{
                                             iss:"Dicom Systems",
@@ -1923,13 +1924,13 @@
                                                 granted:false,
                                                 max:10000,
                                                 query:{
-                                                    granted:false,
+                                                    granted:true,
                                                 },
                                                 dmwl:{
-                                                    granted:false,
+                                                    granted:true,
                                                 },
                                                 retrieve:{
-                                                    granted:false,
+                                                    granted:true,
                                                 },
                                             },
                                             priors:{
@@ -1995,11 +1996,11 @@
                         },
                         methods:{
                             calculateIAT(date){
-                                this.values.router.dicom.iat = this.values.router.hl7.iat = this.values.router.vna.iat = this.values.editor.pro.iat = date;
+                                this.values.router.dicom.iat = this.values.router.hl7.iat = this.values.router.vna.iat = this.values.editor.pro.iat = this.values.dicom.cluster.iat = this.values.dicom.worklist.iat = date;
                                 this.diff_from = date;
                             },
                             calculateEXP(date){
-                                this.values.router.dicom.exp = this.values.router.hl7.exp = this.values.router.vna.exp = this.values.editor.pro.exp = date;
+                                this.values.router.dicom.exp = this.values.router.hl7.exp = this.values.router.vna.exp = this.values.editor.pro.exp = this.values.dicom.cluster.exp = this.values.dicom.worklist.exp = date;
                             },
                             generateContent(key,section){
                                 var values = [];
@@ -2035,6 +2036,16 @@
                                             }
                                             switch(prefix){
                                                 case ".product":
+                                                    continue;
+                                                break;
+                                                case "router.storage.quota.dynamic.granted":
+                                                case ".router.storage.quota.hl7.max":
+                                                case ".router.storage.quota.order.max":
+                                                case ".router.storage.quota.size.max":
+                                                case ".router.storage.quota.study.max":
+                                                case ".router.storage.retention.hl7.max":
+                                                case ".router.storage.retention.order.max":
+                                                case ".router.storage.retention.study.max":
                                                     continue;
                                                 break;
                                             }
@@ -2108,6 +2119,7 @@
                                         this.modal_title = "License generated";
                                         this.modal_description = "License generated successfully. You can find generated license located at panel 'licences'";
                                         this.modal = true;
+                                        window["update_licenses_list"]();
                                     }else{
                                         this.modal_type = "error";
                                         this.modal_title = "Failed to generate license";
@@ -2137,6 +2149,7 @@
                             if(license.toString().trim().length>0){
                                 this.parseManual(license);
                             }
+                            var type = "{/literal}{$HDTYPE}{literal}";
                         }
                     });
                 }

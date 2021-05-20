@@ -9,6 +9,7 @@ function displayAdvancedLicenseGenerator($bean){
     $s = new Sugar_Smarty();
     if($bean instanceof ass_hardware){
         $s->assign("HARDWARE_ID",$bean->hard_id);
+        $s->assign("HDTYPE",$bean->hd_type);
         $s->assign("RECORD_ID",$bean->id);
         $s->assign("SERIAL",$bean->name);
         $license = str_replace("&quot;","",$bean->license);

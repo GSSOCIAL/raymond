@@ -206,6 +206,28 @@ No access
             }
         });
     });
+    
+    window["update_licenses_list"] = function(){
+        fetch(window.location.origin+"/index.php?module=ass_hardware&action=getLicenses&record={/literal}{$hardware_id}{literal}").then(response=>response.json()).then((response)=>{
+            $("#lic_list").children().remove();
+            if(response){
+                for(var x in response){
+                    var option = $(document.createElement("option"));
+                    option.text(response[x].name);
+                    option.attr("label",response[x].name);
+                    option.attr("value",response[x].id);
+                    option.get(0).dataset["delete"] = response[x].access.delete;
+                    option.get(0).dataset["export"] = response[x].access.export;
+                    $("#lic_list").prepend(option);
+                }
+            }
+        });
+    };
+
+    $(document).ready(()=>{
+        window["update_licenses_list"]();
+    });
+
     //Utils
     $(document).on("click","#licenses_list input[type='button']",function(event){
         var ids = [];

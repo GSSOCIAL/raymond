@@ -84,7 +84,11 @@ class Customass_hardwareController extends SugarController{
                 $logfile=fopen("/var/www/html/genlic.log","a+");
                 fwrite($logfile,$cmd);
                 exec($cmd);
-                if(file_exists($file)) {
+                if(file_exists($file)){
+                    //Сохраняем
+                    $bean->license = $context;
+                    $bean->save();
+
                     $license->lic_key = file_get_contents($file);
                     $license->save();
                     echo(json_encode(array(
@@ -110,6 +114,38 @@ class Customass_hardwareController extends SugarController{
             "result"=>false,
             "description"=>"could retrieve hardware record - {$_REQUEST['record']}"
         )));
+        die();
+    }
+
+    /**
+     * List available licenses
+     */
+    function action_getLicenses(){
+        global $db,$current_user;
+        $licenses = array();
+    
+        if($this->bean){
+            $list = $db->query("SELECT l.id,l.name,
+            IF(l.created_by='{$current_user->id}','1','0') AS `is_owner` 
+            FROM ass_lic l 
+            INNER JOIN ass_hardware_ass_lic_c hal ON l.id=hal.ass_hardware_ass_licass_lic_idb AND hal.deleted=0
+            WHERE l.deleted=0
+            AND hal.ass_hardware_ass_licass_hardware_ida='{$this->bean->id}'
+            ORDER BY l.date_entered DESC",true);
+            if($list){
+                while($row = $db->fetchByAssoc($list)){
+                    if(!ACLController::checkAccess("ass_lic","view",$row["is_owner"]=="1")) continue;
+                    $row["access"]=array(
+                        "delete"=>ACLController::checkAccess("ass_lic","delete",$row["is_owner"]=="1"),
+                        "export"=>ACLController::checkAccess("ass_lic","export",$row["is_owner"]=="1"),
+                        "view"=>ACLController::checkAccess("ass_lic","view",$row["is_owner"]=="1")
+                    );
+                    $licenses[]=$row;
+                }
+            }
+        }
+
+        echo(json_encode($licenses));
         die();
     }
 }
