@@ -708,7 +708,7 @@
                 </div>
             </div>
         </div>
-        <div class="fields-row">
+        <div class="fields-row" style="display:none">
             <div class="section-title">Product</div>
             <div class="radio-group">
                 <div class="radio-wrapper" {literal}:class="{'checked':values.product == 'rapid'}"{/literal}>
@@ -2150,6 +2150,16 @@
                                 this.parseManual(license);
                             }
                             var type = "{/literal}{$HDTYPE}{literal}";
+                            var rapid = "{/literal}{$RAPID}{literal}";
+                            if(type == "dicom"){
+                                this.values.product = 'editor';
+                            }else{
+                                if(rapid == '1'){
+                                    this.values.product = 'rapid';
+                                }else{
+                                    this.values.product = 'router';
+                                }
+                            }
                         }
                     });
                 }

@@ -29,6 +29,7 @@ class Customass_hardwareController extends SugarController{
      * Generate license
      */
     function action_generate_license(){
+        global $current_user;
         if(!is_array($_REQUEST) || !array_key_exists("record",$_REQUEST)){
             echo(json_encode(array(
                 "result"=>false,
@@ -66,7 +67,14 @@ class Customass_hardwareController extends SugarController{
             $name = trim(preg_replace('/[\W\s]/',"_",$bean->name));
             $hard_id = trim($bean->hard_id);
 
-            $filename = "{$name}_{$license->end_date}";
+            $filename_parts = array(
+                $bean->name,
+                $current_user->user_name,
+                $_REQUEST['days'],
+                date("Y-m-d",strtotime($_REQUEST['start_date'])),
+                $license->end_date
+            );
+            $filename = implode("_",$filename_parts);
             $filename = trim(str_replace(array(";","/"," ","\\"),array("_","_","_","_"),$filename)); 
 
             $file = $dir."/".$filename.".license";
