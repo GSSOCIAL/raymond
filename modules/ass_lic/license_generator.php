@@ -34,30 +34,12 @@ function display($focus, $field, $value, $view){
     //Get list of licenses
     $licenses = array();
     global $db,$current_user;
-    
-    $list = $db->query("SELECT l.id,l.name,
-        IF(l.created_by='{$current_user->id}','1','0') AS `is_owner` 
-        FROM ass_lic l 
-        INNER JOIN ass_hardware_ass_lic_c hal ON l.id=hal.ass_hardware_ass_licass_lic_idb AND hal.deleted=0
-        WHERE l.deleted=0
-        AND hal.ass_hardware_ass_licass_hardware_ida='{$focus->id}'
-        ORDER BY l.date_entered DESC",true);
-    if($list){
-        while($row = $db->fetchByAssoc($list)){
-            if(!ACLController::checkAccess("ass_lic","view",$row["is_owner"]=="1")) continue;
-            $row["access"]=array(
-                "delete"=>ACLController::checkAccess("ass_lic","delete",$row["is_owner"]=="1"),
-                "export"=>ACLController::checkAccess("ass_lic","export",$row["is_owner"]=="1"),
-                "view"=>ACLController::checkAccess("ass_lic","view",$row["is_owner"]=="1")
-            );
-            $licenses[]=$row;
-        }
-    }
     //Get hardware
     if(empty(trim($focus->hard_id)) || empty($focus->name)){
         $should_display = false;
     }
     
+    $smarty->assign("hardware_id",$focus->id);
     $smarty->assign("display",$should_display);
     $smarty->assign("licenses",$licenses);
     //Setup access

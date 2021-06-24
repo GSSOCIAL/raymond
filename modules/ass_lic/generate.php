@@ -101,7 +101,7 @@ if(empty($_REQUEST["bean_id"])){
     $name[]=date("dmY");
     $name[]=date("dmY",strtotime($License->end_date));
     
-    $License->name=implode("_",$name);
+    $License->name= implode("_",$name);
 
     $License->skip_log = true;
     if($id = $License->save()){
@@ -112,6 +112,7 @@ if(empty($_REQUEST["bean_id"])){
         $response["body"]=array(
             "id"=>$id,
             "name"=>$License->name,
+            "filename"=>$License->filename,
             "access"=>array(
                 "delete"=>ACLController::checkAccess("ass_lic","delete",true)?"1":"0",
                 "view"=>ACLController::checkAccess("ass_lic","view",true)?"1":"0",

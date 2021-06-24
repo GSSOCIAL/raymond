@@ -41,6 +41,7 @@ $GLOBALS["app_list_strings"]["hd_type_list"]=array(
   'vm0' => 'VMWARE',
   'vm1' => 'HYPER-V',
   'vm2' => 'Azure',
+  'dicom' => 'Dicom Editor',
   'small' => 'Small Footprint Server',
   'u1s' => 'Standart 1U Server',
   'u1r' => 'Redundant 1U server',
