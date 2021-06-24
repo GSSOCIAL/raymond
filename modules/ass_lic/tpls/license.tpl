@@ -191,8 +191,8 @@ No access
             if(response.status == true){
                 //License created - create new dropdown option dynamically
                 var option = $(document.createElement("option"));
-                option.text(response.body.name);
-                option.attr("label",response.body.name);
+                option.text(response.body.filename);
+                option.attr("label",response.body.filename);
                 option.attr("value",response.body.id);
                 option.get(0).dataset["delete"] = response.body.access.delete;
                 option.get(0).dataset["export"] = response.body.access.export;
@@ -213,8 +213,8 @@ No access
             if(response){
                 for(var x in response){
                     var option = $(document.createElement("option"));
-                    option.text(response[x].name);
-                    option.attr("label",response[x].name);
+                    option.text(response[x].filename);
+                    option.attr("label",response[x].filename);
                     option.attr("value",response[x].id);
                     option.get(0).dataset["delete"] = response[x].access.delete;
                     option.get(0).dataset["export"] = response[x].access.export;

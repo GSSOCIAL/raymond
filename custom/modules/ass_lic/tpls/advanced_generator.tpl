@@ -681,13 +681,13 @@
             <div class="field-wrapper">
                 <label>Start date</label>
                 <div class="input-wrapper">
-                    <calendar :value="values.start_date" ref="calendar_start_date" @change="calculateIAT($refs.calendar_start_date.str_date);values.start_date = $refs.calendar_start_date.str_date"></calendar>
+                    <calendar :value="values.start_date" ref="calendar_start_date" @change="calculateIAT($refs.calendar_start_date.str_date);values.start_date = $refs.calendar_start_date.str_date;calculateEXP($refs.calendar_days.str_date);"></calendar>
                 </div>
             </div>
             <div class="field-wrapper">
                 <label>Days</label>
                 <div class="input-wrapper">
-                    <input type="number" min="1" step="1" v-model="values.days" @change="$refs.calendar_days.diff = values.days"/>
+                    <input type="number" min="1" step="1" v-model="values.days" @change="$refs.calendar_days.diff = values.days;calculateEXP($refs.calendar_days.str_date);"/>
                     <div class="calendar-wrapper">
                         <calendar 
                         :display_field="false" 
@@ -756,7 +756,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="fields-row section-fields" v-show="values.router.dicom.granted == true">
+                        <div class="fields-row section-fields" v-show="values.router.dicom.granted == true && rapid !== '1'">
                             <div class="field-wrapper">
                                 <div class="field-label">SCP</div>
                                 <div class="fields-wrapper">
@@ -925,7 +925,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="fields-row section-fields" v-show="values.router.dicom.granted == true">
+                        <div class="fields-row section-fields" v-show="values.router.dicom.granted == true && rapid !== '1'">
                             <div class="field-wrapper">
                                 <div class="field-label">SCP</div>
                                 <div class="fields-wrapper">
@@ -1171,7 +1171,7 @@
                                     <div class="field-wrapper">
                                         <label></label>
                                         <input-field min="1" type="number" title="" v-model="values.router.workflow.max"></input-field>
-                                        <div class="description"></div>
+                                        <div class="description">Maximum number of workflows</div>
                                     </div>
                                 </div>
                             </div>
@@ -1433,7 +1433,6 @@
                                 this.date.year = day.year;
                                 this.date.month = day.month;
                                 this.date.day = day.day;
-                                
                                 this.$emit("change",this.str_date);
                             }
                         },
@@ -1837,7 +1836,6 @@
                                         }
                                     }
                                 }
-                                console.log(this.value);
                             }
                         },
                         template:`
@@ -1924,13 +1922,13 @@
                                                 granted:false,
                                                 max:10000,
                                                 query:{
-                                                    granted:true,
+                                                    granted:false,
                                                 },
                                                 dmwl:{
-                                                    granted:true,
+                                                    granted:false,
                                                 },
                                                 retrieve:{
-                                                    granted:true,
+                                                    granted:false,
                                                 },
                                             },
                                             priors:{
@@ -1961,7 +1959,7 @@
                                         },
                                         workflow:{
                                             granted:false,
-                                            max:5
+                                            max:10000
                                         },
                                         cluster:{
                                             iat:"{/literal}{$CURRENT_DATE}{literal}",
@@ -1991,16 +1989,18 @@
                                 modal_type:"success",
                                 modal_title:"",
                                 modal_description:"",
-                                modal_actions:[]
+                                modal_actions:[],
+                                type:"",
+                                rapid:""
                             };
                         },
                         methods:{
                             calculateIAT(date){
-                                this.values.router.dicom.iat = this.values.router.hl7.iat = this.values.router.vna.iat = this.values.editor.pro.iat = this.values.dicom.cluster.iat = this.values.dicom.worklist.iat = date;
+                                this.values.router.dicom.iat = this.values.router.hl7.iat = this.values.router.vna.iat = this.values.editor.pro.iat = date;
                                 this.diff_from = date;
                             },
                             calculateEXP(date){
-                                this.values.router.dicom.exp = this.values.router.hl7.exp = this.values.router.vna.exp = this.values.editor.pro.exp = this.values.dicom.cluster.exp = this.values.dicom.worklist.exp = date;
+                                this.values.router.dicom.exp = this.values.router.hl7.exp = this.values.router.vna.exp = this.values.editor.pro.exp = date;
                             },
                             generateContent(key,section){
                                 var values = [];
@@ -2025,9 +2025,9 @@
                                                 ".router.vna.iat",
                                                 ".start_date",
                                                 ".router.cluster.iat",
-                                                ".router.cluster.iat",
+                                                ".router.cluster.exp",
                                                 ".router.worklist.iat",
-                                                ".router.worklist.iat",
+                                                ".router.worklist.exp",
                                             ].indexOf(prefix)>-1){
                                                 var d = new Date(value);
                                                 if(d){
@@ -2149,12 +2149,12 @@
                             if(license.toString().trim().length>0){
                                 this.parseManual(license);
                             }
-                            var type = "{/literal}{$HDTYPE}{literal}";
-                            var rapid = "{/literal}{$RAPID}{literal}";
-                            if(type == "dicom"){
+                            this.type = "{/literal}{$HDTYPE}{literal}";
+                            this.rapid = "{/literal}{$RAPID}{literal}";
+                            if(this.type == "dicom"){
                                 this.values.product = 'editor';
                             }else{
-                                if(rapid == '1'){
+                                if(this.rapid == '1'){
                                     this.values.product = 'rapid';
                                 }else{
                                     this.values.product = 'router';

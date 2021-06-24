@@ -72,13 +72,15 @@ class Customass_hardwareController extends SugarController{
                 $current_user->user_name,
                 $_REQUEST['days'],
                 date("Y-m-d",strtotime($_REQUEST['start_date'])),
-                $license->end_date
+                $license->end_date,
+                "license"
             );
+
             $filename = implode("_",$filename_parts);
             $filename = trim(str_replace(array(";","/"," ","\\"),array("_","_","_","_"),$filename)); 
-
-            $file = $dir."/".$filename.".license";
             
+            $file = $dir."/".$filename.".txt";
+
             $context = file_get_contents("php://input");
             if(strpos($context,".days")!==false){
                 $license->filename = $filename;
@@ -106,21 +108,21 @@ class Customass_hardwareController extends SugarController{
                 }else{
                     echo(json_encode(array(
                         "result"=>false,
-                        "description"=>"could fetch generated file - {$file}"
+                        "description"=>"Couldnt fetch generated file - {$file}"
                     )));
                     die();
                 }
             }else{
                 echo(json_encode(array(
                     "result"=>false,
-                    "description"=>"invalid license context format"
+                    "description"=>"Invalid license context format"
                 )));
                 die();
             }
         }
         echo(json_encode(array(
             "result"=>false,
-            "description"=>"could retrieve hardware record - {$_REQUEST['record']}"
+            "description"=>"Couldnt retrieve hardware record - {$_REQUEST['record']}"
         )));
         die();
     }
@@ -133,7 +135,7 @@ class Customass_hardwareController extends SugarController{
         $licenses = array();
     
         if($this->bean){
-            $list = $db->query("SELECT l.id,l.name,
+            $list = $db->query("SELECT l.id,l.name,l.filename,
             IF(l.created_by='{$current_user->id}','1','0') AS `is_owner` 
             FROM ass_lic l 
             INNER JOIN ass_hardware_ass_lic_c hal ON l.id=hal.ass_hardware_ass_licass_lic_idb AND hal.deleted=0
