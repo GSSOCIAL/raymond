@@ -327,10 +327,20 @@ class aCase extends Basic
 				$seedAccount->retrieve($this->account_id);
 				if(!empty($seedAccount->id)) {
 					// Если Контрагент корректно найден
+                    $ACCOUNT_NAME = [];
+
+                    // Если контрагент важный
 					if($seedAccount->important) {
-						// Если контрагент важный
-						$temp_array["ACCOUNT_NAME"] = '<span class="btn-danger">!</span> ' . $temp_array["ACCOUNT_NAME"];
+						$ACCOUNT_NAME[] = '<span class="btn-danger" style="padding:0px 3px;">!</span>';
 					}
+
+                    // Если контрагент US Only
+					if($seedAccount->usonly) {
+						$ACCOUNT_NAME[] = '<span class="btn-danger btn-badge" style="padding: 0px 3px;background-color: #03a9f4;">US</span>';
+					}
+
+                    $ACCOUNT_NAME[] = $temp_array["ACCOUNT_NAME"];
+                    $temp_array["ACCOUNT_NAME"] = implode(" ",$ACCOUNT_NAME);
 				}
 			}
 		}
