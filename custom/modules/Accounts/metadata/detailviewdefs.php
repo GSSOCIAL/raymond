@@ -64,7 +64,6 @@ array (
     array (
       'lbl_account_information' => 
       array (
-        0 => 
         array (
           0 => 
           array (
@@ -72,13 +71,12 @@ array (
             'comment' => 'Name of the Company',
             'label' => 'LBL_NAME',
           ),
-          1 => 
-          array (
-            'name' => 'important',
-            'label' => 'LBL_IMPORTANT',
-          ),
+          null
         ),
-        1 => 
+        array(
+          "important",
+          "usonly"
+        ),
         array (
           0 => 
           array (
@@ -97,7 +95,6 @@ array (
             'label' => 'LBL_PHONE_OFFICE',
           ),
         ),
-        2 => 
         array (
           0 => 
           array (
@@ -112,7 +109,6 @@ array (
             'label' => 'LBL_FAX',
           ),
         ),
-        3 => 
         array (
           0 => 
           array (
@@ -135,7 +131,6 @@ array (
             ),
           ),
         ),
-        4 => 
         array (
           0 => 
           array (
@@ -144,7 +139,6 @@ array (
             'label' => 'LBL_DESCRIPTION',
           ),
         ),
-        5 => 
         array (
           0 => 
           array (

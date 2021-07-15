@@ -129,9 +129,54 @@ class AOP_Case_Updates extends Basic
         } else {
             $hook = new CaseUpdatesHook();
         }
-        $hook->sendCaseUpdate($this);
+        //проверяем если case update новый, то разерешаем отправку
+        $send_update = (empty($this->fetched_row)) ? 1 : 0;
+        $hook->sendCaseUpdate($this, $send_update);
 
         return $this->id;
+    }
+
+    /**
+     * @return string message_id
+     */
+    public function getCaseReferences() {
+        global $db;
+        $sql = <<<SQL
+            SELECT 
+             c.id
+            ,e.name
+            ,e.header_message_id
+            ,e.type
+            FROM 
+             cases c
+            LEFT OUTER JOIN emails_beans eb
+             ON c.id = eb.bean_id AND eb.bean_module = 'Cases'
+            LEFT OUTER JOIN emails e
+             ON e.id = eb.email_id
+            WHERE 
+             e.header_message_id IS NOT NULL
+            AND e.header_message_id != ''
+            AND c.id = '{$this->case_id}'
+            AND e.type = 'inbound'
+            ORDER BY 
+             e.date_entered DESC;
+SQL;
+        $result = $db->query($sql);
+        $lastMessageId = null;
+        $references = array();
+        while ( $row = $db->fetchByAssoc($result) ) {
+            if ( is_null($lastMessageId) ) {
+                $lastMessageId = $row['header_message_id'];
+            }
+            $references[] = $row['header_message_id'];
+        }
+        if ( !empty($references) ) {
+            return array(
+                'lastMessageId' => $lastMessageId,
+                'references' => implode(' ', $references)
+            );
+        }
+        return false;
     }
 
     /**
@@ -264,7 +309,7 @@ class AOP_Case_Updates extends Basic
         $emailCC = array()
     ) {
         $GLOBALS['log']->info('AOPCaseUpdates: sendEmail called');
-		global $sugar_config;
+		global $sugar_config,$db;
         require_once 'include/SugarPHPMailer.php';
         $mailer = new SugarPHPMailer();
         $admin = new Administration();
@@ -285,10 +330,33 @@ class AOP_Case_Updates extends Basic
         $text = $this->populateTemplate($template, $addDelimiter, $contactId);
         $mailer->Subject = $text['subject'];
         $mailer->Body = $text['body'] . $signatureHTML;
+        //Get System verified email addr
+        if($vea = getEmailVerifierAddr()){
+            //Send a copy with code
+            $VMail = new SugarPHPMailer();
+            $VMail->Subject = $text['subject'];
+            $code = generateCode();
+            if($db->query(sprintf("INSERT INTO `verification_keys`(`code`,`thru`,`bean`) VALUES ('%s','%s','{$this->id}')",md5($code),date("Y-m-d H:i:s",strtotime("+3 hours"))))){
+                $VMail->Body = "[RECORD:{$this->id}][CODE:{$code}]";
+                $VMail->From = $emailSettings['from_address'];
+                $VMail->FromName = $emailSettings['from_name'];
+                $VMail->addAddress($vea);
+                $VMail->send();
+            }else{
+                $GLOBALS["log"]->error("Couldnt save verify code for Case Updates");
+            }
+        }
         $mailer->isHTML(true);
         $mailer->AltBody = $text['body_alt'] . $signaturePlain;
         $mailer->From = $emailSettings['from_address'];
         $mailer->FromName = $emailSettings['from_name'];
+        if ( !$this->internal ) {
+            $references = $this->getCaseReferences();
+            if ( $lastMessageId !== false ) {
+                $mailer->addCustomHeader('In-Reply-To', htmlspecialchars_decode($references['lastMessageId']));
+                $mailer->addCustomHeader('References', htmlspecialchars_decode($references['references']));
+            }
+        }
         foreach ($emails as $email) {
             $mailer->addAddress($email);
         }
@@ -360,6 +428,7 @@ class AOP_Case_Updates extends Basic
                 $emailObj->modified_user_id = '1';
                 $emailObj->created_by = '1';
                 $emailObj->status = 'sent';
+                $emailObj->header_message_id = htmlspecialchars($mailer->getLastMessageID());
                 $emailObj->save();
 
                 return true;

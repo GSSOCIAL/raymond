@@ -38,7 +38,7 @@ class AOPInboundEmail extends InboundEmail {
             return $string;
         }
         $matches = array();
-        preg_match_all('/cid:([[:alnum:]-]*)/',$string,$matches);
+        preg_match_all('/cid:([[:alnum:]-]*)/i',$string,$matches);
         if(!isset($matches[1]) OR !count($matches[1])){
             return $string;
         }
@@ -46,11 +46,47 @@ class AOPInboundEmail extends InboundEmail {
         //array_shift($matches);
         $matches = array_unique($matches);
         foreach($matches as $match){
-            if(in_array($match,$noteIds)){
-                $string = str_replace('cid:'.$match,$sugar_config['site_url']."/index.php?entryPoint=download&id={$match}&type=Notes&",$string);
+            $id = strtolower($match);
+            if(in_array($id,$noteIds)){
+                //$string = str_replace('cid:'.$match,$sugar_config['site_url']."/index.php?entryPoint=download&id={$id}&type=Notes&",$string);
+                $string = str_replace('cid:'.$match,$sugar_config['site_url']."/upload/{$id}?",$string);
             }
         }
         return $string;
+    }
+
+    public function getCaseIdFromCaseNumber($email, $aCase) {
+        global $db;
+        $result = parent::getCaseIdFromCaseNumber($email, $aCase);
+        if ( !$result ) { 
+            if ( !empty($this->references) && is_array($this->references) ) {
+                $refs = htmlspecialchars("'".join("', '", $this->references)."'");
+                $sql = "
+                    SELECT 
+                     eb.bean_id case_id
+                    FROM 
+                     emails e 
+                    ,emails_beans eb
+                    ,cases c
+                    WHERE 
+                     e.header_message_id IN ({$refs})
+                    AND e.deleted = 0
+                    AND e.parent_type = 'Cases'
+                    AND eb.email_id = e.id
+                    AND eb.deleted = 0
+                    AND c.id = eb.bean_id
+                    AND c.deleted = 0
+                    ORDER BY 
+                     e.date_entered DESC
+                    LIMIT 1";
+                $res = $db->query($sql);
+                $row = $db->fetchByAssoc($res);
+                if ( !empty($row['case_id']) && $refs != "''") {
+                    return $row['case_id'];
+                }
+            }
+        }
+        return $result;
     }
 
 
@@ -58,10 +94,12 @@ class AOPInboundEmail extends InboundEmail {
         global $current_user, $mod_strings, $current_language;
         global $sugar_config;
         global $db;
+        require_once('custom/modules/Cases/CasesHooks.php');
+        CasesHooks::$disable_change_status_hook = true;
         $mod_strings = return_module_language($current_language, "Emails");
         $GLOBALS['log']->debug('In handleCreateCase in AOPInboundEmail');
         $c = new aCase();
-        $case_id = $this->getCaseIdFromCaseNumber($email->name, $c);
+        $case_id = $this->getCaseIdFromCaseNumber($email, $c);
 
         $GLOBALS['handleCreateCase'] = true;
 
@@ -115,7 +153,6 @@ class AOPInboundEmail extends InboundEmail {
             if(!empty($contactIds)) {
                 $c->contact_created_by_id = $contactIds[0];
             }
-
             $c->save(true);
             $c->retrieve($c->id);
             if(!empty($c->contact_created_by_id)) {
@@ -282,7 +319,8 @@ class AOPInboundEmail extends InboundEmail {
             $mainContact->retrieve($c->contact_created_by_id);
 
             $hook = new CaseUpdatesHook();
-            $hook->sendCreationEmail($c, $mainContact);
+	    $this->references = array($this->email->header_message_id);
+            $hook->sendCreationEmail($c, $mainContact, $this->references);
 
         } else {
             echo "First if not matching\n";
@@ -291,7 +329,6 @@ class AOPInboundEmail extends InboundEmail {
             $GLOBALS['case_CC_only'] = true;
             $email->retrieve($email->id);
             $c->retrieve($case_id);
-
             // Все текущие контакты кейса
             $contacts = $c->getContacts();
 
@@ -343,6 +380,7 @@ class AOPInboundEmail extends InboundEmail {
             $this->handleAutoresponse($email, $contactAddr);
             $c->save();//сохраняем кейс для перезаписи date_modified 
         }
+        CasesHooks::$disable_change_status_hook = false;
         echo "End of handle create case\n";
 
     } // fn

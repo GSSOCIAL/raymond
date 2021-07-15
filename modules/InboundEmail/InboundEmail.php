@@ -40,6 +40,7 @@ if(!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point');
 
 
 require_once('include/OutboundEmail/OutboundEmail.php');
+require_once('custom/include/custom_utils.php');
 
 function this_callback($str) {
 	foreach($str as $match) {
@@ -86,6 +87,8 @@ class InboundEmail extends SugarBean {
 	var $group_id;
 	var $is_personal;
 	var $groupfolder_id;
+	var $references;
+	var $partToNotesMap = array();
 
 	// email 2.0
 	var $pop3socket;
@@ -2707,10 +2710,13 @@ class InboundEmail extends SugarBean {
 
 	function handleCaseAssignment($email) {
 		$c = new aCase();
-		if($caseId = $this->getCaseIdFromCaseNumber($email->name, $c)) {
+		if($caseId = $this->getCaseIdFromCaseNumber($email, $c)) {
 			$c->retrieve($caseId);
+			$header_message_id = $email->header_message_id;
 			$email->retrieve($email->id);
+			$email->header_message_id = htmlspecialchars($header_message_id);
             //assign the case info to parent id and parent type so that the case can be linked to the email on Email Save
+
 			$email->parent_type = "Cases";
 			$email->parent_id = $caseId;
 			// assign the email to the case owner
@@ -2768,7 +2774,7 @@ class InboundEmail extends SugarBean {
 		$mod_strings = return_module_language($current_language, "Emails");
 		$GLOBALS['log']->debug('In handleCreateCase');
 		$c = new aCase();
-		$this->getCaseIdFromCaseNumber($email->name, $c);
+		$this->getCaseIdFromCaseNumber($email, $c);
 
 		if (!$this->handleCaseAssignment($email) && $this->isMailBoxTypeCreateCase()) {
 			// create a case
@@ -3486,6 +3492,7 @@ class InboundEmail extends SugarBean {
 						$attach->name = urlencode($this->retrieveAttachmentNameFromStructure($part));
 					}
 					$attach->filename = $attach->name;
+
 					if (empty($attach->filename)) {
 						continue;
 					}
@@ -3498,6 +3505,9 @@ class InboundEmail extends SugarBean {
 					} else {
 						// only save if doing a full import, else we want only the binaries
 						$attach->save();
+					}
+					if ( !empty($part->id) ) {
+						$this->partToNotesMap[str_replace(array('<', '>'), array('',''), $part->id)] = $attach->id;
 					}
 				} // end if disposition type 'attachment'
 			}// end ifdisposition
@@ -3950,7 +3960,6 @@ class InboundEmail extends SugarBean {
 
 		$header = imap_headerinfo($this->conn, $msgNo);
 		$fullHeader = imap_fetchheader($this->conn, $msgNo); // raw headers
-
 		// reset inline images cache
 		$this->inlineImages = array();
 
@@ -3990,6 +3999,7 @@ class InboundEmail extends SugarBean {
 			$email = new Email();
 			$email->isDuplicate = ($dupeCheckResult) ? false : true;
 			$email->mailbox_id = $this->id;
+			$email->header_message_id = htmlspecialchars($header->message_id);
 			$message = array();
 			$email->id = create_guid();
 			$email->new_with_id = true; //forcing a GUID here to prevent double saves.
@@ -4079,6 +4089,9 @@ class InboundEmail extends SugarBean {
 
 			$email->message_id		= $this->compoundMessageId; // filled by importDupeCheck();
 
+			$this->references = explode('::::', preg_replace('/\s+/', '::::', $header->references));
+
+
 			$oldPrefix = $this->imagePrefix;
 			if(!$forDisplay) {
 				// Store CIDs in imported messages, convert on display
@@ -4087,6 +4100,10 @@ class InboundEmail extends SugarBean {
 			// handle multi-part email bodies
 			$email->description_html= $this->getMessageText($msgNo, 'HTML', $structure, $fullHeader,$clean_email); // runs through handleTranserEncoding() already
 			$email->description	= $this->getMessageText($msgNo, 'PLAIN', $structure, $fullHeader,$clean_email); // runs through handleTranserEncoding() already
+			if ( !empty($this->partToNotesMap) ) {
+				$email->description_html = str_ireplace(array_keys($this->partToNotesMap), $this->partToNotesMap, $email->description_html);
+				$email->description = str_ireplace(array_keys($this->partToNotesMap), $this->partToNotesMap, $email->description);
+			}
 			$this->imagePrefix = $oldPrefix;
 
 			// empty() check for body content
@@ -4123,6 +4140,12 @@ class InboundEmail extends SugarBean {
 			}
 
 			if(!$forDisplay) {
+				$email->name = replace4byte($email->name);
+				$email->description = replace4byte($email->description);
+				$email->description_html = replace4byte($email->description_html);
+				print_array('$email->name = ' . var_export($email->name,1),0,1);
+				print_array('$email->description = ' . var_export($email->description,1),0,1);
+				print_array('$email->description_html = ' . var_export($email->description_html,1),0,1);
 				$email->save();
 
 				$email->new_with_id = false; // to allow future saves by UPDATE, instead of INSERT
@@ -4189,7 +4212,7 @@ class InboundEmail extends SugarBean {
 		///////////////////////////////////////////////////////////////////////
 		////	TO SUPPORT EMAIL 2.0
 		$this->email = $email;
-
+		$this->email->header_message_id = htmlspecialchars($header->message_id);
 		if(empty($this->email->et)) {
 			$this->email->email2init();
 		}
@@ -4645,37 +4668,89 @@ eoq;
     /**
      * For mailboxes of type "Support" parse for '[CASE:%1]'
      *
-     * @param string $emailName The subject line of the email
+     * @param string $email The subject line of the email
      * @param aCase  $aCase     A Case object
      *
      * @return string|boolean   Case ID or FALSE if not found
      */
-	function getCaseIdFromCaseNumber($emailName, $aCase) {
-		//$emailSubjectMacro
-		$exMacro = explode('%1', $aCase->getEmailSubjectMacro());
-		$open = $exMacro[0];
-		$close = $exMacro[1];
+	function getCaseIdFromCaseNumber($email, $aCase) {
+		$emailName = $email->name;
+		if(empty($emailName) AND isset($email->Subject)) $emailName = $email->Subject;
+		/**
+		 * https://trello.com/c/dfQlIzYy
+		 * Parse case id from subject
+		 */
+		$macro = explode(",",$aCase->getEmailSubjectMacro());
+		$escape_chars = array('\\',"[","]","(",")",",",".","*","+","|","{","}","?","^","&"); //Array of chars that need escaped for regex.
+		
+		foreach($macro as $pattern){
+			unset($matches);
+			foreach($escape_chars as $char){
+				$pattern = str_replace($char,"\\".$char,$pattern);
+			}
+			$pattern = str_replace(array("%1"),array("(\d+)"),$pattern);
+			$old_pattern = $pattern;
+			preg_match_all("/{$pattern}/",$emailName,$matches);
+			//Case number will store in $matches[1]
+			if(!empty($matches[1])){ // eliminate everything up to the beginning of the macro and return the rest
+				$match = is_array($matches[1]) && ctype_digit($matches[1][0])?intval($matches[1][0]):(ctype_digit($matches[1])?intval($matches[1]):NULL);
+				if($match){
+					// filter out deleted records in order to create a new case
+					// if email is related to deleted one (bug #49840)
+					$query = 'SELECT id FROM cases WHERE case_number = '
+						. $this->db->quoted($match)
+						. ' and deleted = 0';
+					$r = $this->db->query($query, true);
+					$a = $this->db->fetchByAssoc($r);
+					if (!empty($a['id'])){
+						return $a['id'];
+					}
+				}
+			}
+		}
+		// Search for simillar emails
+		$emails = [];
+		if(isset($email->from_addr) AND !empty($email->from_addr) AND $email->from_addr != '') $emails[] = "'" . strtoupper($email->from_addr) . "'";
+		if(isset($email->reply_to_email) AND !empty($email->reply_to_email) AND $email->reply_to_email != '') $emails[] = "'" . strtoupper($email->reply_to_email) . "'";
+		if(isset($email->cc_addrs) AND !empty($email->cc_addrs) AND $email->cc_addrs != '') $emails[] = "'" . strtoupper($email->cc_addrs) . "'";
+		$emails = array_unique($emails);
 
-		if($sub = stristr($emailName, $open)) { // eliminate everything up to the beginning of the macro and return the rest
-			// $sub is [CASE:XX] xxxxxxxxxxxxxxxxxxxxxx
-			$sub2 = str_replace($open, '', $sub);
-			// $sub2 is XX] xxxxxxxxxxxxxx
-			$sub3 = substr($sub2, 0, strpos($sub2, $close));
-
-            // case number is supposed to be numeric
-            if (ctype_digit($sub3)) {
-                // filter out deleted records in order to create a new case
-                // if email is related to deleted one (bug #49840)
-                $query = 'SELECT id FROM cases WHERE case_number = '
-                    . $this->db->quoted($sub3)
-                    . ' and deleted = 0';
-                $r = $this->db->query($query, true);
-                $a = $this->db->fetchByAssoc($r);
-                if (!empty($a['id'])) {
-                    return $a['id'];
-                }
-            }
-        }
+		$sql = "
+				SELECT
+					`cases`.`id`,
+					`cases`.`name`
+				FROM
+					`cases`
+				# Подключаем Контакты
+				INNER JOIN
+					`contacts_cases`
+					ON `contacts_cases`.`case_id` = `cases`.`id`
+					AND `contacts_cases`.`deleted` = 0
+				INNER JOIN
+					`contacts`
+					ON `contacts`.`id` = `contacts_cases`.`contact_id`
+					AND `contacts`.`deleted` = 0
+				# Подключаем адреса Емайл
+				INNER JOIN
+					`email_addr_bean_rel`
+					ON `email_addr_bean_rel`.`bean_id` = `contacts`.`id`
+					AND `email_addr_bean_rel`.`bean_module` = 'Contacts'
+					AND `email_addr_bean_rel`.`deleted` = 0
+				INNER JOIN
+					`email_addresses`
+					ON `email_addresses`.`id` = `email_addr_bean_rel`.`email_address_id`
+					AND `email_addresses`.`deleted` = 0
+					AND `email_addresses`.`email_address_caps` IN (".implode(",",$emails).")
+				WHERE
+					`cases`.`deleted` = 0
+					AND `cases`.`state` NOT IN ('Closed')
+		";
+		$result = $this->db->query($sql, true);
+		while ($row = $this->db->fetchByAssoc($result)) {
+			if(mb_strpos($emailName, $row['name']) !== false) {
+				return $row['id'];
+			}
+		}
 
         return false;
     }

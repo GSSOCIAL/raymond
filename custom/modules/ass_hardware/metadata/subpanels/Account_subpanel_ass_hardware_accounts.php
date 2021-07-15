@@ -1,5 +1,5 @@
 <?php
-// created: 2016-12-28 02:13:47
+// created: 2017-06-09 09:19:11
 $subpanel_layout['list_fields'] = array (
   'instal_name' => 
   array (
@@ -41,6 +41,20 @@ $subpanel_layout['list_fields'] = array (
   array (
     'type' => 'varchar',
     'vname' => 'LBL_DCMSYS_VER',
+    'width' => '10%',
+    'default' => true,
+  ),
+  'hostname' => 
+  array (
+    'type' => 'varchar',
+    'vname' => 'LBL_HOSTNAME',
+    'width' => '10%',
+    'default' => true,
+  ),
+  'ip_eth0' => 
+  array (
+    'type' => 'varchar',
+    'vname' => 'LBL_IP_ETH0',
     'width' => '10%',
     'default' => true,
   ),

@@ -1,5 +1,5 @@
 <?php
-// created: 2017-04-07 03:19:59
+// created: 2018-01-10 05:49:27
 $mod_strings = array (
   'LBL_ASS_HARDWARE_ASS_LIC_FROM_ASS_LIC_TITLE' => 'Licenses',
   'LBL_ASS_HARDWARE_ASS_HARDWARE_FROM_ASS_HARDWARE_L_TITLE' => 'Hardware1',
@@ -14,4 +14,5 @@ $mod_strings = array (
   'LBL_R_PASS' => 'Root Password',
   'LBL_W_PASS' => 'Web Password',
   'LBL_ASS_HARDWARE_CASES_FROM_CASES_TITLE' => 'Cases',
+  'LBL_NAME' => 'Serial #'
 );

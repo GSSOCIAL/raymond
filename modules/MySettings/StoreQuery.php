@@ -256,7 +256,8 @@ class StoreQuery
     {
         global $current_user;
 
-        return $current_user->getPreference($module . 'Q');
+        //		return $current_user->getPreference($module.'Q');
+        return array();//возвращаем пустой массив, чтоб не нарушать логику получения данных по сохранённым фильтрам.
     }
 }
 

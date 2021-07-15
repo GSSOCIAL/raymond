@@ -48,9 +48,24 @@ function display_updates($focus)
 
     $hideImage = SugarThemeRegistry::current()->getImageURL('basic_search.gif');
     $showImage = SugarThemeRegistry::current()->getImageURL('advanced_search.gif');
-
+    //Add Before form template
+    $sugar_smarty = new Sugar_Smarty();
+    $sugar_smarty->assign('MOD', $mod_strings);
+    //Get hardware linked with case
+    $hw = BeanFactory::getBean('ass_hardware',$focus->ass_hardware_casesass_hardware_ida);
+    if($hw && $hw->id){
+        $sugar_smarty->assign("HARDWARE_ID",$hw->id);
+        //Check for buttons
+        if(!empty($hw->pass_w)){
+            $sugar_smarty->assign('COPY_WEB_PASSWORD_BUTTON',"<button class=\"copy_button button\" data-clipboard-text=\"{$hw->pass_w}\">Web</button>");
+        }
+        if(!empty($hw->pass_r)){
+            $sugar_smarty->assign('COPY_ROOT_PASSWORD_BUTTON',"<button class=\"copy_button button\" data-clipboard-text=\"{$hw->pass_r}\">ROOT</button>");
+        }
+    }
+    $html = $sugar_smarty->fetch('modules/AOP_Case_Updates/tpl/caseUpdateFormBefore.tpl');
     //Javascript for Asynchronous update
-    $html = <<<A
+    $html .= <<<A
 <script>
 var hideUpdateImage = '$hideImage';
 var showUpdateImage = '$showImage';
@@ -74,6 +89,102 @@ function toggleCaseUpdate(updateId){
     }
     updateElem.slideToggle('fast');
 }
+
+
+/////////
+//  dialog with timer button START
+/////////
+
+var stopFlag; //стоп-флаг, для остановки рекурсии по нажатию на кнопки из диалога
+var secondsBeforeSend ; //количество секунд на отмену
+
+//рекурсивная функция вызывающая сама себя кадую секунду если выполняется условияе
+function confirmSendUpdateTimer (record, confirmDialog) {
+    var secondsObj = $('#secSendUpdateTimer'); //объект из кнопки "ОК" из диалогового окна
+    var targettime = secondsObj.html(); //количество секунд из кнопки "ОК" из диалогового окна
+    
+    targettime--; //уменьшаем счётчик секунд
+    secondsObj.html(targettime); //записываем обратно в кнопку
+    
+    if (!stopFlag) { //проверяем стопфлаг
+        if(targettime > 0 ) { //проверяем кол-во секунд
+            setTimeout(function() {confirmSendUpdateTimer(record, confirmDialog)},1000); //запускаем снова функцию
+        } else {
+            confirmDialog.hide(); //закрываем диалог
+            window.onbeforeunload = null;//удялем обработчик стандартного диалога что потерям данные когда покинем страницу
+            $("#caseUpdateSaveBtn").prop("disabled", false);//разблокируем кнопку
+            caseUpdates(record); //выполняем запись caseUpdate
+        }
+    }
+}
+
+//функция инициализации диалога и старта функции с таймером.
+function confirmSendUpdate(record) {
+//    $(window).bind('beforeunload', function(){return '';}); //биндим стандартный диалог что данные не сохранятся, если покинуть страницу
+    window.onbeforeunload = function (evt) {
+        var message = "Email not sent yet. You will lost the changes if you leave the page.";
+        if (typeof evt == "undefined") {
+            evt = window.event;
+        }
+        if (evt) {
+            evt.returnValue = message;
+        }
+        return message;
+    }
+    stopFlag = false; //стоп-флаг, для остановки рекурсии по нажатию на кнопки из диалога
+    secondsBeforeSend = 15;  //количество секунд на отмену
+
+    //обработчик "OK"
+    var handleSubmit = function() {
+        this.hide();//хайдим диалог
+        stopFlag = true;//включам стопфалг, чтоб остановить рекурсию
+        window.onbeforeunload = null;//удялем обработчик стандартного диалога что потерям данные когда покинем страницу
+        $("#caseUpdateSaveBtn").prop("disabled", false);//разблокируем кнопку
+        caseUpdates(record);//выполняем запись caseUpdate
+    };
+    //Обработчик "Cancel"
+    var handleCancel = function() {
+        this.hide();//хайдим диалог
+        window.onbeforeunload = null;//удялем обработчик стандартного диалога что потерям данные когда покинем страницу
+        $("#caseUpdateSaveBtn").prop("disabled", false);//разблокируем кнопку
+        stopFlag = true;//включам стопфалг, чтоб остановить рекурсию
+    };
+    //Диалог подтверждения
+    
+    var dialog_x = $(window).width() - 320;
+    var dialog_y = $(window).height() - 110;
+    confirmDialog = new YAHOO.widget.SimpleDialog('confirmSendEmail', {
+                    xy:[dialog_x, dialog_y],
+                    zIndex: 100500,
+                    type: 'alert',
+                    width: '300px',
+                    close: false,
+                    modal: false,
+                    visible: false,
+                    fixedcenter: false,
+                    constraintoviewport: false,
+                    draggable: true,
+                    buttons : [ { text:"Ok (<span id='secSendUpdateTimer'>"+secondsBeforeSend+"</span>)", handler:handleSubmit, isDefault:true }, 
+	                          { text:"Cancel", handler:handleCancel } ] 
+                });
+    confirmDialog.setHeader('Confirm send email');
+    confirmDialog.setBody('Do you want to send email?');
+    confirmDialog.render(document.body);
+    $('#confirmSendEmail_c').css('position', 'fixed');
+    $('#confirmSendEmail_c').css('top', dialog_y);
+    $('#confirmSendEmail_c').css('left', dialog_x);
+    confirmDialog.show();
+    $('#confirmSendEmail_c').css('position', 'fixed');
+    $("#caseUpdateSaveBtn").prop("disabled", true);//блок кнопки отправки case update
+    confirmSendUpdateTimer(record, confirmDialog);//запуск рекурсивной функции.
+    
+}
+
+/////////
+//  dialog with timer button STOP
+/////////
+
+
 function caseUpdates(record){
     loadingMessgPanl = new YAHOO.widget.SimpleDialog('loading', {
                     width: '200px',
@@ -89,7 +200,7 @@ function caseUpdates(record){
     loadingMessgPanl.render(document.body);
     loadingMessgPanl.show();
 
-    var update_data = encodeURIComponent(document.getElementById('update_text').value);
+    var update_data = tinyMCE.activeEditor.getContent();
     var checkbox = document.getElementById('internal').checked;
     var internal = "";
     if(checkbox){
@@ -112,8 +223,8 @@ function caseUpdates(record){
     fd.append("relate_to", "Cases");
     fd.append("relate_id", record);
     fd.append("offset", "1");
-    // fd.append("update_text", update_data);
-    // fd.append("internal", internal);
+    fd.append("update_text", update_data);
+    fd.append("internal", internal);
 
 
     var xmlhttp = new XMLHttpRequest();
@@ -129,24 +240,25 @@ function caseUpdates(record){
 
         if(xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             location.reload()
-//                showSubPanel('history', null, true);
-//                //Reload the case updates stream and history panels
-//    		    $("#LBL_AOP_CASE_UPDATES").load("index.php?module=Cases&action=DetailView&record="+record + " #LBL_AOP_CASE_UPDATES", function(){
-//
-//
-//                    //Collapse all except newest update
-//                    $('.caseUpdateImage').attr("src",showUpdateImage);
-//                    $('.caseUpdate').slideUp('fast');
-//
-//                    var id = $('.caseUpdate').last().attr('id');
-//                    if(id){
-//                        toggleCaseUpdate(id.replace('caseUpdate',''));
-//                    }
-//
-//
-//                    loadingMessgPanl.hide();
-//
-//                });
+            tinyMCE.init({
+                convert_urls:false,
+                valid_children:"+body[style]",
+                height:300,
+                width:"100%",
+                theme:"modern",
+                toolbar1:"code | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | styleselect formatselect fontselect fontsizeselect",
+                strict_loading_mode:true,
+                language:"en",
+                plugins:"insertdatetime,table,preview,paste,searchreplace,directionality",
+                selector:"textarea",
+                extended_valid_elements:"style[dir|lang|media|title|type],hr[class|width|size|noshade],@[class|style]",
+//                content_css:"include/javascript/tiny_mce/themes/advanced/skins/default/content.css",
+                directionality:"ltr",
+                external_plugins: {"nanospell": "plugins/nanospell/plugin.js"},
+                 nanospell_server: "php", // choose "php" "asp" "asp.net" or "java"
+                 nanospell_autostart:true,
+            });
+
     	}
     }
 
@@ -155,16 +267,59 @@ function caseUpdates(record){
 
 
 }
+$(document).ready(function() {
+    
+    var handler = function() {};
+
+    $('.caseUpdate').find('img[class!=attachment_thumb]').replaceWith(function() { return '<a href="' + $(this).attr('src') + '" data-lightbox="attachement">' + this.outerHTML + '</a>'; });
+
+    lightbox.option({
+      'positionFromTop': $('.navbar').length ? $('.navbar').height() + 30 : 50
+    });
+});
 </script>
-A;
-
-    $updates = $focus->get_linked_beans('aop_case_updates', 'AOP_Case_Updates');
-	$updates = array_merge($updates, $focus->get_linked_beans('emails', "Email"));
-    if (!$updates || is_null($focus->id)) {
-        $html .= quick_edit_case_updates($focus);
-
-        return $html;
+<link href="modules/AOP_Case_Updates/assets/lightbox/css/lightbox.min.css" rel="stylesheet">
+<script src="modules/AOP_Case_Updates/assets/lightbox/js/lightbox.min.js"></script>
+<style>
+    .case_updates_wrapper img {
+        max-width: 100%;
     }
+
+    .thumb_link {
+        display: inline-block;
+        padding: 2px;
+        margin: 0 0.5rem 1rem 0.5rem;
+        background-color: #fff;
+        line-height: 0;
+        border-radius: 4px;
+        transition: background-color 0.5s ease-out;
+        border: 1px solid;
+        width: 10rem;
+        text-align: center;
+        //height: 10rem;
+        overflow: hidden;
+    }
+
+    .thumb_link img {
+        #width: 7rem;
+        border-radius: 4px;
+    }
+    div.read-mark{
+        display: inline-block;
+        margin: 1px 3px;
+        border-radius: 100%;
+        width: 7px;
+        height: 7px;
+        background-color: #534d64;
+    }
+    #caseStyleInternal div.read-mark{
+        display:none;
+    }
+    div.update-activated div.read-mark{
+        display:none !important;
+    }
+</style>
+A;
 
     $html .= <<<EOD
 <script>
@@ -174,12 +329,42 @@ $(document).ready(function(){
     if(id){
         toggleCaseUpdate(id.replace('caseUpdate',''));
     }
+    tinyMCE.init({
+    convert_urls:false,
+    valid_children:"+body[style]",
+    height:300,
+    width:"100%",
+    theme:"modern",
+    toolbar1:"code | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | styleselect formatselect fontselect fontsizeselect",
+    strict_loading_mode:true,
+    language:"en",
+    plugins:"code,insertdatetime,table,preview,paste,searchreplace,directionality",
+    selector:"textarea",
+    extended_valid_elements:"style[dir|lang|media|title|type],hr[class|width|size|noshade],@[class|style]",
+//    content_css:"include/javascript/tiny_mce/themes/advanced/skins/default/content.css",
+    directionality:"ltr",
+    external_plugins: {"nanospell": "plugins/nanospell/plugin.js"},
+     nanospell_server: "php", // choose "php" "asp" "asp.net" or "java"
+     nanospell_autostart:true,
+  });
 });
 </script>
 <a href='' onclick='collapseAllUpdates(); return false;'>{$mod_strings['LBL_CASE_UPDATES_COLLAPSE_ALL']}</a>
 <a href='' onclick='expandAllUpdates(); return false;'>{$mod_strings['LBL_CASE_UPDATES_EXPAND_ALL']}</a>
-<div>
+<div class="case_updates_wrapper">
 EOD;
+    $updates = $focus->get_linked_beans('aop_case_updates', 'AOP_Case_Updates');
+    if (!$updates || is_null($focus->id)) {
+        $html .= quick_edit_case_updates($focus);
+
+        return $html;
+    }
+
+    $em = $focus->get_linked_beans('emails', 'Emails');
+
+    if (isset($em) && !empty($em)){
+        $updates = array_merge($updates, $em);
+    }
 
     usort(
         $updates,
@@ -204,17 +389,29 @@ EOD;
     }
 
     foreach($updates as $update){
-
         if($update->object_name == 'AOP_Case_Updates') {
-            // Отображение стандартного облока
             $html .= display_single_update($update, $hideImage);
-        } elseif ($update->object_name == 'Email' AND $update->to_addrs == $email AND !empty($update->assigned_user_id)) {
+        } elseif ($update->object_name == 'Email'  AND !empty($update->assigned_user_id)) {
             // Для отображения Email
             // Емайл должен быть адресован основному клиенту, и у емайл должен быть явно указан ответственный
-            $html .= display_single_update_email($update, $hideImage);
+            $sea = new SugarEmailAddress();
+            $addresses = array();
+            foreach ( array('to', 'cc', 'bcc') as $x ) {
+                $a = explode(',', $update->{$x.'_addrs'});
+                array_walk($a, function (&$address) use ($sea) {
+                    $arr = $sea->splitEmailAddress($address);
+                    $address = $arr['email'];
+                });
+                $addresses = array_merge($addresses, $a);
+            }
+            foreach ( $addresses as $address ) {
+                if ( $address == $email ) {
+                    $html .= display_single_update_email($update, $hideImage);
+                    break;        
+                }
+            }
 
         }
-
 
     }
     $html .= "</div>";
@@ -265,9 +462,9 @@ function getUpdateDisplayHead(SugarBean $update)
     $html .= "<img  id='caseUpdate".$update->id."Image' class='caseUpdateImage' src='".SugarThemeRegistry::current()->getImageURL('basic_search.gif')."'>";
     $html .= "</a>";
     if(isset($update->internal)) {
-        $html .= "<span>" . ($update->internal ? "<strong>" . $mod_strings['LBL_INTERNAL'] . "</strong> " : '') . $name . " " . $update->date_entered . "</span><br>";
+        $html .= "<a href=\"#\" title=\"Probably undelivered\"><div class=\"read-mark\"><span></span></div></a><span>" . ($update->internal ? "<strong>" . $mod_strings['LBL_INTERNAL'] . "</strong> " : '') . $name . " " . $update->date_entered . "</span><br>";
     } else {
-        $html .= "<span>" . $name . " " . $update->date_entered . "</span><br>";
+        $html .= "<a href=\"#\" title=\"Probably undelivered\"><div class=\"read-mark\"><span></span></div></a><span>" . $name . " " . $update->date_entered . "</span><br>";
     }
 
     $notes = $update->get_linked_beans('notes','Notes');
@@ -290,6 +487,21 @@ function getUpdateDisplayHead(SugarBean $update)
     return $html;
 }
 
+function displayAttachedImages($update){
+    global $sugar_config;
+    $html = '';
+    $notes = $update->get_linked_beans('notes','Notes');
+    if($notes){
+        $html.= $mod_strings['LBL_AOP_CASE_ATTACHMENTS'];
+        foreach($notes as $note){
+            if(preg_match("/(\.png|\.jpg|\.jpeg|\.gif)$/is", $note->filename) )  {
+                $html .= "<a href='{$sugar_config['site_url']}/upload/{$note->id}' data-lightbox='attachement' class='thumb_link'><img class='attachment_thumb' src='{$sugar_config['site_url']}/upload/{$note->id}'/></a>";
+            }
+        }
+    }
+    return $html;
+}
+
 /**
  * Gets a single update and returns it.
  *
@@ -299,21 +511,26 @@ function getUpdateDisplayHead(SugarBean $update)
  */
 function display_single_update(AOP_Case_Updates $update)
 {
-
+    global $db;
+    $update->delivered = $db->getOne("SELECT k.activated FROM verification_keys k WHERE k.bean='{$update->id}'");
+    $classNames = array();
+    if($update->delivered != false) $classNames[] = "update-activated";
     /*if assigned user*/
     if ($update->assigned_user_id) {
         /*if internal update*/
         if ($update->internal) {
-            $html = "<div id='caseStyleInternal'>" . getUpdateDisplayHead($update);
+            $html = sprintf("<div id='caseStyleInternal' class=\"%s\">" . getUpdateDisplayHead($update),implode(" ",$classNames));
             $html .= "<div id='caseUpdate" . $update->id . "' class='caseUpdate'>";
-            $html .= nl2br(html_entity_decode($update->description));
+            $html .= (html_entity_decode($update->description));
+            $html .= displayAttachedImages($update);
             $html .= '</div></div>';
 
             return $html;
         } /*if standard update*/ else {
-            $html = "<div id='lessmargin'><div id='caseStyleUser'>" . getUpdateDisplayHead($update);
+            $html = sprintf("<div id='lessmargin' class=\"%s\"><div id='caseStyleUser'>" . getUpdateDisplayHead($update),implode(" ",$classNames));
             $html .= "<div id='caseUpdate" . $update->id . "' class='caseUpdate'>";
-            $html .= nl2br(html_entity_decode($update->description));
+            $html .= (html_entity_decode($update->description));
+            $html .= displayAttachedImages($update);
             $html .= '</div></div></div>';
 
             return $html;
@@ -322,9 +539,10 @@ function display_single_update(AOP_Case_Updates $update)
 
     /*if contact user*/
     if($update->contact_id){
-        $html = "<div id='extramargin'><div id='caseStyleContact'>".getUpdateDisplayHead($update);
+        $html = sprintf("<div id='extramargin' class=\"%s\"><div id='caseStyleContact'>".getUpdateDisplayHead($update),implode(" ",$classNames));
         $html .= "<div id='caseUpdate".$update->id."' class='caseUpdate'>";
-        $html .= nl2br(html_entity_decode($update->description));
+        $html .= (html_entity_decode($update->description));
+        $html .= displayAttachedImages($update);
         $html .= "</div></div></div>";
         return $html;
     }
@@ -343,7 +561,8 @@ function display_single_update_email(Email $update){
     if($update->assigned_user_id){
         $html = "<div id='lessmargin'><div id='caseStyleUser'>" . getUpdateDisplayHead($update);
         $html .= "<div id='caseUpdate" . $update->id . "' class='caseUpdate'>";
-        $html .= nl2br(html_entity_decode($update->description));
+        $html .= (html_entity_decode($update->description_html));
+        $html .= displayAttachedImages($update);
         $html .= "</div></div></div>";
         return $html;
     }
@@ -352,7 +571,8 @@ function display_single_update_email(Email $update){
     if($update->contact_id){
         $html = "<div id='extramargin'><div id='caseStyleContact'>".getUpdateDisplayHead($update);
         $html .= "<div id='caseUpdate".$update->id."' class='caseUpdate'>";
-        $html .= nl2br(html_entity_decode($update->description));
+        $html .= (html_entity_decode($update->description));
+        $html .= displayAttachedImages($update);
         $html .= "</div></div></div>";
         return $html;
     }
@@ -419,13 +639,15 @@ function quick_edit_case_updates($case)
     if ($roles === 'no edit cases' || in_array('no edit cases', $roles)) {
         return '';
     }
-    $internalChecked = '';
-    if (isset($case->internal) && $case->internal) {
+    //$internalChecked = '';
+    //if (isset($case->internal) && $case->internal) {
         $internalChecked = "checked='checked'";
-    }
+    //}
     $internal = $mod_strings['LBL_AOP_INTERNAL'];
-    $saveBtn = $app_strings['LBL_SAVE_BUTTON_LABEL'];
-    $saveTitle = $app_strings['LBL_SAVE_BUTTON_TITLE'];
+//    $saveBtn = $app_strings['LBL_SAVE_BUTTON_LABEL'];
+//    $saveTitle = $app_strings['LBL_SAVE_BUTTON_TITLE'];
+    $saveBtn = $app_strings['LBL_SAVE_BUTTON_FOR_CASE_UPDATE_LABEL'];
+    $saveTitle = $app_strings['LBL_SAVE_BUTTON_FOR_CASE_UPDATE_TITLE'];
 
     $update_file_html = display_update_form('DetailView');
 
@@ -445,7 +667,7 @@ function quick_edit_case_updates($case)
     </div>
     
     
-    <input type='button' value='$saveBtn' onclick="caseUpdates('$record')" title="$saveTitle" name="button"> </input>
+    <input type='button' value='$saveBtn' id='caseUpdateSaveBtn' onclick="confirmSendUpdate('$record')" title="$saveTitle" name="button" style="margin-left: 0px;"> </input>
 
 
     </br>

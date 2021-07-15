@@ -61,6 +61,9 @@ class CasesViewEdit extends ViewEdit {
 
 
     function display(){
+
+        $this->ss->assign('INITIAL_FILTER_ACC', "&ass_hardware_accountsaccounts_ida_advanced=" . urlencode($this->bean->account_id) . "&ass_hardware_accounts_name_advanced=" . urlencode($this->bean->account_name));
+
         parent::display();
 
         global $sugar_config;

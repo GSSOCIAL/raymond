@@ -473,6 +473,7 @@ abstract class SugarRelationship
         //Resave any bean not currently in the middle of a save operation
         foreach (self::$beansToResave as $module => $beans) {
             foreach ($beans as $bean) {
+                if (empty($bean)) continue;
                 if (empty($bean->deleted) && empty($bean->in_save)) {
                     $bean->save();
                 } else {

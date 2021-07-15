@@ -210,7 +210,12 @@ $dictionary['Email'] = array(
             'len' => 255,
             'comment' => 'ID of the email item obtained from the email transport system',
         ),
-
+        'header_message_id' => array(
+            'name' => 'header_message_id',
+            'vname' => 'LBL_HEADER_MESSAGE_ID',
+            'type' => 'varchar',
+            'len' => 255,
+        ),
         'name' => array(
             'name' => 'name',
             'vname' => 'LBL_SUBJECT',

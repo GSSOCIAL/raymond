@@ -23,16 +23,6 @@ $GLOBALS['app_list_strings']['case_type_dom']=array (
   'sysprep' => 'Sysprep',
   'other' => 'Other',
 );
-
-$GLOBALS['app_list_strings']['case_status_dom']=array (
-  'Open_New' => 'New',
-  'Open_Assigned' => 'In Progress',
-  'Closed_Closed' => 'Completed',
-  'Open_Pending Input' => 'Hold',
-  'Closed_Rejected' => 'Rejected',
-  'Closed_Duplicate' => 'Duplicate',
-  'Open_Reopen' => 'Reopen',
-);
 $GLOBALS['app_list_strings']['messenger_type_dom']=array (
   '' => '',
   'MSN' => 'MSN',
@@ -46,6 +36,26 @@ $GLOBALS['app_list_strings']['os_list']=array (
   'f22' => 'Fedora 22',
   'f25' => 'Fedora 25',
   'c7' => 'CentOS 7',
+);
+$GLOBALS["app_list_strings"]["hd_type_list"]=array(
+  'vm0' => 'VMWARE',
+  'vm1' => 'HYPER-V',
+  'vm2' => 'Azure',
+  'small' => 'Small Footprint Server',
+  'u1s' => 'Standart 1U Server',
+  'u1r' => 'Redundant 1U server',
+  'u3a' => 'Research Archive (U3)',
+  'othervm' => 'Other VM',
+  'otherhd' => 'Other Hardware',
+);
+$GLOBALS["app_list_strings"]["status_list"]=array(
+  'new'=> 'New Created',
+  'sent'=> 'Delivered to Customer',
+  'intg'=> 'Integration in progress',
+  'maint'=> 'Maintaining in progress',
+  'prod'=> 'In Production',
+  'test'=> 'Testing/Evaluation',
+  'del'=> 'Replaced',
 );
 $GLOBALS['app_list_strings']['case_type_dom']=array (
   'prob_solv' => 'Problem resolution',
@@ -62,3 +72,26 @@ $GLOBALS['app_list_strings']['case_type_dom']=array (
   'testing' => 'Testing',
   'other' => 'Other',
 );
+$GLOBALS['app_list_strings']['case_status_dom']=array (
+  'Open_New' => 'New',
+  'Open_Assigned' => 'In Progress',
+  'Closed_Closed' => 'Completed',
+  'Open_Reopen' => 'Reopen',
+);
+
+$app_strings['LBL_SAVE_BUTTON_FOR_CASE_UPDATE_TITLE'] = 'Send Email';
+$app_strings['LBL_SAVE_BUTTON_FOR_CASE_UPDATE_LABEL'] = 'Send Email';
+
+$GLOBALS['app_list_strings']['document_subcategory_dom']=array (
+  '' => '',
+  'Product Brochures' => 'Product Brochures',
+  'FAQ' => 'FAQ',
+  'SOW' => 'Statement of work',
+  'Other' => 'Other',
+);
+$GLOBALS['app_list_strings']['last_action_list']=array (
+  'internal' => 'Internal',
+  'external' => 'External',
+);
+$app_strings['LBL_GROUPTAB0_1515599126'] = 'New Group';
+?>
