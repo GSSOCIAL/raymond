@@ -45,6 +45,8 @@ function make_license($bean,$args){
         
         $bean->filename = $filename;
         $bean->file_generated = true; //Recursion - Add flag that file created to skip.
+        
+        $bean->update_date_entered=true;
         $bean->save();
         $bean->skip_log = true;
 
