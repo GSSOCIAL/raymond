@@ -119,6 +119,7 @@ array (
             'studio' => 'visible',
             'label' => 'LBL_LAST_ACTION',
           ),
+          "spent_time"
         ),
         6 =>
         array (

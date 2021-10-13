@@ -159,6 +159,7 @@ array (
             'name' => 'copyRootPassword',
             'customCode' => '{$COPY_ROOT_PASSWORD_BUTTON}',
           ),
+          "spent_time"
         ),
       ),
       'LBL_AOP_CASE_UPDATES' => 
