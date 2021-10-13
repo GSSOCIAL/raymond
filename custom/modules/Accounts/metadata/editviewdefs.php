@@ -138,11 +138,11 @@ array (
         ),
         5 => 
         array (
-          0 => 
           array (
             'name' => 'assigned_user_name',
             'label' => 'LBL_ASSIGNED_TO',
           ),
+          "important_contact"
         ),
       ),
       'LBL_PANEL_ADVANCED' => 
