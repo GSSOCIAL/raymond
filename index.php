@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * 07.12.19 17:05
+ */
 if (!defined('sugarEntry')) {
     define('sugarEntry', true);
 }

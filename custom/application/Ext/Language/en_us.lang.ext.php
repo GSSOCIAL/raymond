@@ -46,6 +46,7 @@ $app_list_strings['moduleList']['ass_lic'] = 'Licenses';
 $app_list_strings['hd_type_list']['vm0'] = 'VMWARE';
 $app_list_strings['hd_type_list']['vm1'] = 'HYPER-V';
 $app_list_strings['hd_type_list']['vm2'] = 'Azure';
+$app_list_strings['hd_type_list']['dicom'] = 'Dicom Editor';
 $app_list_strings['hd_type_list']['small'] = 'Small Footprint Server';
 $app_list_strings['hd_type_list']['u1s'] = 'Standart 1U Server';
 $app_list_strings['hd_type_list']['u1r'] = 'Redundant 1U server';
@@ -69,7 +70,7 @@ $app_list_strings['lic_type_list'][3] = 'Cluster';
 $app_list_strings['lic_type_list'][4] = 'Priors Puller';
 $app_list_strings['lic_type_list'][5] = 'IHE Gateway';
 $app_list_strings['lic_type_list'][6] = 'Vendor Neutral Archive';
-
+$app_list_strings['lic_type_list'][7] = 'Dicom Editor';
 
 /*********************************************************************************
  * SugarCRM Community Edition is a customer relationship management program developed by

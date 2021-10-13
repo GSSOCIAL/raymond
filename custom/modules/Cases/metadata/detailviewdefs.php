@@ -13,6 +13,18 @@ array (
           1 => 'DUPLICATE',
           2 => 'DELETE',
           3 => 'FIND_DUPLICATES',
+          4 => array(
+            'customCode' => '<input type="submit" class="button" title="{$MOD.LBL_CONVERT_TO_XML}" onclick="window.bean_server.export(\'xml\');return false;" value="{$MOD.LBL_CONVERT_TO_XML_BUTTON}"/>',
+          ),
+          5 => array(
+              'customCode' => '<input type="submit" class="button" title="{$MOD.LBL_CONVERT_TO_CSV}" onclick="window.bean_server.export(\'csv\');return false;" value="{$MOD.LBL_CONVERT_TO_CSV_BUTTON}"/>',
+          ),
+          6 => array(
+              'customCode' => '<input type="submit" class="button" title="{$MOD.LBL_CONVERT_TO_HTML}" onclick="window.bean_server.export(\'html\');return false;" value="{$MOD.LBL_CONVERT_TO_HTML_BUTTON}"/>',
+          ),
+          7 => array(
+              'customCode' => '<input type="submit" class="button" title="{$MOD.LBL_CONVERT_TO_DOCX}" onclick="window.bean_server.export(\'docx\');return false;" value="{$MOD.LBL_CONVERT_TO_DOCX_BUTTON}"/>',
+          ),
         ),
       ),
       'maxColumns' => '2',
@@ -27,6 +39,18 @@ array (
         array (
           'label' => '10',
           'field' => '30',
+        ),
+      ),
+      'includes' => 
+      array (
+        0 => array (
+            'file' => 'custom/include/js/bean_export.js',
+        ),
+        1 => array(
+          'file' => "modules/Cases/js/copyToClipboard.js",
+        ),
+        2 => array (
+          'file' => 'include/javascript/tinymce/tinymce.min.js',
         ),
       ),
       'useTabs' => true,
@@ -76,32 +100,15 @@ array (
         array (
           0 => 
           array (
-            'name' => 'name',
-            'label' => 'LBL_SUBJECT',
-          ),
-        ),
-        4 => 
-        array (
-          0 =>
-          array (
-            'name' => 'description',
-            'label' => 'LBL_DESCRIPTION',
-            'customCode' => '{$fields.description.value|from_html}',
-          ),
-        ),
-        5 => 
-        array (
-          0 => 'resolution',
-        ),
-        6 => 
-        array (
-          0 => 
-          array (
             'name' => 'assigned_user_name',
             'label' => 'LBL_ASSIGNED_TO',
           ),
+          1 => 
+          array (
+            'name' => 'ass_hardware_cases_name',
+          ),
         ),
-        7 => 
+        4 => 
         array (
           0 => 
           array (
@@ -115,11 +122,42 @@ array (
             'customCode' => '{$fields.date_modified.value} {$APP.LBL_BY} {$fields.modified_by_name.value}',
           ),
         ),
-        8 => 
+        5 => 
+        array (
+          0 => 'resolution',
+          1 => 
+          array (
+            'name' => 'last_action_c',
+            'studio' => 'visible',
+            'label' => 'LBL_LAST_ACTION',
+          ),
+        ),
+          6 =>
+              array (
+                  0 =>
+                      array (
+                          'name' => 'ip_eth0',
+                          'studio' => 'visible',
+                          'label' => 'LBL_IP_ETH0',
+                      ),
+                  1 =>
+                      array (
+                          'name' => 'instal_name',
+                          'studio' => 'visible',
+                          'label' => 'LBL_INSTAL_NAME',
+                      ),
+              ),
+        7 =>
         array (
           0 => 
           array (
-            'name' => 'ass_hardware_cases_name',
+            'name' => 'copyWebPassword',
+            'customCode' => '{$COPY_WEB_PASSWORD_BUTTON}',
+          ),
+          1 => 
+          array (
+            'name' => 'copyRootPassword',
+            'customCode' => '{$COPY_ROOT_PASSWORD_BUTTON}',
           ),
           "spent_time"
         ),

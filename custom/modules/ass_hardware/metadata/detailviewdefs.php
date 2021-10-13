@@ -13,7 +13,7 @@ array (
           0 => 'EDIT',
           1 => 'DUPLICATE',
           2 => 'DELETE',
-          3 => 'FIND_DUPLICATES',
+          3 => 'FIND_DUPLICATES'
         ),
       ),
       'maxColumns' => '2',
@@ -30,6 +30,8 @@ array (
           'field' => '30',
         ),
       ),
+      'includes' => array(
+      ),
       'useTabs' => true,
       'tabDefs' => 
       array (
@@ -37,6 +39,15 @@ array (
         array (
           'newTab' => true,
           'panelDefault' => 'expanded',
+        ),
+        'LBL_PANEL_ADVANCED_LICENSES' =>array (
+          'newTab' => false,
+          'panelDefault' => 'expanded',
+        ),
+        'LBL_PANEL_LICENSES' =>array (
+          'newTab' => false,
+          'panelDefault' => 'expanded',
+          "displayFunction" => "custom/modules/ass_hardware/metadata/panel_licenses.php",
         ),
         'LBL_EDITVIEW_PANEL1' => 
         array (
@@ -110,6 +121,24 @@ array (
             'label' => 'LBL_OS',
           ),
         ),
+      ),
+      'lbl_panel_advanced_licenses'=>array(
+        0=>array(
+          0=>array(
+            'name' => 'advanced_license_generator',
+            'studio' => 'visible',
+            'hideLabel' => true,
+          ),
+        )
+      ),
+      'lbl_panel_licenses'=>array(
+        0=>array(
+          0=>array(
+            'name' => 'license_generator',
+            'studio' => 'visible',
+            'hideLabel' => true,
+          ),
+        )
       ),
       'lbl_editview_panel1' => 
       array (

@@ -7,10 +7,10 @@
         $(document).on('change','.caseDocumentTypeSelect',function(){
             var wrapper = $(this).closest('.caseDocumentWrapper');
             if($(this).val() == 'internal'){
-                wrapper.find('#case_update_file\\[\\]').hide();
+                wrapper.find('#file_upload').hide();
                 wrapper.find('.internalCaseDocumentWrapper').show();
             }else{
-                wrapper.find('#case_update_file\\[\\]').show();
+                wrapper.find('#file_upload').show();
                 wrapper.find('.internalCaseDocumentWrapper').hide();
             }
 
@@ -42,19 +42,40 @@
             $('.caseDocumentTypeSelect').change();
             docCount++;
         });
-        $(document).on('click','.removeFileButton',function(e){
+        $(document).on('click','button.removeFileButton',function(e){
             $(e.target).closest('span').remove();
+        });
+        $(document).on('change', '.caseDocumentWrapper input.upload_file', function(e) {
+            if ( this.files.length > 0 ) {
+                $(this.parentNode.parentNode).find('#file_name').html(this.files[0].name);
+            }
         });
     });
 </script>
+<style type="text/css">
+    .caseDocumentWrapper .upload_file {
+        width: 0.1px;
+        height: 0.1px;
+        opacity: 0;
+        overflow: hidden;
+        position: absolute;
+        z-index: -1;
+    }
+</style>
 {/literal}
 <script id="updateFileRowTemplate"  type="text/template">
     <span class="caseDocumentWrapper">
         <select class="caseDocumentTypeSelect">
             <option value="internal">{$MOD.LBL_SELECT_INTERNAL_CASE_DOCUMENT}</option>
-            <option value="external">{$MOD.LBL_SELECT_EXTERNAL_CASE_DOCUMENT}</option>
+            <option value="external" selected>{$MOD.LBL_SELECT_EXTERNAL_CASE_DOCUMENT}</option>
         </select>
-        <input type="file" id="case_update_file[]" name="case_update_file[]">
+        <span id="file_upload">
+            <label class="removeFileButton" style="margin-left: 0">
+                Choose file
+                <input type="file" id="case_update_file[]" name="case_update_file[]" class='upload_file'>
+            </label>
+            <span id="file_name">no files selected</span>
+        </span>
         <span class="internalCaseDocumentWrapper">
             <input type="text" name="case_document_name" class="sqsEnabled" tabindex="0" id="case_document_name" size="" value="" title='' autocomplete="off">
             <input type="hidden" name="case_document_id" id="case_document_id" value="">
