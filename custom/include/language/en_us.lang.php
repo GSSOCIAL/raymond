@@ -95,4 +95,14 @@ $GLOBALS['app_list_strings']['last_action_list']=array (
   'external' => 'External',
 );
 $app_strings['LBL_GROUPTAB0_1515599126'] = 'New Group';
+$app_list_strings["cases_timespent_list"]=array(
+  "15"=>"00:15",
+  "30"=>"00:30",
+  "45"=>"00:45",
+  "60"=>"01:00",
+  "75"=>"01:15",
+  "90"=>"01:30",
+  "105"=>"01:45",
+  "120"=>"02:00",
+);
 ?>
